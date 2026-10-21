@@ -18,11 +18,16 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  savedItems: CartItem[];
   addItem: (product: Product, quantity?: number, options?: { customMessage?: string; includeCandles?: boolean }) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   updateCustomization: (productId: string, options: { customMessage?: string; includeCandles?: boolean }) => void;
   clearCart: () => void;
+  saveForLater: (productId: string) => void;
+  moveToCartFromSaved: (productId: string) => void;
+  removeSavedItem: (productId: string) => void;
+  buyAgainItems: (orderItems: { id?: string; productId?: string; name: string; price: number; quantity: number }[]) => void;
   getSubtotal: () => number;
   getItemCount: () => number;
   syncWithFirestore: (userId: string) => Promise<void>;
@@ -52,6 +57,7 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      savedItems: [],
 
       syncWithFirestore: async (userId: string) => {
         try {
@@ -180,6 +186,75 @@ export const useCartStore = create<CartState>()(
       clearCart: () => {
         set({ items: [] });
         syncCurrentCartToFirestore([]);
+      },
+
+      saveForLater: (productId: string) => {
+        set((state) => {
+          const target = state.items.find((i) => i.product.id === productId);
+          if (!target) return state;
+          const newItems = state.items.filter((i) => i.product.id !== productId);
+          const alreadySaved = state.savedItems.some((i) => i.product.id === productId);
+          const newSaved = alreadySaved ? state.savedItems : [...state.savedItems, target];
+          syncCurrentCartToFirestore(newItems);
+          return { items: newItems, savedItems: newSaved };
+        });
+      },
+
+      moveToCartFromSaved: (productId: string) => {
+        set((state) => {
+          const target = state.savedItems.find((i) => i.product.id === productId);
+          if (!target) return state;
+          const newSaved = state.savedItems.filter((i) => i.product.id !== productId);
+          const existingInCart = state.items.find((i) => i.product.id === productId);
+          const newItems = existingInCart
+            ? state.items.map((i) =>
+                i.product.id === productId ? { ...i, quantity: i.quantity + target.quantity } : i
+              )
+            : [...state.items, target];
+          syncCurrentCartToFirestore(newItems);
+          return { items: newItems, savedItems: newSaved };
+        });
+      },
+
+      removeSavedItem: (productId: string) => {
+        set((state) => ({
+          savedItems: state.savedItems.filter((i) => i.product.id !== productId),
+        }));
+      },
+
+      buyAgainItems: (orderItems) => {
+        set((state) => {
+          const newItems = [...state.items];
+          for (const ordItem of orderItems) {
+            const pId = ordItem.productId || ordItem.id || '';
+            const catalogProduct = PRODUCTS.find((p) => p.id === pId) || {
+              id: pId,
+              name: ordItem.name,
+              price: ordItem.price,
+              category: 'Cakes',
+              categorySlug: 'cakes',
+              description: '',
+              image: '/images/products/custom.jpg',
+              inStock: true,
+              stockQuantity: 10,
+              featured: false,
+              bestseller: false,
+              ingredients: '',
+              allergens: '',
+            };
+            const existing = newItems.find((i) => i.product.id === catalogProduct.id);
+            if (existing) {
+              existing.quantity += ordItem.quantity || 1;
+            } else {
+              newItems.push({
+                product: catalogProduct,
+                quantity: ordItem.quantity || 1,
+              });
+            }
+          }
+          syncCurrentCartToFirestore(newItems);
+          return { items: newItems };
+        });
       },
 
       getSubtotal: () => {

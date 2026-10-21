@@ -62,4 +62,30 @@ describe('Cart Store & Calculation Engine', () => {
     const deliveryFeeAbove = subtotalAbove >= 500 ? 0 : 40;
     expect(deliveryFeeAbove).toBe(0);
   });
+
+  it('supports Amazon-style Save For Later and Move to Cart', () => {
+    const dreamCake = getProductById('cake-001')!;
+    useCartStore.getState().addItem(dreamCake, 2);
+    expect(useCartStore.getState().items).toHaveLength(1);
+
+    // Save for later
+    useCartStore.getState().saveForLater('cake-001');
+    expect(useCartStore.getState().items).toHaveLength(0);
+    expect(useCartStore.getState().savedItems).toHaveLength(1);
+    expect(useCartStore.getState().savedItems[0].product.id).toBe('cake-001');
+
+    // Move back to cart
+    useCartStore.getState().moveToCartFromSaved('cake-001');
+    expect(useCartStore.getState().items).toHaveLength(1);
+    expect(useCartStore.getState().savedItems).toHaveLength(0);
+  });
+
+  it('supports Buy Again from past order items', () => {
+    useCartStore.getState().buyAgainItems([
+      { id: 'cake-001', name: 'Dream Cake', price: 150, quantity: 2 },
+      { id: 'brownie-001', name: 'Walnut Brownie', price: 50, quantity: 1 },
+    ]);
+    expect(useCartStore.getState().items).toHaveLength(2);
+    expect(useCartStore.getState().getSubtotal()).toBe(350);
+  });
 });

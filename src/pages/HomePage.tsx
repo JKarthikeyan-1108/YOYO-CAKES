@@ -1,13 +1,58 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Truck, Shield, Clock, Phone, Sparkles } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Star, 
+  Truck, 
+  Shield, 
+  Clock, 
+  Phone, 
+  Sparkles, 
+  Flame, 
+  MapPin, 
+  CheckCircle 
+} from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
 import { PRODUCTS, CATEGORIES, getBestsellers } from '@/data/products';
 
 export default function HomePage() {
+  const [pincode, setPincode] = useState('');
+  const [pincodeStatus, setPincodeStatus] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 28, seconds: 15 });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        return { hours: 6, minutes: 0, seconds: 0 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleCheckPincode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pincode.trim() || pincode.replace(/\D/g, '').length !== 6) {
+      setPincodeStatus('Please enter a valid 6-digit Chennai pincode');
+      return;
+    }
+    setPincodeStatus('✓ Fast 2-Hour Delivery & Midnight Slots Available in your area!');
+  };
+
   const cakes = PRODUCTS.filter((p) => p.categorySlug === 'cakes');
   const bestsellers = getBestsellers().slice(0, 8);
   const miniJars = PRODUCTS.filter((p) => p.categorySlug === 'mini-jar-cakes');
   const brownies = PRODUCTS.filter((p) => p.categorySlug === 'brownies').slice(0, 4);
+
+  // Lightning Deals selection
+  const dealProducts = [
+    PRODUCTS.find((p) => p.id === 'cake-001'),
+    PRODUCTS.find((p) => p.id === 'cake-002'),
+    PRODUCTS.find((p) => p.id === 'br-010'),
+    PRODUCTS.find((p) => p.id === 'tira-001'),
+  ].filter(Boolean);
 
   return (
     <div className="bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)]">
@@ -93,6 +138,109 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Amazon / E-Commerce Category Circle Quick-Access Ribbon */}
+      <section className="bg-white border-y border-gray-200 py-6">
+        <div className="container-main">
+          <div className="flex items-center justify-between gap-5 sm:gap-8 overflow-x-auto pb-2 scrollbar-none">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/shop?category=${cat.slug}`}
+                className="flex flex-col items-center flex-shrink-0 group text-center"
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 border-2 border-[var(--color-brand-primary-light)]/40 group-hover:border-[var(--color-brand-primary-dark)] group-hover:scale-105 transition-all shadow-xs overflow-hidden mb-2 bg-[var(--color-brand-cream)]">
+                  <img
+                    src={`/images/categories/${cat.slug}.jpg`}
+                    alt={cat.name}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <span className="text-xs font-bold text-gray-800 group-hover:text-[var(--color-brand-primary-dark)] transition-colors">
+                  {cat.name}
+                </span>
+                <span className="text-[10px] text-gray-500 font-medium">Fresh Daily</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pincode Delivery Availability Checker Strip */}
+      <section className="bg-[var(--color-brand-cream-dark)] py-4 border-b border-gray-200/80">
+        <div className="container-main">
+          <form onSubmit={handleCheckPincode} className="flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-gray-800">
+              <MapPin size={16} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+              <span className="font-semibold">Check delivery speed & slots for your location:</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                maxLength={6}
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
+                placeholder="Enter 6-digit Pincode"
+                className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-mono outline-none focus:border-[var(--color-brand-primary-dark)] bg-white w-44"
+              />
+              <button
+                type="submit"
+                className="px-4 py-1.5 rounded-lg bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FCD200]"
+              >
+                Check
+              </button>
+            </div>
+          </form>
+          {pincodeStatus && (
+            <p className="text-xs font-medium text-[var(--color-brand-chocolate)] mt-2 flex items-center gap-1.5">
+              <CheckCircle size={14} className="text-[var(--color-brand-success)]" />
+              {pincodeStatus}
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* Lightning Deals / Today's Offers (Amazon Style) */}
+      <section className="py-12 bg-white border-b border-gray-200">
+        <div className="container-main">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-xs">
+                <Flame size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    Today's Fresh Lightning Deals
+                  </h2>
+                  <span className="bg-red-100 text-red-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-sm">
+                    LIMITED BATCH
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Baked early morning with Belgian chocolate. Order before the deal timer ends!
+                </p>
+              </div>
+            </div>
+
+            {/* Live Countdown Timer */}
+            <div className="flex items-center gap-2 bg-red-50 text-red-800 px-4 py-2 rounded-xl border border-red-200 text-xs font-bold self-start sm:self-auto">
+              <Clock size={15} className="text-red-600 animate-pulse" />
+              <span>Ends in:</span>
+              <span className="font-mono text-sm tracking-wider bg-white px-2 py-0.5 rounded border border-red-200 text-red-700">
+                {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+
+          {/* Deal Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {dealProducts.map((p) => p && (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         </div>
       </section>

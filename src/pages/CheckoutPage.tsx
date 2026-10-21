@@ -40,6 +40,10 @@ function generateNewOrderId(): string {
   return `YOYO-${Date.now().toString(36).toUpperCase()}`;
 }
 
+function generateAddressId(): string {
+  return `addr-${Date.now().toString(36)}`;
+}
+
 function getIsoTimestamp(): string {
   return new Date().toISOString();
 }
@@ -150,7 +154,7 @@ export default function CheckoutPage() {
       // Optionally save address to Firestore for logged in user
       if (user?.uid && saveAddressToBook && selectedAddressId === 'new' && fulfillment === 'delivery') {
         saveAddressToFirestore({
-          id: `addr-${Date.now()}`,
+          id: generateAddressId(),
           userId: user.uid,
           name: form.name,
           phone: form.phone,

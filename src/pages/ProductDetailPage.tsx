@@ -1,6 +1,22 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { ShoppingCart, Heart, Minus, Plus, ArrowLeft, Star, Share2, Sparkles, AlertCircle, CheckCircle, MessageCircle } from 'lucide-react';
+import { 
+  ShoppingCart, 
+  Heart, 
+  Minus, 
+  Plus, 
+  ArrowLeft, 
+  Star, 
+  Share2, 
+  Sparkles, 
+  CheckCircle, 
+  MessageCircle, 
+  Truck, 
+  ShieldCheck, 
+  AlertCircle,
+  Zap, 
+  Clock 
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getProductById, getProductsByCategory, formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
@@ -55,6 +71,7 @@ const DEFAULT_REVIEWS: ReviewItem[] = [
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'ingredients' | 'reviews'>('description');
   const addItem = useCartStore((s) => s.addItem);
@@ -116,6 +133,15 @@ export default function ProductDetailPage() {
       includeCandles,
     });
     toast.success(`${quantity}x ${product.name} added to cart`);
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    addItem(product, quantity, {
+      customMessage: customMessage.trim() || undefined,
+      includeCandles,
+    });
+    navigate('/checkout');
   };
 
   const handleWhatsAppOrder = () => {
@@ -239,59 +265,84 @@ export default function ProductDetailPage() {
               {product.name}
             </h1>
 
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-3xl font-bold text-[var(--color-brand-primary-dark)]">
+            <div className="flex items-baseline gap-3 mb-2">
+              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-sm text-[var(--color-brand-success)] font-medium bg-emerald-50 px-3 py-1 rounded-full flex items-center gap-1.5">
-                <CheckCircle size={14} /> {product.inStock ? 'Freshly Available' : 'Out of Stock'}
+              <span className="text-base text-gray-400 line-through">
+                {formatPrice(Math.round((product.price * 1.18) / 10) * 10)}
+              </span>
+              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                17% OFF
+              </span>
+              <span className="text-xs text-[var(--color-brand-success)] font-bold bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                <CheckCircle size={13} /> In Stock
               </span>
             </div>
+            <p className="text-xs text-gray-500 mb-6">
+              Inclusive of all taxes • Handcrafted small-batch daily bake
+            </p>
 
-            <p className="text-base text-[var(--color-brand-chocolate-light)] leading-relaxed mb-8">
+            <p className="text-base text-[var(--color-brand-chocolate-light)] leading-relaxed mb-6">
               {product.description}
             </p>
 
+            {/* Amazon Delivery Promise Box */}
+            <div className="bg-[var(--color-brand-cream-dark)]/70 rounded-xl p-4 mb-6 border border-[var(--color-brand-primary-light)]/40 space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-gray-800 font-semibold">
+                <Truck size={16} className="text-[var(--color-brand-primary-dark)]" />
+                <span>FREE Delivery on orders over ₹500 across Chennai</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Clock size={16} className="text-green-600" />
+                <span>Order within <strong className="text-gray-900">3 hrs 40 mins</strong> for Today Evening Delivery</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <ShieldCheck size={16} className="text-blue-600" />
+                <span>100% Real Belgian Chocolate & Pure Dairy Cream</span>
+              </div>
+            </div>
+
             {/* Quantity Selector */}
-            <div className="mb-8">
-              <label className="text-sm font-semibold text-[var(--color-brand-chocolate)] mb-3 block">
+            <div className="mb-6">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-2 block">
                 Select Quantity
               </label>
               <div className="flex items-center gap-3">
-                <div className="flex items-center bg-white border border-[var(--color-brand-primary)]/20 rounded-xl overflow-hidden">
+                <div className="flex items-center bg-white border border-gray-300 rounded-xl overflow-hidden shadow-xs">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-3 hover:bg-[var(--color-brand-cream)] transition-colors text-[var(--color-brand-chocolate)]"
+                    className="px-3.5 py-2.5 hover:bg-gray-100 transition-colors text-gray-700"
                     disabled={quantity <= 1}
                   >
-                    <Minus size={16} />
+                    <Minus size={15} />
                   </button>
-                  <span className="px-6 py-3 font-bold text-center min-w-[3.5rem] border-x border-[var(--color-brand-primary)]/20 text-[var(--color-brand-chocolate)]">
+                  <span className="px-5 py-2.5 font-bold text-center min-w-[3rem] border-x border-gray-200 text-gray-900 text-sm">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-3 hover:bg-[var(--color-brand-cream)] transition-colors text-[var(--color-brand-chocolate)]"
+                    className="px-3.5 py-2.5 hover:bg-gray-100 transition-colors text-gray-700"
                     disabled={quantity >= product.stockQuantity}
                   >
-                    <Plus size={16} />
+                    <Plus size={15} />
                   </button>
                 </div>
-                <span className="text-xs text-[var(--color-brand-muted)] font-medium">
-                  {product.stockQuantity} batches ready today
+                <span className="text-xs text-gray-500 font-medium">
+                  {product.stockQuantity} ready for today's delivery slots
                 </span>
               </div>
             </div>
 
             {/* Cake Customization: Message on Cake & Free Candles */}
-            <div className="bg-white rounded-2xl p-5 border border-[var(--color-brand-primary-light)]/40 mb-8 space-y-4 shadow-sm">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 mb-6 space-y-3.5 shadow-xs">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-sm font-semibold text-[var(--color-brand-chocolate)] flex items-center gap-2">
-                    <Sparkles size={16} className="text-[var(--color-brand-primary-dark)]" />
+                  <label className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-[var(--color-brand-primary-dark)]" />
                     Message on Cake (Optional)
                   </label>
-                  <span className="text-xs text-[var(--color-brand-muted)]">{customMessage.length}/35 chars</span>
+                  <span className="text-[11px] text-gray-500">{customMessage.length}/35 chars</span>
                 </div>
                 <input
                   type="text"
@@ -299,44 +350,57 @@ export default function ProductDetailPage() {
                   value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
                   placeholder="e.g., Happy Birthday Rahul! 🎉"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/40 focus:border-[var(--color-brand-primary-dark)] outline-none text-sm text-[var(--color-brand-chocolate)] placeholder-[var(--color-brand-muted)]/60"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] outline-none text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 bg-white"
                 />
-                <p className="text-xs text-[var(--color-brand-muted)] mt-1.5">
-                  Hand-piped on the cake surface or placed on a custom dark chocolate plaque.
+                <p className="text-[11px] text-gray-500 mt-1">
+                  Hand-piped on the cake surface or placed on a dark chocolate plaque.
                 </p>
               </div>
 
-              <label className="flex items-center gap-3 cursor-pointer pt-3 border-t border-[var(--color-brand-primary-light)]/20">
+              <label className="flex items-center gap-2.5 cursor-pointer pt-3 border-t border-gray-100">
                 <input
                   type="checkbox"
                   checked={includeCandles}
                   onChange={(e) => setIncludeCandles(e.target.checked)}
                   className="w-4 h-4 rounded text-[var(--color-brand-primary-dark)] accent-[var(--color-brand-primary-dark)] cursor-pointer"
                 />
-                <span className="text-xs sm:text-sm text-[var(--color-brand-chocolate)]">
-                  Include complimentary wooden cake knife & birthday candle pack (Free)
+                <span className="text-xs text-gray-700 font-medium">
+                  Include complimentary wooden cake knife & birthday candle pack (FREE)
                 </span>
               </label>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-10">
-              <button
-                onClick={handleAddToCart}
-                className="btn-primary flex-1 py-3.5 text-base flex items-center justify-center gap-2"
-                disabled={!product.inStock}
-              >
-                <ShoppingCart size={18} /> Add to Cart — {formatPrice(product.price * quantity)}
-              </button>
-              <button
-                type="button"
-                onClick={handleWhatsAppOrder}
-                className="bg-[#25D366] hover:bg-[#1EBE5D] text-white font-semibold px-6 py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm"
-                title="Order directly with bakery on WhatsApp"
-              >
-                <MessageCircle size={18} /> Order via WhatsApp
-              </button>
+            {/* Action Buttons: Amazon Gold Add to Cart + Orange Buy Now + WhatsApp */}
+            <div className="space-y-3 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!product.inStock}
+                  className="py-3.5 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 border border-[#FCD200]"
+                >
+                  <ShoppingCart size={17} /> Add to Cart — {formatPrice(product.price * quantity)}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  disabled={!product.inStock}
+                  className="py-3.5 px-4 rounded-xl bg-[#FFA41C] hover:bg-[#FA8900] active:bg-[#E87A00] text-[#0F1111] font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 border border-[#FF8F00]"
+                >
+                  <Zap size={17} /> Buy Now (Instant Checkout)
+                </button>
+              </div>
+
               <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  className="flex-1 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 text-xs sm:text-sm"
+                  title="Order directly with bakery on WhatsApp"
+                >
+                  <MessageCircle size={18} /> 1-Click WhatsApp Concierge Order
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -347,19 +411,20 @@ export default function ProductDetailPage() {
                         : `${product.name} added to wishlist`
                     );
                   }}
-                  className={`p-3.5 rounded-xl border-2 transition-colors ${
+                  className={`p-3 rounded-xl border transition-colors ${
                     isInWishlist
-                      ? 'border-[var(--color-brand-error)] bg-[var(--color-brand-error)] text-white'
-                      : 'border-[var(--color-brand-primary-light)] hover:border-[var(--color-brand-error)] hover:text-[var(--color-brand-error)] text-[var(--color-brand-chocolate)]'
+                      ? 'border-red-500 bg-red-50 text-red-500'
+                      : 'border-gray-300 hover:border-gray-400 text-gray-700 bg-white'
                   }`}
                   title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
                   <Heart size={18} fill={isInWishlist ? 'currentColor' : 'none'} />
                 </button>
+
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="p-3.5 rounded-xl border-2 border-[var(--color-brand-primary-light)] hover:border-[var(--color-brand-primary-dark)] hover:text-[var(--color-brand-primary-dark)] text-[var(--color-brand-chocolate)] transition-colors"
+                  className="p-3 rounded-xl border border-gray-300 hover:border-gray-400 text-gray-700 bg-white transition-colors"
                   title="Share treat"
                 >
                   <Share2 size={18} />
@@ -563,28 +628,35 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Mobile Sticky Add to Cart Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[var(--color-brand-primary-light)]/40 p-4 z-40 flex items-center justify-between shadow-elevated">
-        <div>
-          <span className="text-xs text-[var(--color-brand-muted)] block">Total</span>
-          <span className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-3 z-40 flex items-center justify-between gap-3 shadow-elevated">
+        <div className="flex-shrink-0">
+          <span className="text-[10px] text-gray-500 block uppercase font-bold">Total</span>
+          <span className="font-heading text-base font-extrabold text-gray-900 leading-none">
             {formatPrice(product.price * quantity)}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-1 justify-end">
           <button
             type="button"
             onClick={handleWhatsAppOrder}
-            className="bg-[#25D366] text-white p-2.5 rounded-xl flex items-center justify-center shadow-sm"
+            className="bg-[#25D366] text-white p-2.5 rounded-xl flex items-center justify-center shadow-xs flex-shrink-0"
             title="Order on WhatsApp"
           >
             <MessageCircle size={18} />
           </button>
           <button
             onClick={handleAddToCart}
-            className="btn-primary py-2.5 px-5 text-sm"
+            className="flex-1 py-2.5 px-3 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FCD200] flex items-center justify-center gap-1"
             disabled={!product.inStock}
           >
-            <ShoppingCart size={16} /> Add to Cart
+            <ShoppingCart size={15} /> Add to Cart
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-[#FFA41C] hover:bg-[#FA8900] active:bg-[#E87A00] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FF8F00] flex items-center justify-center gap-1"
+            disabled={!product.inStock}
+          >
+            <Zap size={15} /> Buy Now
           </button>
         </div>
       </div>
