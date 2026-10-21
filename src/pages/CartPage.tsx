@@ -231,6 +231,15 @@ export default function CartPage() {
   return (
     <div className="bg-[#EAEDED] min-h-screen py-6 sm:py-8 font-sans">
       <div className="container-main max-w-7xl px-4">
+        {/* DaisyUI Checkout Progress Steps */}
+        <div className="flex justify-center mb-6">
+          <ul className="steps steps-horizontal w-full max-w-lg text-xs font-bold">
+            <li className="step step-primary" data-content="1">Shopping Cart</li>
+            <li className="step text-gray-500" data-content="2">Delivery & Slots</li>
+            <li className="step text-gray-500" data-content="3">Payment & Review</li>
+          </ul>
+        </div>
+
         {/* Amazon-Style Free Delivery Progress Bar */}
         <div className="bg-white rounded-xl p-4 sm:p-5 mb-5 shadow-xs border border-gray-200/90">
           <div className="flex items-center gap-3 mb-2.5">

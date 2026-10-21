@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Headphones,
+  Heart,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
@@ -290,37 +291,59 @@ export default function AccountPage() {
             </div>
           </div>
 
-          {/* Amazon 4-Tile Account Quick Metric Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-gray-200">
+          {/* DaisyUI Stats Strip */}
+          <div className="stats stats-vertical sm:stats-horizontal shadow-xs border border-gray-200 bg-white w-full rounded-2xl overflow-hidden mt-6">
             <button
+              type="button"
               onClick={() => setActiveTab('orders')}
-              className="p-3 rounded-xl bg-gray-50 hover:bg-amber-50/60 border border-gray-200 transition-all text-left"
+              className="stat hover:bg-gray-50 transition-colors text-left"
             >
-              <div className="text-xs text-gray-500 font-medium">Total Orders</div>
-              <div className="text-xl font-extrabold text-[#0F1111]">{orders.length}</div>
+              <div className="stat-figure text-amber-600">
+                <Package size={22} />
+              </div>
+              <div className="stat-title text-xs font-semibold text-gray-500">Total Orders</div>
+              <div className="stat-value text-2xl font-black text-gray-900">{orders.length}</div>
+              <div className="stat-desc text-[11px] text-gray-400">Past & active bakes</div>
             </button>
+
             <button
+              type="button"
               onClick={() => setActiveTab('addresses')}
-              className="p-3 rounded-xl bg-gray-50 hover:bg-amber-50/60 border border-gray-200 transition-all text-left"
+              className="stat hover:bg-gray-50 transition-colors text-left"
             >
-              <div className="text-xs text-gray-500 font-medium">Saved Addresses</div>
-              <div className="text-xl font-extrabold text-[#0F1111]">{addresses.length}</div>
+              <div className="stat-figure text-blue-600">
+                <MapPin size={22} />
+              </div>
+              <div className="stat-title text-xs font-semibold text-gray-500">Saved Addresses</div>
+              <div className="stat-value text-2xl font-black text-gray-900">{addresses.length}</div>
+              <div className="stat-desc text-[11px] text-gray-400">Chennai delivery spots</div>
             </button>
+
             <Link
               to="/wishlist"
-              className="p-3 rounded-xl bg-gray-50 hover:bg-amber-50/60 border border-gray-200 transition-all text-left"
+              className="stat hover:bg-gray-50 transition-colors text-left"
             >
-              <div className="text-xs text-gray-500 font-medium">Wishlist Items</div>
-              <div className="text-xl font-extrabold text-[#0F1111]">{wishlistCount}</div>
-            </Link>
-            <button
-              onClick={() => setActiveTab('support')}
-              className="p-3 rounded-xl bg-gray-50 hover:bg-amber-50/60 border border-gray-200 transition-all text-left"
-            >
-              <div className="text-xs text-gray-500 font-medium">Bakery Concierge</div>
-              <div className="text-xs font-bold text-[#007600] mt-1 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-[#007600] inline-block animate-pulse" /> Live Now
+              <div className="stat-figure text-red-500">
+                <Heart size={22} />
               </div>
+              <div className="stat-title text-xs font-semibold text-gray-500">Wishlist Items</div>
+              <div className="stat-value text-2xl font-black text-gray-900">{wishlistCount}</div>
+              <div className="stat-desc text-[11px] text-gray-400">Saved for celebration</div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('support')}
+              className="stat hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="stat-figure text-emerald-600">
+                <MessageCircle size={22} />
+              </div>
+              <div className="stat-title text-xs font-semibold text-gray-500">Bakery Concierge</div>
+              <div className="stat-value text-base font-extrabold text-emerald-700 flex items-center gap-1.5 mt-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse" /> Live Online
+              </div>
+              <div className="stat-desc text-[11px] text-gray-400">WhatsApp direct assistance</div>
             </button>
           </div>
         </div>
@@ -535,35 +558,24 @@ export default function AccountPage() {
                             </span>
                           </div>
 
-                          {/* Visual Progress Steps */}
-                          <div className="grid grid-cols-4 gap-2 text-center text-[11px]">
-                            {['Order Placed', 'Payment Confirmed', 'Baking in Kitchen', 'Out for Delivery / Ready'].map(
-                              (label, sIdx) => {
-                                const isDone = stepIdx >= sIdx;
-                                const isCurrent = stepIdx === sIdx;
-
-                                return (
-                                  <div key={label} className="relative">
-                                    <div
-                                      className={`h-1.5 rounded-full mb-1.5 ${
-                                        isDone ? 'bg-[#007600]' : 'bg-gray-200'
-                                      }`}
-                                    />
-                                    <span
-                                      className={`block ${
-                                        isCurrent
-                                          ? 'font-bold text-[#007600]'
-                                          : isDone
-                                          ? 'text-gray-700 font-medium'
-                                          : 'text-gray-400'
-                                      }`}
+                          {/* Visual Progress Steps using DaisyUI steps */}
+                          <div className="w-full py-2">
+                            <ul className="steps steps-vertical sm:steps-horizontal w-full text-xs">
+                              {['Order Placed', 'Payment Confirmed', 'Baking in Kitchen', 'Out for Delivery / Ready'].map(
+                                (label, sIdx) => {
+                                  const isDone = stepIdx >= sIdx;
+                                  return (
+                                    <li
+                                      key={label}
+                                      className={`step ${isDone ? 'step-primary font-bold' : 'text-gray-400 font-medium'}`}
+                                      data-content={isDone ? '✓' : String(sIdx + 1)}
                                     >
                                       {label}
-                                    </span>
-                                  </div>
-                                );
-                              }
-                            )}
+                                    </li>
+                                  );
+                                }
+                              )}
+                            </ul>
                           </div>
                         </div>
 

@@ -253,6 +253,15 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-[var(--color-brand-cream)] py-12 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto">
+          {/* DaisyUI Checkout Progress Steps */}
+          <div className="flex justify-center mb-8">
+            <ul className="steps steps-horizontal w-full max-w-lg text-xs font-bold">
+              <li className="step step-primary" data-content="✓">Cart</li>
+              <li className="step step-primary" data-content="✓">Delivery & Slots</li>
+              <li className="step step-primary" data-content="✓">Order Confirmed</li>
+            </ul>
+          </div>
+
           {/* Top Banner */}
           <div className="bg-white rounded-2xl shadow-elevated border border-[var(--color-brand-primary-light)]/30 overflow-hidden mb-6">
             <div className="bg-[var(--color-brand-chocolate)] p-6 text-white text-center sm:text-left sm:flex sm:items-center sm:justify-between">
@@ -399,6 +408,15 @@ export default function CheckoutPage() {
           </Link>
           <span>/</span>
           <span className="text-gray-800 font-semibold">Review & Pay</span>
+        </div>
+
+        {/* DaisyUI Checkout Progress Steps */}
+        <div className="flex justify-center mb-8">
+          <ul className="steps steps-horizontal w-full max-w-lg text-xs font-bold">
+            <li className="step step-primary" data-content="✓">Cart</li>
+            <li className="step step-primary" data-content="2">Delivery & Slots</li>
+            <li className="step text-gray-400 font-medium" data-content="3">Payment & Review</li>
+          </ul>
         </div>
 
         <form onSubmit={handleSubmit}>

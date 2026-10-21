@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, HelpCircle, Phone } from 'lucide-react';
+import { HelpCircle, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FAQItem {
@@ -70,49 +70,47 @@ export default function FAQPage() {
           </p>
         </div>
 
-        {/* Category Pills */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                selectedCategory === cat
-                  ? 'bg-[var(--color-brand-chocolate)] text-white shadow-sm'
-                  : 'bg-white text-[var(--color-brand-chocolate-light)] hover:bg-[var(--color-brand-cream-dark)]'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Category Filter using DaisyUI tabs */}
+        <div className="flex justify-center mb-10 overflow-x-auto">
+          <div className="tabs tabs-box bg-white p-1 rounded-2xl shadow-xs border border-gray-200">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`tab text-xs font-bold rounded-xl transition-all ${
+                  selectedCategory === cat
+                    ? 'tab-active bg-[var(--color-brand-chocolate)] text-white shadow-xs'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* FAQ Accordion */}
+        {/* FAQ Accordion using DaisyUI collapse-plus */}
         <div className="space-y-3 mb-12">
           {filteredFaqs.map((faq, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-[var(--color-brand-primary-light)]/20 shadow-sm overflow-hidden"
+                className="collapse collapse-plus bg-white border border-[var(--color-brand-primary-light)]/30 rounded-2xl shadow-xs hover:border-[var(--color-brand-primary-dark)]/40 transition-colors"
               >
-                <button
-                  onClick={() => setOpenIdx(isOpen ? null : idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-heading font-semibold text-base sm:text-lg text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] transition-colors"
-                >
-                  <span>{faq.q}</span>
-                  <ChevronDown
-                    size={20}
-                    className={`text-[var(--color-brand-primary-dark)] flex-shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-sm text-[var(--color-brand-muted)] leading-relaxed border-t border-gray-100 animate-fade-in">
-                    {faq.a}
-                  </div>
-                )}
+                <input
+                  type="checkbox"
+                  checked={isOpen}
+                  onChange={() => setOpenIdx(isOpen ? null : idx)}
+                  aria-label={faq.q}
+                />
+                <div className="collapse-title font-heading font-bold text-base sm:text-lg text-[var(--color-brand-chocolate)] pr-12">
+                  {faq.q}
+                </div>
+                <div className="collapse-content text-sm text-[var(--color-brand-muted)] leading-relaxed border-t border-gray-100 pt-3">
+                  <p>{faq.a}</p>
+                </div>
               </div>
             );
           })}

@@ -68,29 +68,34 @@ export default function ProductCard({ product, showQuickView: _showQuickView = t
           {/* Badges */}
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
             {product.bestseller && (
-              <span className="px-2.5 py-1 bg-[#232F3E] text-white text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-xs flex items-center gap-1">
+              <span className="badge badge-neutral text-white text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-xs flex items-center gap-1 border-none py-1">
                 <span className="text-[#FF9900]">#1</span> Best Seller
               </span>
             )}
             {discountPercent > 0 && (
-              <span className="px-2 py-0.5 bg-[#CC0C39] text-white text-[10px] font-bold rounded-sm shadow-xs">
+              <span className="badge badge-error text-white text-[10px] font-bold rounded-sm shadow-xs border-none py-1">
                 {discountPercent}% OFF
               </span>
             )}
           </div>
 
-          {/* Wishlist Button */}
-          <button
-            onClick={handleToggleWishlist}
-            className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-xs ${
-              isInWishlist
-                ? 'bg-red-500 text-white'
-                : 'bg-white/90 text-gray-600 hover:bg-white hover:text-red-500'
-            }`}
-            title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+          {/* Wishlist Button with DaisyUI Tooltip */}
+          <div
+            className="tooltip tooltip-left absolute top-2.5 right-2.5 z-10"
+            data-tip={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Heart size={15} fill={isInWishlist ? 'currentColor' : 'none'} />
-          </button>
+            <button
+              onClick={handleToggleWishlist}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-xs ${
+                isInWishlist
+                  ? 'bg-red-500 text-white'
+                  : 'bg-white/90 text-gray-600 hover:bg-white hover:text-red-500'
+              }`}
+              aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart size={15} fill={isInWishlist ? 'currentColor' : 'none'} />
+            </button>
+          </div>
         </div>
 
         {/* Product Details (Amazon E-commerce Typography & Layout) */}
@@ -99,7 +104,7 @@ export default function ProductCard({ product, showQuickView: _showQuickView = t
             <span className="uppercase tracking-wider font-semibold text-[var(--color-brand-muted)]">
               {product.category}
             </span>
-            <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-semibold border border-green-200/60">
+            <span className="badge badge-soft badge-success text-[10px] font-semibold py-0.5">
               Fresh Bake
             </span>
           </div>
