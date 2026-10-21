@@ -1,0 +1,16 @@
+# Robots.txt for YOYO CAKES E-Commerce
+User-agent: *
+Allow: /
+Allow: /shop
+Allow: /product/
+Allow: /about
+Allow: /contact
+Allow: /faq
+
+# Disallow private user accounts, cart, and admin portals from indexing
+Disallow: /admin/
+Disallow: /account/
+Disallow: /checkout/
+Disallow: /order/
+
+Sitemap: https://yoyocakes.in/sitemap.xml

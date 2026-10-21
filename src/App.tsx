@@ -4,8 +4,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { useAuthStore } from '@/stores/authStore';
 
-// Layouts
+// Layouts & Boundary
 import Layout from '@/components/layout/Layout';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 // Customer Pages (Lazy loaded for optimal bundle size and page load speed)
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -58,40 +59,42 @@ export default function App() {
   }, [setUser]);
 
   return (
-    <BrowserRouter>
-      <Suspense fallback={<PageFallback />}>
-        <Routes>
-          {/* Customer Storefront Routes */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order/:id" element={<OrderConfirmationPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/privacy-policy" element={<PolicyPage />} />
-            <Route path="/terms" element={<PolicyPage />} />
-            <Route path="/shipping-policy" element={<PolicyPage />} />
-            <Route path="/cancellation-policy" element={<PolicyPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            {/* Customer Storefront Routes */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order/:id" element={<OrderConfirmationPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/account" element={<AccountPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/privacy-policy" element={<PolicyPage />} />
+              <Route path="/terms" element={<PolicyPage />} />
+              <Route path="/shipping-policy" element={<PolicyPage />} />
+              <Route path="/cancellation-policy" element={<PolicyPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
 
-          {/* Protected / Admin Portal Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="products" element={<AdminProductsPage />} />
-            <Route path="orders" element={<AdminOrdersPage />} />
-            <Route path="settings" element={<AdminSettingsPage />} />
-          </Route>
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+            {/* Protected / Admin Portal Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="products" element={<AdminProductsPage />} />
+              <Route path="orders" element={<AdminOrdersPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
