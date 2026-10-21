@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Store, Phone, Globe, MapPin, Clock, Truck, Shield } from 'lucide-react';
+import { Save, Store, Phone, Truck, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { seedCatalogToFirestore } from '@/lib/seed';
 

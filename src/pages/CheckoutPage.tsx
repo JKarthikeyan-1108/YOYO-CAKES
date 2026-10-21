@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPin, Phone, Mail, User, Truck, Store, CreditCard, ArrowLeft, Shield, CheckCircle } from 'lucide-react';
+import { MapPin, User, Truck, Store, CreditCard, ArrowLeft, Shield, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';

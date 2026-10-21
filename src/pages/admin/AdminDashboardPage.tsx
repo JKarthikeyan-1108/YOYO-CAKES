@@ -16,13 +16,11 @@ import { PRODUCTS, formatPrice } from '@/data/products';
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       const data = await getAllOrders();
       setOrders(data);
-      setLoading(false);
     }
     load();
   }, []);

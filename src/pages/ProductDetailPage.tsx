@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { ShoppingCart, Heart, Minus, Plus, ArrowLeft, Star, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getProductById, getProductsByCategory, formatPrice, type Product } from '@/data/products';
+import { getProductById, getProductsByCategory, formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import ProductCard from '@/components/product/ProductCard';
@@ -16,6 +16,9 @@ export default function ProductDetailPage() {
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(id || ''));
 
   const product = id ? getProductById(id) : undefined;
+  const categoryImage = product ? `/images/categories/${product.categorySlug}.jpg` : '';
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const [hasFailedOnce, setHasFailedOnce] = useState(false);
 
   if (!product) {
     return (
@@ -39,12 +42,10 @@ export default function ProductDetailPage() {
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 
-  const categoryImage = `/images/categories/${product.categorySlug}.jpg`;
-  const [imgSrc, setImgSrc] = useState(product.image || categoryImage);
-  const [hasFailedOnce, setHasFailedOnce] = useState(false);
+  const displayImage = imgSrc || product.image || categoryImage;
 
   const handleImageError = () => {
-    if (!hasFailedOnce && imgSrc !== categoryImage) {
+    if (!hasFailedOnce && displayImage !== categoryImage) {
       setImgSrc(categoryImage);
       setHasFailedOnce(true);
     }
@@ -102,7 +103,7 @@ export default function ProductDetailPage() {
           <div className="relative">
             <div className="aspect-square rounded-3xl overflow-hidden shadow-elevated border-4 border-white bg-[var(--color-brand-cream)] group">
               <img
-                src={imgSrc}
+                src={displayImage}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 onError={handleImageError}

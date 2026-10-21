@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Truck, Shield, Clock, Gift } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
-import { PRODUCTS, CATEGORIES, getBestsellers, getFeaturedProducts } from '@/data/products';
+import { PRODUCTS, CATEGORIES, getBestsellers } from '@/data/products';
 
 export default function HomePage() {
   const bestsellers = getBestsellers().slice(0, 8);
-  const featured = getFeaturedProducts().slice(0, 4);
   const miniJars = PRODUCTS.filter((p) => p.categorySlug === 'mini-jar-cakes');
   const brownies = PRODUCTS.filter((p) => p.categorySlug === 'brownies').slice(0, 4);
 

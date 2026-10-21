@@ -8,7 +8,6 @@ const db = admin.firestore();
 // 1. TRUSTED BACKEND OPERATION: ASSIGN ADMIN ROLE
 export const setAdminClaim = functions.https.onCall(async (data, context) => {
   // Only existing admins or the designated master bootstrap email can assign admin roles
-  const callerUid = context.auth?.uid;
   const callerEmail = context.auth?.token.email;
   const isMasterAdmin = callerEmail === 'admin@yoyocakes.com';
   const hasAdminClaim = context.auth?.token.admin === true;

@@ -1,5 +1,5 @@
 import { db, isFirebaseConfigured } from './firebase';
-import { collection, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, writeBatch } from 'firebase/firestore';
 import { PRODUCTS, CATEGORIES } from '@/data/products';
 
 /**

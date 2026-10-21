@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import {
   Search,
   Filter,
-  CheckCircle,
   Truck,
   ChefHat,
   Eye,
   RefreshCw,
-  ExternalLink,
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';

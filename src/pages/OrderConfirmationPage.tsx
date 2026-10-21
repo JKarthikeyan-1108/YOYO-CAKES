@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Clock, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft } from 'lucide-react';
 import { getOrderById, type Order, type OrderStatus } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
 
