@@ -29,3 +29,5 @@ functions/lib
 
 # Taste skill inspection artifacts
 .taste-skill/
+.agents/repos/
+

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
+import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { CATEGORIES } from '@/data/products';
 
@@ -25,6 +26,7 @@ export default function Navbar() {
   const [currentPincode, setCurrentPincode] = useState('600001');
 
   const cartCount = useCartStore((s) => s.getItemCount());
+  const wishlistCount = useWishlistStore((s) => s.items.length);
   const { user, logout } = useAuthStore();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -208,10 +210,15 @@ export default function Navbar() {
               {/* Wishlist */}
               <Link
                 to="/wishlist"
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center"
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative"
                 aria-label="Wishlist"
               >
-                <Heart size={20} />
+                <Heart size={20} className={wishlistCount > 0 ? "text-red-500 fill-red-500" : ""} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center shadow-xs">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               {/* Amazon-Style Cart Badge */}
