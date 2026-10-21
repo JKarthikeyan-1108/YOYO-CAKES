@@ -36,24 +36,24 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-[var(--color-brand-cream)] to-[var(--color-brand-primary-light)]/40 p-8 rounded-2xl border border-[var(--color-brand-primary-light)]/30 text-center">
+            <div className="bg-[var(--color-brand-cream)] p-8 rounded-2xl border border-[var(--color-brand-primary-light)]/40 text-center">
               <div className="text-4xl font-heading font-black text-[var(--color-brand-primary-dark)] mb-2">
                 27+
               </div>
               <div className="text-sm font-bold text-[var(--color-brand-chocolate)] mb-6">
                 Signature Bakery Recipes
               </div>
-              <div className="space-y-3 text-xs text-[var(--color-brand-chocolate-light)] text-left">
+              <div className="space-y-3 text-sm text-[var(--color-brand-chocolate-light)] text-left">
                 <div className="flex items-center gap-2">
-                  <ChefHat size={16} className="text-[var(--color-brand-primary-dark)]" />
+                  <ChefHat size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
                   <span>Small-batch artisanal baking techniques</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Award size={16} className="text-[var(--color-brand-primary-dark)]" />
+                  <Award size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
                   <span>Finest Belgian chocolates & cocoa beans</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-[var(--color-brand-primary-dark)]" />
+                  <ShieldCheck size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
                   <span>Hygienic, temperature-controlled kitchen</span>
                 </div>
               </div>
@@ -68,7 +68,7 @@ export default function AboutPage() {
               <ChefHat size={24} />
             </div>
             <h3 className="font-heading font-bold text-lg text-[var(--color-brand-chocolate)] mb-2">Fresh Ingredients</h3>
-            <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed">
+            <p className="text-sm text-[var(--color-brand-muted)] leading-relaxed">
               We never cut corners. Real butter, pure dairy cream, and authentic chocolate in every single bake.
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function AboutPage() {
               <Heart size={24} />
             </div>
             <h3 className="font-heading font-bold text-lg text-[var(--color-brand-chocolate)] mb-2">Baked with Love</h3>
-            <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed">
+            <p className="text-sm text-[var(--color-brand-muted)] leading-relaxed">
               Every cake is iced and finished by skilled dessert artisans who take pride in their craft.
             </p>
           </div>
@@ -88,18 +88,18 @@ export default function AboutPage() {
               <Sparkles size={24} />
             </div>
             <h3 className="font-heading font-bold text-lg text-[var(--color-brand-chocolate)] mb-2">Sweet Happiness</h3>
-            <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed">
+            <p className="text-sm text-[var(--color-brand-muted)] leading-relaxed">
               Our guiding motto is simple: Every single bite should deliver a genuine smile of delight.
             </p>
           </div>
         </div>
 
         {/* CTA Banner */}
-        <div className="bg-gradient-to-r from-[var(--color-brand-chocolate)] to-[var(--color-brand-primary-dark)] text-white rounded-3xl p-8 sm:p-12 text-center">
-          <h2 className="font-heading text-2xl sm:text-3xl font-bold mb-4">
+        <div className="bg-[var(--color-brand-chocolate)] text-white rounded-3xl p-8 sm:p-12 text-center shadow-lg">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white mb-4">
             Ready to Taste the Happiness?
           </h2>
-          <p className="text-white/80 text-sm max-w-md mx-auto mb-8">
+          <p className="text-[var(--color-brand-cream)]/90 text-sm sm:text-base max-w-md mx-auto mb-8 leading-relaxed">
             Browse our full catalog of 27 artisanal desserts and have your favorites delivered fresh.
           </p>
           <Link to="/shop" className="btn-primary inline-flex items-center gap-2 text-sm px-8 py-3.5">

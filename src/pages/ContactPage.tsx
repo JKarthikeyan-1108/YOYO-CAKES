@@ -102,9 +102,9 @@ export default function ContactPage() {
             </div>
 
             {/* Quick Note */}
-            <div className="bg-gradient-to-br from-[var(--color-brand-chocolate)] to-[var(--color-brand-primary-dark)] text-white p-6 rounded-2xl shadow-elevated">
-              <h4 className="font-heading font-bold text-base mb-2">Bulk & Custom Orders</h4>
-              <p className="text-xs text-white/80 leading-relaxed">
+            <div className="bg-[var(--color-brand-chocolate)] text-white p-6 rounded-2xl shadow-elevated">
+              <h4 className="font-heading font-bold text-base text-white mb-2">Bulk & Custom Orders</h4>
+              <p className="text-xs text-[var(--color-brand-cream)]/90 leading-relaxed">
                 Planning a birthday party, anniversary celebration, or corporate event? Call our hotline for personalized pastry selections and custom box packings!
               </p>
             </div>

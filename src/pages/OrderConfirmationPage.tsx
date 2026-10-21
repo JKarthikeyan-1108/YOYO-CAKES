@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft, Printer } from 'lucide-react';
 import { getOrderById, type Order, type OrderStatus } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
 
@@ -68,11 +68,11 @@ export default function OrderConfirmationPage() {
       <div className="container-main max-w-4xl">
         <div className="bg-white rounded-2xl shadow-elevated overflow-hidden border border-[var(--color-brand-primary-light)]/20">
           {/* Header Banner */}
-          <div className="bg-gradient-to-r from-[var(--color-brand-primary-dark)] to-[var(--color-brand-chocolate)] text-white p-8 sm:p-10 text-center">
+          <div className="bg-[var(--color-brand-chocolate)] text-white p-8 sm:p-10 text-center">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={36} className="text-[#A3E635]" />
             </div>
-            <h1 className="font-heading text-3xl font-bold mb-2">Order Status & Tracking</h1>
+            <h1 className="font-heading text-3xl font-bold text-white mb-2">Order Status & Tracking</h1>
             <p className="text-white/80 text-sm">
               Order ID: <span className="font-mono font-bold text-white">{order.id}</span>
             </p>
@@ -204,15 +204,34 @@ export default function OrderConfirmationPage() {
 
             {/* Items Summary */}
             <div className="mb-8">
-              <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] mb-4">
-                Items Ordered ({order.items.reduce((s, i) => s + i.quantity, 0)})
-              </h3>
-              <div className="divide-y divide-[var(--color-brand-primary-light)]/20 border border-[var(--color-brand-primary-light)]/20 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
+                  Items Ordered ({order.items.reduce((s, i) => s + i.quantity, 0)})
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5"
+                >
+                  <Printer size={14} /> Print Receipt
+                </button>
+              </div>
+              <div className="divide-y divide-[var(--color-brand-primary-light)]/20 border border-[var(--color-brand-primary-light)]/20 rounded-xl overflow-hidden bg-white">
                 {order.items.map((item) => (
                   <div key={item.id} className="p-4 flex items-center justify-between hover:bg-[var(--color-brand-cream)]/50 transition-colors">
-                    <div>
-                      <h4 className="font-semibold text-sm text-[var(--color-brand-chocolate)]">{item.name}</h4>
-                      <p className="text-xs text-[var(--color-brand-muted)]">{item.category} • Qty: {item.quantity}</p>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={item.image || `/images/categories/${item.category?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'cakes'}.jpg`}
+                        alt={item.name}
+                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-[var(--color-brand-cream-dark)]"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/images/categories/cakes.jpg';
+                        }}
+                      />
+                      <div>
+                        <h4 className="font-semibold text-sm text-[var(--color-brand-chocolate)]">{item.name}</h4>
+                        <p className="text-xs text-[var(--color-brand-muted)]">{item.category} • Qty: {item.quantity}</p>
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-sm text-[var(--color-brand-chocolate)]">

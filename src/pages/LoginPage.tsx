@@ -32,7 +32,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-primary-dark)] flex items-center justify-center text-white font-heading text-2xl font-bold shadow-lg mx-auto mb-4">
+            <div className="w-16 h-16 rounded-full bg-[var(--color-brand-primary)] text-[var(--color-brand-chocolate)] flex items-center justify-center font-heading text-2xl font-black shadow-sm mx-auto mb-4">
               Y
             </div>
           </Link>

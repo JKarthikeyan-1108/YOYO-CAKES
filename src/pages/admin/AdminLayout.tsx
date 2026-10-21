@@ -20,7 +20,7 @@ export default function AdminLayout() {
         <div>
           {/* Brand */}
           <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-primary-dark)] flex items-center justify-center text-white font-heading text-lg font-bold">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-brand-primary)] text-[var(--color-brand-chocolate)] flex items-center justify-center font-heading text-lg font-black shadow-sm">
               Y
             </div>
             <div>

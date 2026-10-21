@@ -151,7 +151,7 @@ export default function AccountPage() {
         {/* Account Header */}
         <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8 mb-8 border border-[var(--color-brand-primary-light)]/20 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-primary-dark)] flex items-center justify-center text-white font-heading text-2xl font-bold shadow-md">
+            <div className="w-16 h-16 rounded-full bg-[var(--color-brand-primary-dark)] text-[var(--color-brand-cream)] flex items-center justify-center font-heading text-2xl font-bold shadow-sm">
               {user?.displayName ? user.displayName.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'Y'}
             </div>
             <div>
