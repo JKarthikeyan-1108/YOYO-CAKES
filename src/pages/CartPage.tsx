@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Minus, Plus, X, ShoppingCart, ArrowRight, Tag } from 'lucide-react';
+import { Minus, Plus, X, ShoppingCart, ArrowRight, Tag, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
@@ -16,6 +16,35 @@ export default function CartPage() {
   const deliveryFee = subtotal >= 500 ? 0 : 40; // Free delivery above ₹500
   const discount = couponApplied ? discountAmount : 0;
   const total = subtotal - discount + deliveryFee;
+
+  const handleWhatsAppCartOrder = () => {
+    const hotline = '918428855444';
+    const itemLines = items
+      .map((i, idx) => {
+        let line = `${idx + 1}. *${i.product.name}* × ${i.quantity} — ${formatPrice(i.product.price * i.quantity)}`;
+        if (i.customMessage) line += `\n   └ Message: "${i.customMessage}"`;
+        if (i.includeCandles) line += `\n   └ (Free knife & candle included)`;
+        return line;
+      })
+      .join('\n');
+
+    const messageLines = [
+      `*Hello YOYO CAKES!* 🎂`,
+      `I would like to order my shopping cart:`,
+      ``,
+      itemLines,
+      ``,
+      `*Subtotal:* ${formatPrice(subtotal)}`,
+      discount > 0 ? `*Discount:* -${formatPrice(discount)}` : '',
+      `*Delivery Fee:* ${deliveryFee === 0 ? 'FREE' : formatPrice(deliveryFee)}`,
+      `*Total:* ${formatPrice(total)}`,
+      ``,
+      `Please confirm kitchen availability for delivery/pickup. Thank you!`,
+    ].filter(Boolean);
+
+    const waUrl = `https://wa.me/${hotline}?text=${encodeURIComponent(messageLines.join('\n'))}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -90,6 +119,16 @@ export default function CartPage() {
                       <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
                         {item.product.category}
                       </p>
+                      {item.customMessage && (
+                        <div className="mt-1.5 text-xs text-[var(--color-brand-chocolate)] bg-[var(--color-brand-cream)] px-2.5 py-1 rounded-md border border-[var(--color-brand-primary-light)]/40 inline-block">
+                          <span className="font-semibold text-[var(--color-brand-primary-dark)]">Cake Message:</span> "{item.customMessage}"
+                        </div>
+                      )}
+                      {item.includeCandles && (
+                        <div className="mt-1 text-[11px] text-[var(--color-brand-success)] font-medium">
+                          ✓ Free wooden knife & candle included
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => {
@@ -250,6 +289,15 @@ export default function CartPage() {
               >
                 Proceed to Checkout
               </Link>
+
+              <button
+                type="button"
+                onClick={handleWhatsAppCartOrder}
+                className="w-full mt-3 py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-semibold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2"
+                title="Send full cart directly to bakery WhatsApp"
+              >
+                <MessageCircle size={18} /> Order Cart via WhatsApp
+              </button>
 
               <p className="text-xs text-[var(--color-brand-muted)] text-center mt-3">
                 Taxes calculated at checkout

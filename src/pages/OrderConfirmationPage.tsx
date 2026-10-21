@@ -231,6 +231,16 @@ export default function OrderConfirmationPage() {
                       <div>
                         <h4 className="font-semibold text-sm text-[var(--color-brand-chocolate)]">{item.name}</h4>
                         <p className="text-xs text-[var(--color-brand-muted)]">{item.category} • Qty: {item.quantity}</p>
+                        {item.customMessage && (
+                          <p className="text-xs text-[var(--color-brand-primary-dark)] italic mt-0.5">
+                            Cake Message: "{item.customMessage}"
+                          </p>
+                        )}
+                        {item.includeCandles && (
+                          <p className="text-[11px] text-[var(--color-brand-success)] font-medium mt-0.5">
+                            ✓ Complimentary knife & candles included
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">

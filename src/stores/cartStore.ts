@@ -12,13 +12,16 @@ import {
 export interface CartItem {
   product: Product;
   quantity: number;
+  customMessage?: string;
+  includeCandles?: boolean;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: Product, quantity?: number, options?: { customMessage?: string; includeCandles?: boolean }) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  updateCustomization: (productId: string, options: { customMessage?: string; includeCandles?: boolean }) => void;
   clearCart: () => void;
   getSubtotal: () => number;
   getItemCount: () => number;
@@ -96,7 +99,11 @@ export const useCartStore = create<CartState>()(
         }
       },
 
-      addItem: (product: Product, quantity: number = 1) => {
+      addItem: (
+        product: Product,
+        quantity: number = 1,
+        options?: { customMessage?: string; includeCandles?: boolean }
+      ) => {
         set((state) => {
           const existing = state.items.find(
             (item) => item.product.id === product.id
@@ -105,12 +112,44 @@ export const useCartStore = create<CartState>()(
           if (existing) {
             newItems = state.items.map((item) =>
               item.product.id === product.id
-                ? { ...item, quantity: item.quantity + quantity }
+                ? {
+                    ...item,
+                    quantity: item.quantity + quantity,
+                    customMessage: options?.customMessage ?? item.customMessage,
+                    includeCandles: options?.includeCandles ?? item.includeCandles,
+                  }
                 : item
             );
           } else {
-            newItems = [...state.items, { product, quantity }];
+            newItems = [
+              ...state.items,
+              {
+                product,
+                quantity,
+                customMessage: options?.customMessage,
+                includeCandles: options?.includeCandles,
+              },
+            ];
           }
+          syncCurrentCartToFirestore(newItems);
+          return { items: newItems };
+        });
+      },
+
+      updateCustomization: (
+        productId: string,
+        options: { customMessage?: string; includeCandles?: boolean }
+      ) => {
+        set((state) => {
+          const newItems = state.items.map((item) =>
+            item.product.id === productId
+              ? {
+                  ...item,
+                  customMessage: options.customMessage ?? item.customMessage,
+                  includeCandles: options.includeCandles ?? item.includeCandles,
+                }
+              : item
+          );
           syncCurrentCartToFirestore(newItems);
           return { items: newItems };
         });

@@ -122,6 +122,8 @@ export default function CheckoutPage() {
               quantity: item.quantity,
               category: item.product.category,
               image: item.product.image,
+              customMessage: item.customMessage,
+              includeCandles: item.includeCandles,
             })),
             subtotal,
             deliveryFee,
@@ -512,9 +514,16 @@ export default function CheckoutPage() {
                             (e.currentTarget as HTMLImageElement).src = `/images/categories/${item.product.categorySlug}.jpg`;
                           }}
                         />
-                        <span className="text-[var(--color-brand-chocolate-light)] truncate">
-                          {item.product.name} × {item.quantity}
-                        </span>
+                        <div className="min-w-0">
+                          <span className="text-[var(--color-brand-chocolate-light)] truncate block">
+                            {item.product.name} × {item.quantity}
+                          </span>
+                          {item.customMessage && (
+                            <span className="text-[11px] text-[var(--color-brand-primary-dark)] italic truncate block">
+                              "{item.customMessage}"
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <span className="font-medium text-[var(--color-brand-chocolate)] flex-shrink-0">
                         {formatPrice(item.product.price * item.quantity)}

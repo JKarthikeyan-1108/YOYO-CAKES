@@ -27,6 +27,8 @@ export interface OrderItem {
   quantity: number;
   category: string;
   image?: string;
+  customMessage?: string;
+  includeCandles?: boolean;
 }
 
 export interface Order {

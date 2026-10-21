@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ShoppingCart, Heart, Minus, Plus, ArrowLeft, Star, Share2, Sparkles, AlertCircle, CheckCircle } from 'lucide-react';
+import { ShoppingCart, Heart, Minus, Plus, ArrowLeft, Star, Share2, Sparkles, AlertCircle, CheckCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getProductById, getProductsByCategory, formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
@@ -66,6 +66,10 @@ export default function ProductDetailPage() {
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [hasFailedOnce, setHasFailedOnce] = useState(false);
 
+  // Cake customization options
+  const [customMessage, setCustomMessage] = useState('');
+  const [includeCandles, setIncludeCandles] = useState(false);
+
   // Review submission state
   const [reviewsList, setReviewsList] = useState<ReviewItem[]>(() => {
     return (id && INITIAL_REVIEWS[id]) ? INITIAL_REVIEWS[id] : DEFAULT_REVIEWS;
@@ -107,8 +111,29 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    addItem(product, quantity);
+    addItem(product, quantity, {
+      customMessage: customMessage.trim() || undefined,
+      includeCandles,
+    });
     toast.success(`${quantity}x ${product.name} added to cart`);
+  };
+
+  const handleWhatsAppOrder = () => {
+    const hotline = '918428855444';
+    const messageLines = [
+      `*Hello YOYO CAKES!* 🎂`,
+      `I would like to order:`,
+      `• *Item:* ${product.name}`,
+      `• *Quantity:* ${quantity}`,
+      `• *Price:* ${formatPrice(product.price * quantity)}`,
+      customMessage.trim() ? `• *Message on cake:* "${customMessage.trim()}"` : '',
+      includeCandles ? `• *Complimentary:* Free wooden knife & candle included` : '',
+      ``,
+      `Please confirm kitchen availability and delivery/pickup time. Thank you!`,
+    ].filter(Boolean);
+
+    const waUrl = `https://wa.me/${hotline}?text=${encodeURIComponent(messageLines.join('\n'))}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleShare = () => {
@@ -258,40 +283,88 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
+            {/* Cake Customization: Message on Cake & Free Candles */}
+            <div className="bg-white rounded-2xl p-5 border border-[var(--color-brand-primary-light)]/40 mb-8 space-y-4 shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-semibold text-[var(--color-brand-chocolate)] flex items-center gap-2">
+                    <Sparkles size={16} className="text-[var(--color-brand-primary-dark)]" />
+                    Message on Cake (Optional)
+                  </label>
+                  <span className="text-xs text-[var(--color-brand-muted)]">{customMessage.length}/35 chars</span>
+                </div>
+                <input
+                  type="text"
+                  maxLength={35}
+                  value={customMessage}
+                  onChange={(e) => setCustomMessage(e.target.value)}
+                  placeholder="e.g., Happy Birthday Rahul! 🎉"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/40 focus:border-[var(--color-brand-primary-dark)] outline-none text-sm text-[var(--color-brand-chocolate)] placeholder-[var(--color-brand-muted)]/60"
+                />
+                <p className="text-xs text-[var(--color-brand-muted)] mt-1.5">
+                  Hand-piped on the cake surface or placed on a custom dark chocolate plaque.
+                </p>
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer pt-3 border-t border-[var(--color-brand-primary-light)]/20">
+                <input
+                  type="checkbox"
+                  checked={includeCandles}
+                  onChange={(e) => setIncludeCandles(e.target.checked)}
+                  className="w-4 h-4 rounded text-[var(--color-brand-primary-dark)] accent-[var(--color-brand-primary-dark)] cursor-pointer"
+                />
+                <span className="text-xs sm:text-sm text-[var(--color-brand-chocolate)]">
+                  Include complimentary wooden cake knife & birthday candle pack (Free)
+                </span>
+              </label>
+            </div>
+
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 mb-10">
+            <div className="flex flex-col sm:flex-row gap-3 mb-10">
               <button
                 onClick={handleAddToCart}
-                className="btn-primary flex-1 min-w-[220px] py-3.5 text-base"
+                className="btn-primary flex-1 py-3.5 text-base flex items-center justify-center gap-2"
                 disabled={!product.inStock}
               >
                 <ShoppingCart size={18} /> Add to Cart — {formatPrice(product.price * quantity)}
               </button>
               <button
-                onClick={() => {
-                  toggleWishlist(product.id);
-                  toast.success(
+                type="button"
+                onClick={handleWhatsAppOrder}
+                className="bg-[#25D366] hover:bg-[#1EBE5D] text-white font-semibold px-6 py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm"
+                title="Order directly with bakery on WhatsApp"
+              >
+                <MessageCircle size={18} /> Order via WhatsApp
+              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleWishlist(product.id);
+                    toast.success(
+                      isInWishlist
+                        ? `${product.name} removed from wishlist`
+                        : `${product.name} added to wishlist`
+                    );
+                  }}
+                  className={`p-3.5 rounded-xl border-2 transition-colors ${
                     isInWishlist
-                      ? `${product.name} removed from wishlist`
-                      : `${product.name} added to wishlist`
-                  );
-                }}
-                className={`p-3.5 rounded-full border-2 transition-colors ${
-                  isInWishlist
-                    ? 'border-[var(--color-brand-error)] bg-[var(--color-brand-error)] text-white'
-                    : 'border-[var(--color-brand-primary-light)] hover:border-[var(--color-brand-error)] hover:text-[var(--color-brand-error)] text-[var(--color-brand-chocolate)]'
-                }`}
-                title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-              >
-                <Heart size={18} fill={isInWishlist ? 'currentColor' : 'none'} />
-              </button>
-              <button
-                onClick={handleShare}
-                className="p-3.5 rounded-full border-2 border-[var(--color-brand-primary-light)] hover:border-[var(--color-brand-primary-dark)] hover:text-[var(--color-brand-primary-dark)] text-[var(--color-brand-chocolate)] transition-colors"
-                title="Share treat"
-              >
-                <Share2 size={18} />
-              </button>
+                      ? 'border-[var(--color-brand-error)] bg-[var(--color-brand-error)] text-white'
+                      : 'border-[var(--color-brand-primary-light)] hover:border-[var(--color-brand-error)] hover:text-[var(--color-brand-error)] text-[var(--color-brand-chocolate)]'
+                  }`}
+                  title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                >
+                  <Heart size={18} fill={isInWishlist ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="p-3.5 rounded-xl border-2 border-[var(--color-brand-primary-light)] hover:border-[var(--color-brand-primary-dark)] hover:text-[var(--color-brand-primary-dark)] text-[var(--color-brand-chocolate)] transition-colors"
+                  title="Share treat"
+                >
+                  <Share2 size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Tabs */}
@@ -497,13 +570,23 @@ export default function ProductDetailPage() {
             {formatPrice(product.price * quantity)}
           </span>
         </div>
-        <button
-          onClick={handleAddToCart}
-          className="btn-primary py-2.5 px-6 text-sm"
-          disabled={!product.inStock}
-        >
-          <ShoppingCart size={16} /> Add to Cart
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleWhatsAppOrder}
+            className="bg-[#25D366] text-white p-2.5 rounded-xl flex items-center justify-center shadow-sm"
+            title="Order on WhatsApp"
+          >
+            <MessageCircle size={18} />
+          </button>
+          <button
+            onClick={handleAddToCart}
+            className="btn-primary py-2.5 px-5 text-sm"
+            disabled={!product.inStock}
+          >
+            <ShoppingCart size={16} /> Add to Cart
+          </button>
+        </div>
       </div>
     </div>
   );
