@@ -24,13 +24,13 @@ export default function Navbar() {
   return (
     <>
       {/* Announcement Bar */}
-      <div className="bg-[var(--color-brand-primary-dark)] text-white text-center py-2 px-4 text-sm font-medium tracking-wide">
-        <span className="hidden sm:inline">🎂 Free delivery on orders above ₹500 • </span>
-        Every bite, a little happiness ✨
+      <div className="bg-[var(--color-brand-chocolate)] text-white text-center py-2.5 px-4 text-xs sm:text-sm font-medium tracking-wide">
+        <span className="hidden sm:inline">Free delivery on orders above ₹500 • </span>
+        Every bite, a little happiness
       </div>
 
       {/* Main Navbar */}
-      <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-[var(--color-brand-primary-light)]/30 shadow-soft">
+      <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-soft">
         <div className="container-main">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Mobile menu button */}
@@ -44,14 +44,14 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gradient-to-br from-[var(--color-brand-primary)] to-[var(--color-brand-primary-dark)] flex items-center justify-center text-white font-heading text-lg lg:text-xl font-bold shadow-md group-hover:shadow-lg transition-shadow">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-[var(--color-brand-primary-dark)] flex items-center justify-center text-white font-heading text-lg lg:text-xl font-bold transition-transform group-hover:scale-105">
                 Y
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-heading text-xl lg:text-2xl font-bold text-[var(--color-brand-chocolate)] leading-none">
+                <span className="font-heading text-xl lg:text-2xl font-bold text-[var(--color-brand-chocolate)] leading-none block">
                   YOYO CAKES
-                </h1>
-                <p className="text-[10px] lg:text-xs text-[var(--color-brand-muted)] tracking-widest uppercase">
+                </span>
+                <p className="text-xs text-[var(--color-brand-muted)] tracking-wider">
                   Every bite, a little happiness
                 </p>
               </div>

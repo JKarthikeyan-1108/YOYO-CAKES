@@ -83,15 +83,15 @@ export default function ShopPage() {
   return (
     <div className="bg-[var(--color-brand-cream)] min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[var(--color-brand-primary-dark)] to-[var(--color-brand-chocolate)] py-12 lg:py-16">
+      <div className="bg-[var(--color-brand-chocolate)] py-12 lg:py-16">
         <div className="container-main text-center">
           <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
             {activeCategory ? activeCategory.name : 'All Products'}
           </h1>
-          <p className="text-white/70 max-w-md mx-auto">
+          <p className="text-white/85 max-w-md mx-auto text-base">
             {activeCategory
               ? activeCategory.description
-              : 'Discover our complete collection of handcrafted cakes, brownies, and desserts'}
+              : 'Discover our complete collection of 27 handcrafted cakes, brownies, and desserts'}
           </p>
         </div>
       </div>

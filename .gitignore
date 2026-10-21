@@ -26,3 +26,6 @@ functions/lib
 *.njsproj
 *.sln
 *.sw?
+
+# Taste skill inspection artifacts
+.taste-skill/

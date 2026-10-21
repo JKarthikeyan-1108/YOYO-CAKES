@@ -49,10 +49,10 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   return (
     <Link
       to={`/product/${product.id}`}
-      className="group block card overflow-hidden border border-[var(--color-brand-primary-light)]/20 shadow-card hover:shadow-card-hover transition-all"
+      className="group block card overflow-hidden bg-white transition-all"
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-[var(--color-brand-cream)]">
+      <div className="relative aspect-square overflow-hidden bg-[var(--color-brand-cream-dark)]">
         <img
           src={imgSrc}
           alt={product.name}
@@ -65,14 +65,14 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
           <div className="flex gap-2">
             <button
               onClick={handleAddToCart}
-              className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-[var(--color-brand-primary-dark)] hover:text-white transition-colors"
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-[var(--color-brand-primary-dark)] hover:text-white transition-colors"
               title="Add to cart"
             >
               <ShoppingCart size={16} />
             </button>
             <button
               onClick={handleToggleWishlist}
-              className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-colors ${
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                 isInWishlist
                   ? 'bg-[var(--color-brand-error)] text-white'
                   : 'bg-white hover:bg-[var(--color-brand-error)] hover:text-white'
@@ -84,7 +84,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
             {showQuickView && (
               <Link
                 to={`/product/${product.id}`}
-                className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-[var(--color-brand-primary-dark)] hover:text-white transition-colors"
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-[var(--color-brand-primary-dark)] hover:text-white transition-colors"
                 title="Quick view"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -97,12 +97,12 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.bestseller && (
-            <span className="px-2.5 py-1 bg-[var(--color-brand-primary-dark)] text-white text-[10px] font-semibold rounded-full uppercase tracking-wider">
+            <span className="px-3 py-1 bg-[var(--color-brand-primary-dark)] text-white text-xs font-medium rounded-full">
               Bestseller
             </span>
           )}
           {product.featured && !product.bestseller && (
-            <span className="px-2.5 py-1 bg-[var(--color-brand-primary)] text-white text-[10px] font-semibold rounded-full uppercase tracking-wider">
+            <span className="px-3 py-1 bg-[var(--color-brand-primary)] text-white text-xs font-medium rounded-full">
               Featured
             </span>
           )}
@@ -114,7 +114,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
           className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
             isInWishlist
               ? 'bg-[var(--color-brand-error)] text-white'
-              : 'bg-white/80 text-[var(--color-brand-chocolate-light)] hover:bg-white'
+              : 'bg-white/90 text-[var(--color-brand-chocolate-light)] hover:bg-white'
           }`}
         >
           <Heart size={14} fill={isInWishlist ? 'currentColor' : 'none'} />
@@ -122,11 +122,11 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <p className="text-[10px] uppercase tracking-widest text-[var(--color-brand-muted)] mb-1">
+      <div className="p-5">
+        <p className="text-xs text-[var(--color-brand-muted)] font-medium mb-1">
           {product.category}
         </p>
-        <h3 className="font-heading text-base font-semibold text-[var(--color-brand-chocolate)] mb-2 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2">
+        <h3 className="font-heading text-base sm:text-lg font-bold text-[var(--color-brand-chocolate)] mb-3 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2">
           {product.name}
         </h3>
         <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
           </span>
           <button
             onClick={handleAddToCart}
-            className="px-3 py-1.5 bg-[var(--color-brand-primary-dark)] text-white text-xs font-semibold rounded-full hover:bg-[var(--color-brand-chocolate)] transition-colors"
+            className="px-4 py-2 bg-[var(--color-brand-primary-dark)] text-white text-xs font-semibold rounded-full hover:bg-[var(--color-brand-chocolate)] transition-colors"
           >
             Add to Cart
           </button>
