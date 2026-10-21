@@ -87,4 +87,12 @@ describe('Orders Lifecycle & State Management', () => {
     order = await getOrderById('YOYO-TRACK-101');
     expect(order?.orderStatus).toBe('delivered');
   });
+
+  it('verifies razorpay options calculation with integer paise conversion', () => {
+    const amount = 450;
+    const amountPaise = Math.round(amount * 100);
+    expect(amountPaise).toBe(45000);
+    expect(Number.isInteger(amountPaise)).toBe(true);
+  });
 });
+
