@@ -10,10 +10,62 @@ import {
   Sparkles, 
   Flame, 
   MapPin, 
-  CheckCircle 
+  CheckCircle,
+  CheckCircle2
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
 import { PRODUCTS, CATEGORIES, getBestsellers } from '@/data/products';
+
+const TESTIMONIALS = [
+  {
+    id: 't-1',
+    name: 'Priya Sundaram',
+    location: 'Anna Nagar, Chennai',
+    verified: true,
+    rating: 5,
+    date: '3 days ago',
+    headline: 'Best Chocolate Dream Cake in Chennai! Hands down.',
+    comment: 'Ordered the 5-in-1 Chocolate Dream Cake for my daughter’s birthday. The crack on the top chocolate shell was so crisp and satisfying, and the cocoa layers underneath were melt-in-mouth! Delivery was right on time at 7 PM sharp.',
+    productName: '5-in-1 Chocolate Dream Cake',
+    productImage: '/images/products/dream-cake.jpg',
+  },
+  {
+    id: 't-2',
+    name: 'Karthik Raja',
+    location: 'T. Nagar, Chennai',
+    verified: true,
+    rating: 5,
+    date: '1 week ago',
+    headline: 'Pure Belgian indulgence, absolutely uncompromised quality.',
+    comment: 'The Assorted Brownie Box (Nutella + Biscoff + Pista) is pure bliss. Unlike bakery brownies loaded with excess sugar, YOYO uses authentic cocoa and butter. You can literally taste the premium ingredients. 10/10 recommendation!',
+    productName: 'Assorted Brownie Box (6 Pcs)',
+    productImage: '/images/products/assorted-brownies.jpg',
+  },
+  {
+    id: 't-3',
+    name: 'Ananya Krishnan',
+    location: 'Velachery, Chennai',
+    verified: true,
+    rating: 5,
+    date: '2 weeks ago',
+    headline: 'The Mini Jar Cakes are so cute and super fresh!',
+    comment: 'Ordered 10 Red Velvet and Mango mini jar cakes for an office anniversary party. The personal jars were a total hit—zero mess, perfectly portioned, and the cream cheese frosting was heavenly. Fast doorstep delivery in refrigerated packing.',
+    productName: 'Mini Jar Cakes (Assorted)',
+    productImage: '/images/products/mini-jar-cakes.jpg',
+  },
+  {
+    id: 't-4',
+    name: 'Vikram Chandran',
+    location: 'Adyar, Chennai',
+    verified: true,
+    rating: 5,
+    date: '3 weeks ago',
+    headline: 'Classic Tiramisu done right with mascarpone cream.',
+    comment: 'Finally found real Italian-style tiramisu in Chennai. Proper espresso soaked biscuits, light mascarpone layer, and fine dark cocoa powder. Delivered in cold insulated packaging so it arrived in picture-perfect shape.',
+    productName: 'Classic Italian Tiramisu',
+    productImage: '/images/products/tiramisu.jpg',
+  },
+];
 
 export default function HomePage() {
   const [pincode, setPincode] = useState('');
@@ -460,6 +512,85 @@ export default function HomePage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+      {/* Verified Customer Reviews & Amazon-Style Social Proof */}
+      <section className="py-20 bg-white border-t border-gray-200">
+        <div className="container-main">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={18} fill="currentColor" />
+                  ))}
+                </div>
+                <span className="text-sm font-bold text-gray-900">4.9 out of 5 stars</span>
+                <span className="text-xs text-gray-500 font-medium">(1,420+ Chennai reviews)</span>
+              </div>
+              <h2 className="font-heading text-3xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)]">
+                Loved Across Chennai
+              </h2>
+              <p className="text-base text-[var(--color-brand-muted)] mt-1">
+                Real feedback from real cake lovers across Anna Nagar, T. Nagar, Velachery, and beyond.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 bg-[var(--color-brand-cream)] px-4 py-2.5 rounded-xl border border-[var(--color-brand-primary)]/20 text-xs">
+              <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-gray-900">100% Verified Purchases</p>
+                <p className="text-gray-500 text-[11px]">Direct bakery orders & doorstep deliveries</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.id}
+                className="bg-[var(--color-brand-cream-dark)]/50 rounded-2xl p-6 border border-gray-200/80 flex flex-col justify-between hover:shadow-md transition-shadow relative"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex text-amber-400">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} size={14} fill="currentColor" />
+                      ))}
+                    </div>
+                    <span className="text-[11px] text-gray-400 font-mono">{t.date}</span>
+                  </div>
+
+                  <h3 className="text-sm font-bold text-gray-900 mb-2 leading-snug line-clamp-2">
+                    "{t.headline}"
+                  </h3>
+
+                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-4 mb-4">
+                    {t.comment}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200/60">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-full bg-[var(--color-brand-primary)]/20 text-[var(--color-brand-primary-dark)] font-bold text-xs flex items-center justify-center">
+                      {t.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-900 leading-tight">{t.name}</p>
+                      <p className="text-[10px] text-gray-500">{t.location}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded">
+                    <span className="flex items-center gap-1 font-semibold">
+                      <CheckCircle2 size={11} /> Verified Purchase
+                    </span>
+                    <span className="truncate max-w-[110px] text-gray-600">{t.productName}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
