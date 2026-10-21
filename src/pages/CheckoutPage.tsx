@@ -11,6 +11,10 @@ import { getUserAddressesFromFirestore, type SavedAddress } from '@/services/fir
 
 type FulfillmentType = 'delivery' | 'pickup';
 
+function generateNewOrderId(): string {
+  return `YOYO-${Date.now().toString(36).toUpperCase()}`;
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { items, getSubtotal, clearCart } = useCartStore();
@@ -87,7 +91,7 @@ export default function CheckoutPage() {
     setProcessing(true);
 
     try {
-      const generatedOrderId = `YOYO-${Date.now().toString(36).toUpperCase()}`;
+      const generatedOrderId = generateNewOrderId();
       setOrderId(generatedOrderId);
 
       // Open Razorpay Checkout (uses Razorpay modal or test simulator)
@@ -142,7 +146,7 @@ export default function CheckoutPage() {
           setProcessing(false);
         },
       });
-    } catch (error) {
+    } catch {
       toast.error('Order creation failed. Please try again.');
       setProcessing(false);
     }

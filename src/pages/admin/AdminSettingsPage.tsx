@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Save, Store, Phone, Truck, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { seedCatalogToFirestore } from '@/lib/seed';
@@ -34,18 +34,17 @@ const DEFAULT_SETTINGS: BusinessSettings = {
 };
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<BusinessSettings>(DEFAULT_SETTINGS);
-
-  useEffect(() => {
+  const [settings, setSettings] = useState<BusinessSettings>(() => {
     try {
       const stored = localStorage.getItem(SETTINGS_KEY);
       if (stored) {
-        setSettings(JSON.parse(stored));
+        return JSON.parse(stored);
       }
     } catch {
       // fallback
     }
-  }, []);
+    return DEFAULT_SETTINGS;
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;

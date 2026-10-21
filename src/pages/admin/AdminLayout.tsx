@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 export default function AdminLayout() {
   const location = useLocation();
-  const { user, isAdmin } = useAuthStore();
+  const { user } = useAuthStore();
 
   const navItems = [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },

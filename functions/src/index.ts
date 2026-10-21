@@ -39,7 +39,7 @@ export const setAdminClaim = functions.https.onCall(async (data, context) => {
 });
 
 // 2. TRUSTED BACKEND OPERATION: CREATE RAZORPAY ORDER WITH PAISE ACCURACY
-export const createRazorpayOrder = functions.https.onCall(async (data, context) => {
+export const createRazorpayOrder = functions.https.onCall(async (data, _context) => {
   const { amountPaise, currency = 'INR', receipt } = data;
 
   if (!amountPaise || amountPaise <= 0) {
@@ -151,7 +151,7 @@ export const verifyRazorpayPayment = functions.https.onCall(async (data, context
 });
 
 // 4. TRUSTED BACKEND OPERATION: SERVER-SIDE COUPON VALIDATION
-export const validateCoupon = functions.https.onCall(async (data, context) => {
+export const validateCoupon = functions.https.onCall(async (data, _context) => {
   const { code, orderAmount } = data;
   if (!code) {
     throw new functions.https.HttpsError('invalid-argument', 'Coupon code is required.');

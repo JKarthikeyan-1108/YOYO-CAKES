@@ -30,7 +30,15 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-    loadOrders();
+    let isMounted = true;
+    getAllOrders().then((list) => {
+      if (isMounted) {
+        setOrders(list);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Filter

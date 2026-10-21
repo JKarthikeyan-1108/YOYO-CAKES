@@ -20,6 +20,8 @@ function InstagramIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export default function Footer() {
   return (
     <footer className="bg-[var(--color-brand-chocolate)] text-white/90">
@@ -138,7 +140,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container-main py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} YOYO CAKES. All rights reserved.
+            © {CURRENT_YEAR} YOYO CAKES. All rights reserved.
           </p>
           <p className="text-xs text-white/40">
             Handcrafted with ❤️ in India
