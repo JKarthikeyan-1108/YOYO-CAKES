@@ -9,13 +9,15 @@ import {
   MapPin, 
   ChevronDown, 
   Sparkles,
-  PhoneCall
+  PhoneCall,
+  Flame,
+  ArrowRight
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
-import { CATEGORIES } from '@/data/products';
+import { CATEGORIES, PRODUCTS, formatPrice } from '@/data/products';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -24,17 +26,52 @@ export default function Navbar() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [currentPincode, setCurrentPincode] = useState('600001');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const cartCount = useCartStore((s) => s.getItemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const { user, logout } = useAuthStore();
 
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchResults = searchQuery.trim().length > 0
+    ? PRODUCTS.filter((p) => {
+        const matchesCategory = selectedCategory === 'all' || p.categorySlug === selectedCategory;
+        const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.category.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesQuery;
+      }).slice(0, 5)
+    : [];
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setIsSearchOpen(false);
       const catParam = selectedCategory !== 'all' ? `&category=${selectedCategory}` : '';
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}${catParam}`);
     }
+  };
+
+  const handleSelectProduct = (productId: string) => {
+    setIsSearchOpen(false);
+    navigate(`/product/${productId}`);
+  };
+
+  const handleSelectTrending = (query: string) => {
+    setSearchQuery(query);
+    setIsSearchOpen(false);
+    navigate(`/shop?search=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -99,42 +136,172 @@ export default function Navbar() {
               </div>
             </button>
 
-            {/* Central Amazon Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-1 sm:mx-2">
-              <div className="flex rounded-xl overflow-hidden border border-gray-300 focus-within:border-[var(--color-brand-primary-dark)] focus-within:ring-2 focus-within:ring-[#FFD814]/40 shadow-xs transition-all bg-white">
-                {/* Category Dropdown */}
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="hidden md:block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-2.5 border-r border-gray-300 outline-none hover:bg-gray-200 cursor-pointer"
-                >
-                  <option value="all">All Cakes</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.slug}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+            {/* Central Amazon Search Bar with Live Autocomplete */}
+            <div ref={searchContainerRef} className="flex-1 max-w-2xl mx-1 sm:mx-2 relative">
+              <form onSubmit={handleSearch}>
+                <div className="flex rounded-xl overflow-hidden border border-gray-300 focus-within:border-[var(--color-brand-primary-dark)] focus-within:ring-2 focus-within:ring-[#FFD814]/40 shadow-xs transition-all bg-white">
+                  {/* Category Dropdown */}
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="hidden md:block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-2.5 border-r border-gray-300 outline-none hover:bg-gray-200 cursor-pointer"
+                  >
+                    <option value="all">All Cakes</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.slug}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
 
-                {/* Search Input */}
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Matilda, Dream Cake, Tiramisu, Brownies..."
-                  className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400"
-                />
+                  {/* Search Input */}
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onFocus={() => setIsSearchOpen(true)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setIsSearchOpen(true);
+                    }}
+                    placeholder="Search Matilda, Dream Cake, Tiramisu, Brownies..."
+                    className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400"
+                  />
 
-                {/* Amazon Gold Search Button */}
-                <button
-                  type="submit"
-                  aria-label="Search"
-                  className="bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] px-4 sm:px-5 flex items-center justify-center text-gray-900 transition-colors border-l border-gray-200"
-                >
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
+                  {/* Clear button if typed */}
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="px-2 text-gray-400 hover:text-gray-600 text-xs"
+                      aria-label="Clear search"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+
+                  {/* Amazon Gold Search Button */}
+                  <button
+                    type="submit"
+                    aria-label="Search"
+                    className="bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] px-4 sm:px-5 flex items-center justify-center text-gray-900 transition-colors border-l border-gray-200"
+                  >
+                    <Search size={18} />
+                  </button>
+                </div>
+              </form>
+
+              {/* Instant Search Autocomplete Overlay */}
+              {isSearchOpen && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden animate-fade-in">
+                  {searchQuery.trim().length > 0 ? (
+                    <div>
+                      {searchResults.length > 0 ? (
+                        <div>
+                          <div className="p-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
+                            <span>Matching Bakery Treats ({searchResults.length})</span>
+                            <span className="text-[11px]">Press Enter to view all</span>
+                          </div>
+                          <div className="divide-y divide-gray-100">
+                            {searchResults.map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => handleSelectProduct(item.id)}
+                                className="w-full text-left p-3 hover:bg-[var(--color-brand-cream)]/60 transition-colors flex items-center gap-3 group"
+                              >
+                                <img
+                                  src={item.image || `/images/categories/${item.categorySlug}.jpg`}
+                                  alt={item.name}
+                                  className="w-11 h-11 rounded-lg object-cover flex-shrink-0 bg-gray-100 border border-gray-200"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-xs font-bold text-gray-900 truncate group-hover:text-[var(--color-brand-primary-dark)]">
+                                      {item.name}
+                                    </h4>
+                                    {item.bestseller && (
+                                      <span className="bg-[#FFD814] text-[#0F1111] text-[9px] font-black uppercase px-1.5 py-0.2 rounded-xs">
+                                        Best Seller
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-gray-500 truncate">{item.category}</p>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <span className="font-heading text-xs font-extrabold text-gray-900 block">
+                                    {formatPrice(item.price)}
+                                  </span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold">Fresh Daily</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          <div className="p-3 bg-gray-50 border-t border-gray-100 text-center">
+                            <button
+                              type="button"
+                              onClick={handleSearch}
+                              className="text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline inline-flex items-center gap-1.5"
+                            >
+                              View all results for "{searchQuery}" <ArrowRight size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-6 text-center text-gray-500">
+                          <p className="text-xs font-bold text-gray-800 mb-1">No exact matches found for "{searchQuery}"</p>
+                          <p className="text-[11px] mb-3">Try checking our popular handcrafted categories instead:</p>
+                          <div className="flex flex-wrap justify-center gap-2">
+                            {['Dream Cake', 'Brownies', 'Tiramisu', 'Jar Cakes'].map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => handleSelectTrending(tag)}
+                                className="px-2.5 py-1 rounded-full bg-gray-100 hover:bg-[#FFD814] hover:text-gray-900 text-[11px] font-semibold text-gray-700 transition-colors"
+                              >
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Trending Searches when input is empty & clicked */
+                    <div className="p-4">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-gray-800 mb-3">
+                        <Flame size={15} className="text-red-500" />
+                        <span>Trending Chennai Favorites</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {[
+                          { term: '5-in-1 Chocolate Dream Cake', cat: 'Signature Cakes' },
+                          { term: 'Matilda Dark Chocolate Cake', cat: 'Signature Cakes' },
+                          { term: 'Assorted Brownie Box', cat: 'Brownies' },
+                          { term: 'Classic Italian Tiramisu', cat: 'Tiramisu' },
+                          { term: 'Red Velvet Mini Jar Cake', cat: 'Jar Cakes' },
+                          { term: 'Nutella Hazelnut Brownie', cat: 'Brownies' },
+                        ].map((trend) => (
+                          <button
+                            key={trend.term}
+                            type="button"
+                            onClick={() => handleSelectTrending(trend.term)}
+                            className="p-2 rounded-xl hover:bg-[var(--color-brand-cream)]/70 transition-colors text-left flex items-center justify-between border border-transparent hover:border-gray-200 group"
+                          >
+                            <div>
+                              <p className="text-xs font-bold text-gray-900 group-hover:text-[var(--color-brand-primary-dark)]">
+                                {trend.term}
+                              </p>
+                              <p className="text-[10px] text-gray-500">{trend.cat}</p>
+                            </div>
+                            <ArrowRight size={12} className="text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Right Action Icons (Account, Returns & Orders, Wishlist, Cart) */}
             <div className="flex items-center gap-1 sm:gap-3">

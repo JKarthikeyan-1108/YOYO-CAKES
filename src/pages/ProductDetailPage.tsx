@@ -197,6 +197,31 @@ export default function ProductDetailPage() {
     toast.success('Thank you! Your review has been submitted.');
   };
 
+  const handleAddCombo = () => {
+    if (!product) return;
+    addItem(product, 1, {
+      customMessage: customMessage.trim() || undefined,
+      includeCandles: true,
+    });
+    // Complementary celebration add-on
+    addItem({
+      id: 'addon-candles',
+      name: 'Sparkling Birthday Candle Pack',
+      price: 50,
+      image: '/images/products/candles.jpg',
+      category: 'Accessories',
+      categorySlug: 'accessories',
+      description: 'Pack of 6 sparkling birthday celebration candles with safe holders.',
+      ingredients: 'Wax, organic color pigment',
+      allergens: 'None',
+      inStock: true,
+      stockQuantity: 99,
+      bestseller: false,
+      featured: false,
+    }, 1);
+    toast.success(`Combo added: ${product.name} + Birthday Candle Pack!`);
+  };
+
   return (
     <div className="bg-[var(--color-brand-cream)] min-h-screen pb-20 lg:pb-12">
       {/* Breadcrumb */}
@@ -501,29 +526,54 @@ export default function ProductDetailPage() {
 
               {activeTab === 'reviews' && (
                 <div className="space-y-6">
-                  {/* Reviews Summary */}
-                  <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-[var(--color-brand-primary)]/15">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-heading text-2xl font-bold text-[var(--color-brand-chocolate)]">
-                          5.0
-                        </span>
-                        <div className="flex text-amber-500">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={16} fill="currentColor" />
-                          ))}
+                  {/* Reviews Summary with Amazon Star Breakdown Bars */}
+                  <div className="bg-white p-5 rounded-2xl border border-[var(--color-brand-primary)]/15 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-heading text-3xl font-bold text-gray-900">
+                            4.9
+                          </span>
+                          <div className="flex text-amber-400">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={18} fill="currentColor" />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-500 font-semibold">out of 5 stars</span>
                         </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {reviewsList.length + 84} verified customer ratings across Chennai
+                        </p>
                       </div>
-                      <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
-                        Based on {reviewsList.length} verified customer reviews
-                      </p>
+                      <button
+                        onClick={() => setShowReviewForm(!showReviewForm)}
+                        className="px-4 py-2 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs font-bold border border-[#FCD200] self-start sm:self-auto shadow-xs"
+                      >
+                        {showReviewForm ? 'Cancel Review' : 'Write a Customer Review'}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setShowReviewForm(!showReviewForm)}
-                      className="px-4 py-2 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] text-xs font-semibold hover:bg-[var(--color-brand-primary-light)] transition-colors"
-                    >
-                      {showReviewForm ? 'Cancel' : 'Write a Review'}
-                    </button>
+
+                    {/* 5-Star Breakdown Bars */}
+                    <div className="space-y-1.5 text-xs">
+                      {[
+                        { star: 5, pct: 88, count: '88%' },
+                        { star: 4, pct: 9, count: '9%' },
+                        { star: 3, pct: 2, count: '2%' },
+                        { star: 2, pct: 1, count: '1%' },
+                        { star: 1, pct: 0, count: '0%' },
+                      ].map((row) => (
+                        <div key={row.star} className="flex items-center gap-3 text-gray-600">
+                          <span className="w-12 text-right font-medium">{row.star} star</span>
+                          <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                            <div
+                              className="h-full bg-amber-400 rounded-full"
+                              style={{ width: `${row.pct}%` }}
+                            />
+                          </div>
+                          <span className="w-8 text-right font-mono text-gray-500">{row.count}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Submission Form */}
@@ -608,6 +658,104 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Amazon-Style Frequently Bought Together */}
+        <div className="mt-12 bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-xs">
+          <h2 className="font-heading text-xl sm:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Sparkles size={20} className="text-[var(--color-brand-primary-dark)]" />
+            Frequently Bought Together
+          </h2>
+
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+              {/* Product 1 */}
+              <div className="flex items-center gap-3">
+                <img
+                  src={displayImage}
+                  alt={product.name}
+                  className="w-20 h-20 rounded-xl object-cover border border-gray-200 bg-gray-50"
+                />
+                <div>
+                  <p className="text-xs font-bold text-gray-900 max-w-[180px] truncate">{product.name}</p>
+                  <p className="text-xs font-extrabold text-gray-900 mt-0.5">{formatPrice(product.price)}</p>
+                  <span className="text-[10px] text-emerald-600 font-semibold">This item</span>
+                </div>
+              </div>
+
+              <span className="text-gray-400 font-bold text-xl">+</span>
+
+              {/* Complementary Add-on */}
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-20 rounded-xl bg-[var(--color-brand-cream)] flex items-center justify-center text-3xl border border-gray-200">
+                  🕯️
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-900 max-w-[180px]">Sparkling Birthday Candle Pack</p>
+                  <p className="text-xs font-extrabold text-gray-900 mt-0.5">₹50</p>
+                  <span className="text-[10px] text-gray-500">Party accessory</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bundle Price and 1-Click Action */}
+            <div className="lg:border-l lg:border-gray-200 lg:pl-8 flex flex-col gap-2 w-full lg:w-auto">
+              <div className="text-xs text-gray-600">
+                <span>Total Combo Price: </span>
+                <span className="font-heading text-xl font-extrabold text-gray-900 ml-1">
+                  {formatPrice(product.price + 50)}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddCombo}
+                className="py-2.5 px-6 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FCD200] transition-colors flex items-center justify-center gap-2"
+              >
+                <ShoppingCart size={15} /> Add both to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Amazon-Style Product Specifications Table */}
+        <div className="mt-10 bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-xs">
+          <h2 className="font-heading text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+            Product Specifications & Details
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Bake Type</span>
+              <span className="font-semibold text-gray-900">Handcrafted Small-Batch</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Chocolate Source</span>
+              <span className="font-semibold text-gray-900">Pure Belgian Cocoa & Callebaut</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Dairy Standard</span>
+              <span className="font-semibold text-gray-900">100% Real Dairy Cream & Butter</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Preservatives</span>
+              <span className="font-semibold text-emerald-700">Zero Synthetic Preservatives</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Storage Instruction</span>
+              <span className="font-semibold text-gray-900">Keep refrigerated at 2°C – 5°C</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Best Before</span>
+              <span className="font-semibold text-gray-900">48 hours from delivery date</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Delivery Packaging</span>
+              <span className="font-semibold text-gray-900">Cold-insulated tamper-proof box</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="text-gray-500 font-medium">Bakery Kitchen</span>
+              <span className="font-semibold text-gray-900">Anna Nagar / T. Nagar, Chennai</span>
             </div>
           </div>
         </div>

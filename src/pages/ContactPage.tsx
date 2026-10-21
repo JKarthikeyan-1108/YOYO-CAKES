@@ -94,7 +94,7 @@ export default function ContactPage() {
                       Local City Delivery & Kitchen Pickup
                     </p>
                     <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
-                      (Configurable in Admin Settings)
+                      Serving Anna Nagar, T. Nagar, Velachery, Adyar, and across Chennai with refrigerated delivery.
                     </p>
                   </div>
                 </div>
