@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^6.0.0",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "date-fns": "^4.4.0",
     "firebase": "^13.1.0",
