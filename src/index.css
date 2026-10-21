@@ -16,8 +16,8 @@
   --color-brand-error: #C74A4A;
   --color-brand-info: #5B8DB8;
 
-  --font-heading: 'Playfair Display', Georgia, serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --shadow-card: none;
   --shadow-card-hover: 0 8px 24px rgba(61, 36, 23, 0.08);
@@ -33,13 +33,6 @@
 
 /* ===== GLOBAL STYLES ===== */
 @layer base {
-  @font-face {
-    font-family: 'Playfair Display';
-    font-style: normal;
-    font-weight: 400 900;
-    font-display: swap;
-    src: url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
-  }
 
   * {
     margin: 0;

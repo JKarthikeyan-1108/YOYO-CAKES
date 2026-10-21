@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Eye } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Clock } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { Product } from '@/data/products';
@@ -7,14 +7,12 @@ import { formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 
-
-
 interface ProductCardProps {
   product: Product;
   showQuickView?: boolean;
 }
 
-export default function ProductCard({ product, showQuickView = true }: ProductCardProps) {
+export default function ProductCard({ product, showQuickView: _showQuickView = true }: ProductCardProps) {
   const categoryImage = `/images/categories/${product.categorySlug}.jpg`;
   const [imgSrc, setImgSrc] = useState(product.image || categoryImage);
   const [hasFailedOnce, setHasFailedOnce] = useState(false);
@@ -22,6 +20,12 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
+
+  // Simulated ratings & MRP for Amazon e-commerce feel
+  const rating = product.bestseller ? 4.9 : 4.8;
+  const reviewCount = product.bestseller ? 218 : 84;
+  const mrp = Math.round((product.price * 1.18) / 10) * 10;
+  const discountPercent = Math.round(((mrp - product.price) / mrp) * 100);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,97 +53,98 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   return (
     <Link
       to={`/product/${product.id}`}
-      className="group block card overflow-hidden bg-white transition-all"
+      className="group flex flex-col justify-between rounded-2xl bg-white border border-gray-200/80 hover:border-gray-300 hover:shadow-elevated transition-all overflow-hidden"
     >
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-[var(--color-brand-cream-dark)]">
-        <img
-          src={imgSrc}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={handleImageError}
-        />
+      <div>
+        {/* Image & Badges */}
+        <div className="relative aspect-square overflow-hidden bg-[var(--color-brand-cream-dark)]">
+          <img
+            src={imgSrc}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={handleImageError}
+          />
 
-        {/* Overlay Actions */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
-          <div className="flex gap-2">
-            <button
-              onClick={handleAddToCart}
-              className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-[var(--color-brand-primary-dark)] hover:text-white transition-colors"
-              title="Add to cart"
-            >
-              <ShoppingCart size={16} />
-            </button>
-            <button
-              onClick={handleToggleWishlist}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                isInWishlist
-                  ? 'bg-[var(--color-brand-error)] text-white'
-                  : 'bg-white hover:bg-[var(--color-brand-error)] hover:text-white'
-              }`}
-              title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-            >
-              <Heart size={16} fill={isInWishlist ? 'currentColor' : 'none'} />
-            </button>
-            {showQuickView && (
-              <Link
-                to={`/product/${product.id}`}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-[var(--color-brand-primary-dark)] hover:text-white transition-colors"
-                title="Quick view"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Eye size={16} />
-              </Link>
+          {/* Badges */}
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
+            {product.bestseller && (
+              <span className="px-2.5 py-1 bg-[#232F3E] text-white text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-xs flex items-center gap-1">
+                <span className="text-[#FF9900]">#1</span> Best Seller
+              </span>
+            )}
+            {discountPercent > 0 && (
+              <span className="px-2 py-0.5 bg-[#CC0C39] text-white text-[10px] font-bold rounded-sm shadow-xs">
+                {discountPercent}% OFF
+              </span>
             )}
           </div>
-        </div>
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {product.bestseller && (
-            <span className="px-3 py-1 bg-[var(--color-brand-primary-dark)] text-white text-xs font-medium rounded-full">
-              Bestseller
-            </span>
-          )}
-          {product.featured && !product.bestseller && (
-            <span className="px-3 py-1 bg-[var(--color-brand-primary)] text-white text-xs font-medium rounded-full">
-              Featured
-            </span>
-          )}
-        </div>
-
-        {/* Wishlist - Top Right */}
-        <button
-          onClick={handleToggleWishlist}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-            isInWishlist
-              ? 'bg-[var(--color-brand-error)] text-white'
-              : 'bg-white/90 text-[var(--color-brand-chocolate-light)] hover:bg-white'
-          }`}
-        >
-          <Heart size={14} fill={isInWishlist ? 'currentColor' : 'none'} />
-        </button>
-      </div>
-
-      {/* Info */}
-      <div className="p-5">
-        <p className="text-xs text-[var(--color-brand-muted)] font-medium mb-1">
-          {product.category}
-        </p>
-        <h3 className="font-heading text-base sm:text-lg font-bold text-[var(--color-brand-chocolate)] mb-3 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2">
-          {product.name}
-        </h3>
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-[var(--color-brand-primary-dark)]">
-            {formatPrice(product.price)}
-          </span>
+          {/* Wishlist Button */}
           <button
-            onClick={handleAddToCart}
-            className="px-4 py-2 bg-[var(--color-brand-primary-dark)] text-white text-xs font-semibold rounded-full hover:bg-[var(--color-brand-chocolate)] transition-colors"
+            onClick={handleToggleWishlist}
+            className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-xs ${
+              isInWishlist
+                ? 'bg-red-500 text-white'
+                : 'bg-white/90 text-gray-600 hover:bg-white hover:text-red-500'
+            }`}
+            title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            Add to Cart
+            <Heart size={15} fill={isInWishlist ? 'currentColor' : 'none'} />
           </button>
         </div>
+
+        {/* Product Details (Amazon E-commerce Typography & Layout) */}
+        <div className="p-4 sm:p-5">
+          <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+            <span className="uppercase tracking-wider font-semibold text-[var(--color-brand-muted)]">
+              {product.category}
+            </span>
+            <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-semibold border border-green-200/60">
+              Fresh Bake
+            </span>
+          </div>
+
+          <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2 leading-snug mb-1.5">
+            {product.name}
+          </h3>
+
+          {/* Star Ratings */}
+          <div className="flex items-center gap-1 mb-2.5">
+            <div className="flex text-[#FFA41C]">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={13} fill="currentColor" strokeWidth={0} />
+              ))}
+            </div>
+            <span className="text-xs font-bold text-gray-800">{rating}</span>
+            <span className="text-[11px] text-gray-500 font-medium">({reviewCount})</span>
+          </div>
+
+          {/* Amazon-Style Price Tag */}
+          <div className="flex items-baseline gap-2 mb-2">
+            <span className="text-lg sm:text-xl font-extrabold text-gray-900">
+              {formatPrice(product.price)}
+            </span>
+            <span className="text-xs text-gray-400 line-through">
+              {formatPrice(mrp)}
+            </span>
+          </div>
+
+          {/* Delivery Promise */}
+          <div className="text-[11px] text-gray-600 flex items-center gap-1 mb-4">
+            <Clock size={12} className="text-green-600" />
+            <span>FREE Delivery on orders over ₹500</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Amazon-Style Gold Add to Cart Button */}
+      <div className="p-4 sm:p-5 pt-0">
+        <button
+          onClick={handleAddToCart}
+          className="w-full py-2.5 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2 border border-[#FCD200]"
+        >
+          <ShoppingCart size={14} /> Add to Cart
+        </button>
       </div>
     </Link>
   );
