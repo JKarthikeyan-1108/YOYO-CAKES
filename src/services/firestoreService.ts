@@ -18,9 +18,20 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Product } from '@/data/products';
 import { PRODUCTS, CATEGORIES } from '@/data/products';
 
-// ==========================================
-// 1. DATA TYPES FOR THE 11 FIRESTORE COLLECTIONS
-// ==========================================
+export const COLLECTIONS = {
+  USERS: 'users',
+  USER_SETTINGS: 'userSettings',
+  ADDRESSES: 'addresses',
+  CATEGORIES: 'categories',
+  PRODUCTS: 'products',
+  CARTS: 'carts',
+  WISHLISTS: 'wishlists',
+  ORDERS: 'orders',
+  PAYMENTS: 'payments',
+  COUPONS: 'coupons',
+  ORDER_STATUS_HISTORY: 'orderStatusHistory',
+  BUSINESS_SETTINGS: 'businessSettings',
+} as const;
 
 export interface UserProfile {
   uid: string;
