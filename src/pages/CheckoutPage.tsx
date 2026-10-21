@@ -502,10 +502,20 @@ export default function CheckoutPage() {
 
                 <div className="space-y-3 max-h-60 overflow-y-auto mb-4">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex justify-between text-sm">
-                      <span className="text-[var(--color-brand-chocolate-light)] truncate pr-2">
-                        {item.product.name} × {item.quantity}
-                      </span>
+                    <div key={item.product.id} className="flex items-center justify-between text-sm gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <img
+                          src={item.product.image || `/images/categories/${item.product.categorySlug}.jpg`}
+                          alt={item.product.name}
+                          className="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-[var(--color-brand-cream-dark)]"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = `/images/categories/${item.product.categorySlug}.jpg`;
+                          }}
+                        />
+                        <span className="text-[var(--color-brand-chocolate-light)] truncate">
+                          {item.product.name} × {item.quantity}
+                        </span>
+                      </div>
                       <span className="font-medium text-[var(--color-brand-chocolate)] flex-shrink-0">
                         {formatPrice(item.product.price * item.quantity)}
                       </span>

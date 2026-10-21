@@ -65,19 +65,16 @@ export default function CartPage() {
                 key={item.product.id}
                 className="bg-white rounded-xl p-4 md:p-6 shadow-card flex gap-4 md:gap-6 animate-fade-in"
               >
-                {/* Product Image Placeholder */}
-                <div className="w-20 h-20 md:w-28 md:h-28 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-[var(--color-brand-primary-light)] to-[var(--color-brand-primary)] flex items-center justify-center">
-                  <span className="text-3xl md:text-4xl">
-                    {item.product.categorySlug === 'brownies'
-                      ? '🍫'
-                      : item.product.categorySlug === 'cakes'
-                      ? '🎂'
-                      : item.product.categorySlug === 'mini-jar-cakes'
-                      ? '🧁'
-                      : item.product.categorySlug === 'tiramisu-desserts'
-                      ? '🍮'
-                      : '🍰'}
-                  </span>
+                {/* Product Image */}
+                <div className="w-20 h-20 md:w-28 md:h-28 rounded-lg overflow-hidden flex-shrink-0 bg-[var(--color-brand-cream-dark)]">
+                  <img
+                    src={item.product.image || `/images/categories/${item.product.categorySlug}.jpg`}
+                    alt={item.product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = `/images/categories/${item.product.categorySlug}.jpg`;
+                    }}
+                  />
                 </div>
 
                 {/* Details */}
