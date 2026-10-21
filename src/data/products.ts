@@ -37,8 +37,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 20,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: '5-in-1 layers: Belgian chocolate sponge, 54% dark chocolate ganache, whipped chocolate mousse, molten lava cream, crisp chocolate shell, Dutch cocoa powder.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'cake-002',
@@ -52,8 +52,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 15,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: '70% Belgian dark chocolate, Dutch process cocoa, espresso infusion, double dairy cream, organic flour, brown sugar, cultured butter.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'cake-003',
@@ -67,8 +67,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 15,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Dark chocolate sponge, crushed Oreo cookies, vanilla buttercream, dark chocolate ganache drip, dairy cream.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Soy.',
   },
   {
     id: 'cake-004',
@@ -82,8 +82,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 10,
     featured: true,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Moist chocolate sponge, golden honeycomb toffee crunch, caramelized hazelnut praline, salted caramel sauce, dark chocolate ganache.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Tree Nuts (Hazelnuts), Eggs.',
   },
   {
     id: 'cake-005',
@@ -97,8 +97,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 12,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Soft baked dark chocolate cake, molten chocolate lava fudge center, powdered sugar, pure vanilla extract.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'cake-006',
@@ -112,8 +112,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 8,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Cream cheese, farm-fresh eggs, fresh dairy milk, cultured butter, organic flour, dark, milk, and white chocolate drizzles.',
+    allergens: 'Contains Dairy (Milk), Eggs, Gluten (Wheat).',
   },
 
   // ===== TIRAMISU & DESSERTS =====
@@ -129,8 +129,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 10,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Savoiardi ladyfingers, freshly brewed Italian espresso, mascarpone cheese, pasteurized egg yolks, raw sugar, Dutch cocoa powder.',
+    allergens: 'Contains Dairy (Milk), Eggs, Gluten (Wheat).',
   },
   {
     id: 'tiramisu-002',
@@ -144,8 +144,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 8,
     featured: true,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Savoiardi ladyfingers, rich chocolate cream, mascarpone, espresso, dark chocolate shavings, Dutch cocoa.',
+    allergens: 'Contains Dairy (Milk), Eggs, Gluten (Wheat).',
   },
   {
     id: 'tiramisu-003',
@@ -159,8 +159,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 20,
     featured: false,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: '70% dark chocolate mousse, 33% milk chocolate mousse, white chocolate mousse, dairy whipping cream, chocolate pearls.',
+    allergens: 'Contains Dairy (Milk), Soy.',
   },
 
   // ===== BROWNIES =====
@@ -176,8 +176,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 50,
     featured: false,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Belgian dark chocolate, Dutch cocoa powder, European dairy butter, fresh eggs, raw cane sugar, sea salt.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'brownie-002',
@@ -191,8 +191,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 30,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Belgian chocolate brownie loaded with toasted California walnuts, roasted almonds, and cashews.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Tree Nuts.',
   },
   {
     id: 'brownie-003',
@@ -206,8 +206,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 25,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Bite-sized fudgy brownie cubes served with warm 60% dark chocolate dipping ganache.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'brownie-004',
@@ -221,8 +221,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 20,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Rich fudgy brownie with an oozing molten dark chocolate center and crinkly crust.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'brownie-005',
@@ -236,8 +236,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 15,
     featured: true,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Dark chocolate brownie packed with dark, milk, and white Belgian chocolate chunks.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'brownie-006',
@@ -251,8 +251,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 15,
     featured: false,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Fudgy chocolate brownie swirled with creamy hazelnut Nutella and toasted hazelnuts.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Tree Nuts (Hazelnuts).',
   },
   {
     id: 'brownie-007',
@@ -266,8 +266,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 12,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Dark chocolate brownie crowned with roasted Iranian pistachios and white chocolate glaze.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Tree Nuts (Pistachios).',
   },
   {
     id: 'brownie-008',
@@ -281,8 +281,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 25,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Belgian brownie swirled with Lotus Biscoff spread and topped with crushed speculoos cookies.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Soy.',
   },
   {
     id: 'brownie-009',
@@ -296,8 +296,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 18,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Fusion brownie topped with crunchy golden roasted kunafa vermicelli and sweet pistachio cream.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Tree Nuts.',
   },
   {
     id: 'brownie-010',
@@ -311,8 +311,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 10,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Chef\'s curated selection of 6 assorted signature brownie varieties in a luxury gift box.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Tree Nuts.',
   },
 
   // ===== TEA CAKES & PIES =====
@@ -328,8 +328,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 20,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Traditional English vanilla sponge cake with golden crust, cultured butter, and moist velvety crumb.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'teacake-002',
@@ -343,8 +343,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 18,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Tender vanilla and dark Dutch cocoa swirled loaf cake baked fresh daily.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'teacake-003',
@@ -358,8 +358,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 12,
     featured: true,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Deep dish golden chocolate chip cookie pie filled with gooey molten Belgian chocolate.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
 
   // ===== MINI JAR CAKES =====
@@ -375,8 +375,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 30,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Layers of dark chocolate sponge, vanilla whipped cream, sour cherry compote, and dark chocolate flakes.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'jar-002',
@@ -390,8 +390,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 30,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Vanilla sponge layered with tangy wild blackcurrant compote and whipped dairy cream.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'jar-003',
@@ -405,8 +405,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 30,
     featured: false,
     bestseller: true,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Golden sponge layered with butterscotch cream and crunchy caramelized praline nuts.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs, Tree Nuts.',
   },
   {
     id: 'jar-004',
@@ -420,8 +420,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 30,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Fluffy sponge layered with fresh strawberry compote and light whipped cream.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
   {
     id: 'jar-005',
@@ -435,8 +435,8 @@ export const PRODUCTS: Product[] = [
     stockQuantity: 30,
     featured: false,
     bestseller: false,
-    ingredients: 'To be configured by business owner',
-    allergens: 'To be configured by business owner',
+    ingredients: 'Vanilla sponge layered with sweet Alphonso mango puree and luscious mango cream.',
+    allergens: 'Contains Gluten (Wheat), Dairy (Milk), Eggs.',
   },
 ];
 
