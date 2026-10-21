@@ -7,14 +7,6 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import ProductCard from '@/components/product/ProductCard';
 
-const CATEGORY_COLORS: Record<string, { from: string; to: string; emoji: string }> = {
-  'cakes': { from: '#E8D5C4', to: '#C9A184', emoji: '🎂' },
-  'tiramisu-desserts': { from: '#D4C4B0', to: '#8B7355', emoji: '🍮' },
-  'brownies': { from: '#6B4C3B', to: '#3D2417', emoji: '🍫' },
-  'tea-cakes-pies': { from: '#F5E6D3', to: '#D4A574', emoji: '🍰' },
-  'mini-jar-cakes': { from: '#FFE4E1', to: '#E8A598', emoji: '🧁' },
-};
-
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
@@ -47,7 +39,16 @@ export default function ProductDetailPage() {
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 
-  const colors = CATEGORY_COLORS[product.categorySlug] || CATEGORY_COLORS['cakes'];
+  const categoryImage = `/images/categories/${product.categorySlug}.jpg`;
+  const [imgSrc, setImgSrc] = useState(product.image || categoryImage);
+  const [hasFailedOnce, setHasFailedOnce] = useState(false);
+
+  const handleImageError = () => {
+    if (!hasFailedOnce && imgSrc !== categoryImage) {
+      setImgSrc(categoryImage);
+      setHasFailedOnce(true);
+    }
+  };
 
   const handleAddToCart = () => {
     addItem(product, quantity);
@@ -99,24 +100,18 @@ export default function ProductDetailPage() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
           {/* Image */}
           <div className="relative">
-            <div className="aspect-square rounded-2xl overflow-hidden shadow-elevated">
-              <div
-                className="w-full h-full flex flex-col items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, ${colors.from} 0%, ${colors.to} 100%)`,
-                }}
-              >
-                <span className="text-8xl mb-4">{colors.emoji}</span>
-                <span className="text-white/80 text-lg font-medium px-6 text-center">
-                  {product.name}
-                </span>
-                <span className="text-white/50 text-xs mt-2">Product image to be uploaded by admin</span>
-              </div>
+            <div className="aspect-square rounded-3xl overflow-hidden shadow-elevated border-4 border-white bg-[var(--color-brand-cream)] group">
+              <img
+                src={imgSrc}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                onError={handleImageError}
+              />
             </div>
 
             {/* Badges */}
             {product.bestseller && (
-              <span className="absolute top-4 left-4 px-4 py-1.5 bg-[var(--color-brand-primary-dark)] text-white text-sm font-semibold rounded-full">
+              <span className="absolute top-4 left-4 px-4 py-1.5 bg-[var(--color-brand-primary-dark)] text-white text-sm font-semibold rounded-full shadow-md">
                 Bestseller
               </span>
             )}

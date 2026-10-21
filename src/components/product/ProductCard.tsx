@@ -7,19 +7,7 @@ import { formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 
-// Generate placeholder dessert images using gradient backgrounds
-function getProductImage(product: Product): string {
-  // Returns a gradient-based placeholder keyed to category
-  return '';
-}
 
-const CATEGORY_COLORS: Record<string, { from: string; to: string; emoji: string }> = {
-  'cakes': { from: '#E8D5C4', to: '#C9A184', emoji: '🎂' },
-  'tiramisu-desserts': { from: '#D4C4B0', to: '#8B7355', emoji: '🍮' },
-  'brownies': { from: '#6B4C3B', to: '#3D2417', emoji: '🍫' },
-  'tea-cakes-pies': { from: '#F5E6D3', to: '#D4A574', emoji: '🍰' },
-  'mini-jar-cakes': { from: '#FFE4E1', to: '#E8A598', emoji: '🧁' },
-};
 
 interface ProductCardProps {
   product: Product;
@@ -27,12 +15,13 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, showQuickView = true }: ProductCardProps) {
-  const [imageError, setImageError] = useState(true); // Start with placeholder
+  const categoryImage = `/images/categories/${product.categorySlug}.jpg`;
+  const [imgSrc, setImgSrc] = useState(product.image || categoryImage);
+  const [hasFailedOnce, setHasFailedOnce] = useState(false);
+
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
-
-  const colors = CATEGORY_COLORS[product.categorySlug] || CATEGORY_COLORS['cakes'];
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,33 +39,26 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
     );
   };
 
+  const handleImageError = () => {
+    if (!hasFailedOnce && imgSrc !== categoryImage) {
+      setImgSrc(categoryImage);
+      setHasFailedOnce(true);
+    }
+  };
+
   return (
     <Link
       to={`/product/${product.id}`}
-      className="group block card overflow-hidden"
+      className="group block card overflow-hidden border border-[var(--color-brand-primary-light)]/20 shadow-card hover:shadow-card-hover transition-all"
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden">
-        {imageError ? (
-          <div
-            className="w-full h-full flex flex-col items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${colors.from} 0%, ${colors.to} 100%)`,
-            }}
-          >
-            <span className="text-5xl mb-2">{colors.emoji}</span>
-            <span className="text-white/80 text-xs font-medium px-3 text-center leading-tight">
-              {product.name}
-            </span>
-          </div>
-        ) : (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={() => setImageError(true)}
-          />
-        )}
+      <div className="relative aspect-square overflow-hidden bg-[var(--color-brand-cream)]">
+        <img
+          src={imgSrc}
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={handleImageError}
+        />
 
         {/* Overlay Actions */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">

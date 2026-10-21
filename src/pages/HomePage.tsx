@@ -25,57 +25,73 @@ export default function HomePage() {
                            radial-gradient(circle at 60% 80%, rgba(127,86,67,0.2) 0%, transparent 50%)`
         }} />
 
-        <div className="container-main relative z-10 py-20 lg:py-32">
-          <div className="max-w-2xl">
-            <p className="text-[var(--color-brand-primary-dark)] text-sm font-semibold tracking-[0.2em] uppercase mb-4 animate-fade-in">
-              Welcome to YOYO CAKES
-            </p>
-            <h1
-              className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-[var(--color-brand-chocolate)] leading-[1.1] mb-6"
-              style={{ animationDelay: '0.1s' }}
-            >
-              Every Bite, a Little{' '}
-              <span className="text-[var(--color-brand-primary-dark)] italic">Happiness</span>
-            </h1>
-            <p
-              className="text-lg md:text-xl text-[var(--color-brand-chocolate-light)] mb-8 leading-relaxed max-w-lg animate-fade-in"
-              style={{ animationDelay: '0.2s' }}
-            >
-              Handcrafted cakes, brownies, tiramisu, and desserts made with love. From our kitchen to your celebrations.
-            </p>
-            <div
-              className="flex flex-wrap gap-4 animate-fade-in"
-              style={{ animationDelay: '0.3s' }}
-            >
-              <Link to="/shop" className="btn-primary text-base px-8 py-3.5">
-                Shop Now <ArrowRight size={18} />
-              </Link>
-              <Link to="/shop?category=brownies" className="btn-secondary text-base px-8 py-3.5">
-                Explore Brownies
-              </Link>
+        <div className="container-main relative z-10 py-16 lg:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-brand-primary)]/20 border border-[var(--color-brand-primary-dark)]/20 text-[var(--color-brand-primary-dark)] text-xs font-semibold tracking-wider uppercase mb-5 animate-fade-in">
+                <span>✨ Artisanal Bakery & Patisserie</span>
+              </div>
+              <h1
+                className="font-heading text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-[var(--color-brand-chocolate)] leading-[1.1] mb-6"
+              >
+                Every Bite, a Little{' '}
+                <span className="text-[var(--color-brand-primary-dark)] italic">Happiness</span>
+              </h1>
+              <p
+                className="text-base sm:text-lg lg:text-xl text-[var(--color-brand-chocolate-light)] mb-8 leading-relaxed max-w-xl"
+              >
+                Handcrafted cakes, fudgy brownies, classic tiramisu, and adorable mini jar cakes made with pure Belgian chocolate and dairy cream. Fresh from our kitchen to your celebrations.
+              </p>
+              <div className="flex flex-wrap gap-4 mb-10">
+                <Link to="/shop" className="btn-primary text-base px-8 py-3.5 shadow-elevated">
+                  Shop All 27 Treats <ArrowRight size={18} />
+                </Link>
+                <Link to="/shop?category=brownies" className="btn-secondary text-base px-8 py-3.5">
+                  Explore Brownies
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="flex flex-wrap gap-8 pt-6 border-t border-[var(--color-brand-primary-dark)]/15">
+                <div>
+                  <p className="text-3xl font-heading font-bold text-[var(--color-brand-chocolate)]">27+</p>
+                  <p className="text-xs text-[var(--color-brand-muted)] uppercase tracking-wider font-semibold">Signature Varieties</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-heading font-bold text-[var(--color-brand-chocolate)]">100%</p>
+                  <p className="text-xs text-[var(--color-brand-muted)] uppercase tracking-wider font-semibold">Fresh Baked Daily</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-heading font-bold text-[var(--color-brand-primary-dark)]">₹50</p>
+                  <p className="text-xs text-[var(--color-brand-muted)] uppercase tracking-wider font-semibold">Starting Price</p>
+                </div>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="flex gap-8 mt-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <div>
-                <p className="text-2xl font-heading font-bold text-[var(--color-brand-primary-dark)]">27+</p>
-                <p className="text-xs text-[var(--color-brand-muted)] uppercase tracking-wider">Varieties</p>
-              </div>
-              <div>
-                <p className="text-2xl font-heading font-bold text-[var(--color-brand-primary-dark)]">100%</p>
-                <p className="text-xs text-[var(--color-brand-muted)] uppercase tracking-wider">Fresh Baked</p>
-              </div>
-              <div>
-                <p className="text-2xl font-heading font-bold text-[var(--color-brand-primary-dark)]">₹50</p>
-                <p className="text-xs text-[var(--color-brand-muted)] uppercase tracking-wider">Starting At</p>
+            {/* Right Hero Image Card */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative rounded-3xl overflow-hidden shadow-elevated border-4 border-white group">
+                <img
+                  src="/images/hero-banner.jpg"
+                  alt="YOYO CAKES Artisanal Dessert Showcase"
+                  className="w-full h-[380px] sm:h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6 text-white">
+                  <span className="text-xs uppercase tracking-widest font-semibold text-[var(--color-brand-primary-light)]">
+                    Fresh from our oven
+                  </span>
+                  <p className="font-heading text-lg font-bold">Artisanal Cakes, Brownies & Jars</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Decorative Elements */}
-        <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-[var(--color-brand-primary)]/10 blur-3xl" />
-        <div className="absolute bottom-10 right-40 w-96 h-96 rounded-full bg-[var(--color-brand-primary-dark)]/8 blur-3xl" />
+        <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-[var(--color-brand-primary)]/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-40 w-96 h-96 rounded-full bg-[var(--color-brand-primary-dark)]/8 blur-3xl pointer-events-none" />
       </section>
 
       {/* Shop by Category */}
@@ -89,39 +105,31 @@ export default function HomePage() {
               Shop by Category
             </h2>
             <p className="text-[var(--color-brand-muted)] max-w-md mx-auto">
-              Explore our handcrafted selection of cakes, brownies, and desserts
+              Explore our handcrafted selection of cakes, brownies, tiramisu, and mini jar cakes
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
             {CATEGORIES.map((cat, index) => {
-              const categoryColors: Record<string, { bg: string; text: string }> = {
-                'cakes': { bg: 'from-[#E8D5C4] to-[#C9A184]', text: '🎂' },
-                'tiramisu-desserts': { bg: 'from-[#D4C4B0] to-[#8B7355]', text: '🍮' },
-                'brownies': { bg: 'from-[#8B7355] to-[#3D2417]', text: '🍫' },
-                'tea-cakes-pies': { bg: 'from-[#F5E6D3] to-[#D4A574]', text: '🍰' },
-                'mini-jar-cakes': { bg: 'from-[#FFE4E1] to-[#E8A598]', text: '🧁' },
-              };
-              const color = categoryColors[cat.slug] || categoryColors['cakes'];
-
               return (
                 <Link
                   key={cat.id}
                   to={`/shop?category=${cat.slug}`}
-                  className="group relative rounded-2xl overflow-hidden aspect-[4/5] flex items-end p-4 lg:p-5 card border-0"
+                  className="group relative rounded-2xl overflow-hidden aspect-[4/5] flex items-end p-4 lg:p-5 card border-0 shadow-card hover:shadow-card-hover transition-all"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-b ${color.bg}`} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl opacity-60 group-hover:scale-110 transition-transform duration-500">
-                    {color.text}
-                  </div>
-                  <div className="relative z-10">
-                    <h3 className="font-heading text-base lg:text-lg font-bold text-white mb-0.5">
+                  <img
+                    src={`/images/categories/${cat.slug}.jpg`}
+                    alt={cat.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 group-hover:from-black/90 transition-colors" />
+                  <div className="relative z-10 text-white">
+                    <h3 className="font-heading text-base lg:text-lg font-bold text-white mb-0.5 drop-shadow-sm">
                       {cat.name}
                     </h3>
-                    <p className="text-white/70 text-xs flex items-center gap-1">
-                      Shop now <ArrowRight size={12} />
+                    <p className="text-white/80 text-xs flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      Shop treats <ArrowRight size={12} />
                     </p>
                   </div>
                 </Link>
