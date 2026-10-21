@@ -286,6 +286,25 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* DaisyUI Stats Strip */}
+            <div className="stats stats-vertical sm:stats-horizontal w-full border-b border-gray-100 bg-gray-50/50 rounded-none text-xs">
+              <div className="stat py-3 px-4">
+                <div className="stat-title text-[11px] text-gray-500 font-semibold">Delivery Date</div>
+                <div className="stat-value text-sm font-bold text-gray-900">{deliveryDate}</div>
+                <div className="stat-desc text-[11px] text-[#007600] font-semibold">{selectedSlotObj?.time || 'Evening Slot'}</div>
+              </div>
+              <div className="stat py-3 px-4">
+                <div className="stat-title text-[11px] text-gray-500 font-semibold">Payment Status</div>
+                <div className="stat-value text-sm font-bold text-gray-900">{placedOrder.paymentStatus === 'paid' ? 'Paid Online' : 'Pay on Delivery'}</div>
+                <div className="stat-desc text-[11px] text-gray-500 font-semibold">{placedOrder.paymentMethod}</div>
+              </div>
+              <div className="stat py-3 px-4">
+                <div className="stat-title text-[11px] text-gray-500 font-semibold">Total Amount</div>
+                <div className="stat-value text-sm font-extrabold text-[#B12704]">{formatPrice(placedOrder.total)}</div>
+                <div className="stat-desc text-[11px] text-[#007600] font-semibold">{placedOrder.deliveryFee === 0 ? 'Free Express Delivery' : 'Standard Delivery'}</div>
+              </div>
+            </div>
+
             <div className="p-6 sm:p-8 space-y-6">
               {/* Delivery Promise */}
               <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/40">

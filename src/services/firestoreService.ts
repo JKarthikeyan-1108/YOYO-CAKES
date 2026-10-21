@@ -401,10 +401,24 @@ export async function validateCouponInFirestore(code: string, currentTotal: numb
 }> {
   const normalized = code.trim().toUpperCase();
 
-  // Always check standard fallback rule
+  // Standard fallback promotional coupons for instant client response
   if (normalized === 'YOYO10') {
     const discount = Math.round(currentTotal * 0.1);
     return { valid: true, discount, message: '10% discount applied successfully!' };
+  }
+  if (normalized === 'FIRST50') {
+    if (currentTotal < 300) {
+      return { valid: false, discount: 0, message: 'Minimum order amount of ₹300 required for FIRST50.' };
+    }
+    const discount = Math.min(50, currentTotal);
+    return { valid: true, discount, message: 'Flat ₹50 welcome discount applied!' };
+  }
+  if (normalized === 'SWEET20') {
+    if (currentTotal < 600) {
+      return { valid: false, discount: 0, message: 'Minimum order amount of ₹600 required for SWEET20.' };
+    }
+    const discount = Math.min(200, Math.round(currentTotal * 0.2));
+    return { valid: true, discount, message: '20% celebration discount applied!' };
   }
 
   if (isFirebaseConfigured && db) {

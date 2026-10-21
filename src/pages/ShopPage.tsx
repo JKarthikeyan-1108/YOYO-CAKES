@@ -132,6 +132,138 @@ export default function ShopPage() {
 
   const activeCategory = CATEGORIES.find((c) => c.slug === selectedCategory);
 
+  const renderFilterSidebar = () => (
+    <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-5 space-y-6">
+      {/* Category Filter */}
+      <div>
+        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+          Department
+        </h3>
+        <div className="space-y-1 text-xs">
+          <button
+            onClick={() => handleCategoryChange('')}
+            className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-colors ${
+              !selectedCategory
+                ? 'font-extrabold text-[#0F1111] bg-amber-50'
+                : 'text-gray-600 hover:text-black hover:bg-gray-50'
+            }`}
+          >
+            <span>All Products</span>
+            <span className="badge badge-sm badge-ghost text-gray-500 font-bold">{PRODUCTS.length}</span>
+          </button>
+          {CATEGORIES.map((cat) => {
+            const count = PRODUCTS.filter((p) => p.categorySlug === cat.slug).length;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryChange(cat.slug)}
+                className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-colors ${
+                  selectedCategory === cat.slug
+                    ? 'font-extrabold text-[#0F1111] bg-amber-50'
+                    : 'text-gray-600 hover:text-black hover:bg-gray-50'
+                }`}
+              >
+                <span>{cat.name}</span>
+                <span className="badge badge-sm badge-ghost text-gray-500 font-bold">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Price Filter */}
+      <div className="pt-4 border-t border-gray-100">
+        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+          Price Range
+        </h3>
+        <div className="space-y-1.5 text-xs text-gray-700">
+          {[
+            { id: 'all', label: 'All Prices' },
+            { id: 'under-100', label: 'Under ₹100' },
+            { id: '100-150', label: '₹100 to ₹150' },
+            { id: '150-200', label: '₹150 to ₹200' },
+            { id: 'over-200', label: 'Over ₹200' },
+          ].map((pOpt) => (
+            <label
+              key={pOpt.id}
+              className="flex items-center gap-2 cursor-pointer hover:text-black select-none py-0.5"
+            >
+              <input
+                type="radio"
+                name="priceFilter"
+                checked={priceRange === pOpt.id}
+                onChange={() => setPriceRange(pOpt.id as PriceRangeOption)}
+                className="text-[#FF9900] focus:ring-[#FF9900]"
+              />
+              <span className={priceRange === pOpt.id ? 'font-bold text-[#0F1111]' : ''}>
+                {pOpt.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Highlights Checkbox */}
+      <div className="pt-4 border-t border-gray-100">
+        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+          Highlights
+        </h3>
+        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={onlyBestsellers}
+            onChange={(e) => setOnlyBestsellers(e.target.checked)}
+            className="rounded text-[#FF9900] focus:ring-[#FF9900]"
+          />
+          <span className="font-semibold flex items-center gap-1.5">
+            <Sparkles size={14} className="text-amber-500" /> #1 Best Sellers Only
+          </span>
+        </label>
+      </div>
+
+      {/* Customer Review Rating Filter */}
+      <div className="pt-4 border-t border-gray-100">
+        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+          Avg. Customer Review
+        </h3>
+        <div className="space-y-1.5 text-xs">
+          {[4.8, 4.5].map((r) => (
+            <button
+              key={r}
+              onClick={() => setMinRating(minRating === r ? 0 : r)}
+              className={`flex items-center justify-between w-full text-left py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors ${
+                minRating === r ? 'bg-amber-50 font-bold' : ''
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                <div className="flex text-[#FFA41C]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={13}
+                      fill={i < Math.floor(r) ? 'currentColor' : 'none'}
+                      strokeWidth={i < Math.floor(r) ? 0 : 1.5}
+                    />
+                  ))}
+                </div>
+                <span className="text-gray-700">& Up</span>
+              </div>
+              {minRating === r && <Check size={14} className="text-[#007600]" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Reassurance Badge */}
+      <div className="pt-4 border-t border-gray-100 bg-amber-50/50 -mx-5 -mb-5 p-4 rounded-b-xl text-[11px] text-gray-600 space-y-1">
+        <div className="font-bold text-gray-900 flex items-center gap-1">
+          <Check size={14} className="text-[#007600]" /> 100% Fresh Daily Guarantee
+        </div>
+        <p>Every cake is baked to order on the morning of delivery.</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-[#EAEDED] min-h-screen font-sans">
       {/* Amazon-Style Breadcrumb & Banner Header */}
@@ -194,10 +326,10 @@ export default function ShopPage() {
             {/* Filter Toggle on Mobile & Sort Selector */}
             <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
               <button
-                onClick={() => setShowFilters(!showFilters)}
+                onClick={() => setShowFilters(true)}
                 className="lg:hidden px-3.5 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5"
               >
-                <SlidersHorizontal size={14} /> Filters {hasActiveFilters && '(Active)'}
+                <SlidersHorizontal size={14} /> Filters {hasActiveFilters && <span className="badge badge-warning badge-xs">Active</span>}
               </button>
 
               <div className="flex items-center gap-2 text-xs">
@@ -276,139 +408,47 @@ export default function ShopPage() {
 
         {/* Main Grid & Sidebar Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Amazon Filter Sidebar (3 cols) */}
-          <aside
-            className={`${
-              showFilters ? 'block' : 'hidden'
-            } lg:block lg:col-span-3 space-y-4`}
-          >
-            <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-5 space-y-6">
-              {/* Category Filter */}
-              <div>
-                <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
-                  Department
-                </h3>
-                <div className="space-y-1 text-xs">
-                  <button
-                    onClick={() => handleCategoryChange('')}
-                    className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between transition-colors ${
-                      !selectedCategory
-                        ? 'font-extrabold text-[#0F1111] bg-amber-50'
-                        : 'text-gray-600 hover:text-black hover:bg-gray-50'
-                    }`}
-                  >
-                    <span>All Products</span>
-                    <span className="text-gray-400">({PRODUCTS.length})</span>
-                  </button>
-                  {CATEGORIES.map((cat) => {
-                    const count = PRODUCTS.filter((p) => p.categorySlug === cat.slug).length;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => handleCategoryChange(cat.slug)}
-                        className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between transition-colors ${
-                          selectedCategory === cat.slug
-                            ? 'font-extrabold text-[#0F1111] bg-amber-50'
-                            : 'text-gray-600 hover:text-black hover:bg-gray-50'
-                        }`}
-                      >
-                        <span>{cat.name}</span>
-                        <span className="text-gray-400">({count})</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Price Filter */}
-              <div className="pt-4 border-t border-gray-100">
-                <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
-                  Price
-                </h3>
-                <div className="space-y-1.5 text-xs text-gray-700">
-                  {[
-                    { id: 'all', label: 'All Prices' },
-                    { id: 'under-100', label: 'Under ₹100' },
-                    { id: '100-150', label: '₹100 to ₹150' },
-                    { id: '150-200', label: '₹150 to ₹200' },
-                    { id: 'over-200', label: 'Over ₹200' },
-                  ].map((pOpt) => (
-                    <label
-                      key={pOpt.id}
-                      className="flex items-center gap-2 cursor-pointer hover:text-black select-none"
-                    >
-                      <input
-                        type="radio"
-                        name="priceFilter"
-                        checked={priceRange === pOpt.id}
-                        onChange={() => setPriceRange(pOpt.id as PriceRangeOption)}
-                        className="text-[#FF9900] focus:ring-[#FF9900]"
-                      />
-                      <span className={priceRange === pOpt.id ? 'font-bold text-[#0F1111]' : ''}>
-                        {pOpt.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Best Seller Checkbox */}
-              <div className="pt-4 border-t border-gray-100">
-                <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
-                  Highlights
-                </h3>
-                <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={onlyBestsellers}
-                    onChange={(e) => setOnlyBestsellers(e.target.checked)}
-                    className="rounded text-[#FF9900] focus:ring-[#FF9900]"
-                  />
-                  <span className="font-semibold flex items-center gap-1">
-                    <Sparkles size={13} className="text-amber-500" /> #1 Best Sellers Only
-                  </span>
-                </label>
-              </div>
-
-              {/* Customer Review Rating Filter */}
-              <div className="pt-4 border-t border-gray-100">
-                <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
-                  Avg. Customer Review
-                </h3>
-                <div className="space-y-1.5 text-xs">
-                  {[4.8, 4.5].map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => setMinRating(minRating === r ? 0 : r)}
-                      className={`flex items-center gap-1.5 w-full text-left py-1 px-1.5 rounded hover:bg-gray-50 transition-colors ${
-                        minRating === r ? 'bg-amber-50 font-bold' : ''
-                      }`}
-                    >
-                      <div className="flex text-[#FFA41C]">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={13}
-                            fill={i < Math.floor(r) ? 'currentColor' : 'none'}
-                            strokeWidth={i < Math.floor(r) ? 0 : 1.5}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-gray-700">& Up</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reassurance Badge */}
-              <div className="pt-4 border-t border-gray-100 bg-amber-50/50 -mx-5 -mb-5 p-4 rounded-b-xl text-[11px] text-gray-600 space-y-1">
-                <div className="font-bold text-gray-900 flex items-center gap-1">
-                  <Check size={14} className="text-[#007600]" /> 100% Fresh Daily Guarantee
-                </div>
-                <p>Every cake is baked to order on the morning of delivery.</p>
-              </div>
-            </div>
+          {/* Left Amazon Filter Sidebar for Desktop (3 cols) */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-4">
+            {renderFilterSidebar()}
           </aside>
+
+          {/* Mobile Filter Modal using DaisyUI */}
+          {showFilters && (
+            <div className="modal modal-open lg:hidden">
+              <div className="modal-box max-w-md p-5 max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                  <h3 className="font-heading font-extrabold text-base text-[#0F1111] flex items-center gap-2">
+                    <SlidersHorizontal size={16} /> Filters & Sorting
+                  </h3>
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="btn btn-sm btn-circle btn-ghost"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {renderFilterSidebar()}
+
+                <div className="mt-4 pt-3 border-t border-gray-100 flex gap-2">
+                  <button
+                    onClick={clearAllFilters}
+                    className="btn btn-outline btn-sm flex-1 text-xs"
+                  >
+                    Reset Filters
+                  </button>
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="btn btn-primary btn-sm flex-1 text-xs font-bold"
+                  >
+                    Show {filteredProducts.length} Results
+                  </button>
+                </div>
+              </div>
+              <div className="modal-backdrop bg-black/50" onClick={() => setShowFilters(false)} />
+            </div>
+          )}
 
           {/* Right Product Grid (9 cols) */}
           <main className="lg:col-span-9">

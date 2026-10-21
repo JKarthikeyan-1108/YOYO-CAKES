@@ -68,6 +68,11 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const totalRevenue = orders.reduce((acc, o) => acc + (o.paymentStatus === 'paid' ? o.total : 0), 0);
+  const bakingCount = orders.filter((o) => o.orderStatus === 'preparing').length;
+  const onRouteCount = orders.filter((o) => o.orderStatus === 'out_for_delivery').length;
+  const completedCount = orders.filter((o) => o.orderStatus === 'delivered').length;
+
   return (
     <div className="space-y-6 max-w-7xl">
       {/* Header */}
@@ -86,6 +91,30 @@ export default function AdminOrdersPage() {
         >
           <RefreshCw size={14} /> Refresh Orders
         </button>
+      </div>
+
+      {/* DaisyUI Metrics Stats Banner */}
+      <div className="stats stats-vertical sm:stats-horizontal shadow-xs border border-gray-200/80 bg-white w-full rounded-2xl">
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">Total Orders</div>
+          <div className="stat-value text-2xl font-bold text-[var(--color-brand-chocolate)]">{orders.length}</div>
+          <div className="stat-desc text-xs text-gray-400">All recorded bakery orders</div>
+        </div>
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">Collected Revenue</div>
+          <div className="stat-value text-2xl font-bold text-[#007600]">{formatPrice(totalRevenue)}</div>
+          <div className="stat-desc text-xs text-[#007600] font-semibold">Online + Settled COD</div>
+        </div>
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">In Kitchen / Baking</div>
+          <div className="stat-value text-2xl font-bold text-amber-600">{bakingCount}</div>
+          <div className="stat-desc text-xs text-amber-600 font-semibold">Active baking tickets</div>
+        </div>
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">Out For Delivery</div>
+          <div className="stat-value text-2xl font-bold text-blue-600">{onRouteCount}</div>
+          <div className="stat-desc text-xs text-blue-600 font-semibold">{completedCount} delivered today</div>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -128,9 +157,9 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Orders List Table */}
-      <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/70 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="table table-zebra table-hover w-full text-left text-xs">
             <thead className="bg-gray-50 border-b border-gray-100 text-[var(--color-brand-muted)] uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3.5 px-4">Order ID & Date</th>
@@ -143,10 +172,10 @@ export default function AdminOrdersPage() {
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {filtered.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50/60 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-[var(--color-brand-chocolate)]">
+                <tr key={order.id} className="hover:bg-amber-50/40 transition-colors">
+                  <td className="py-3 px-4 font-mono font-bold text-[var(--color-brand-chocolate)]">
                     <div>{order.id}</div>
                     <span className="text-[10px] text-gray-400 font-normal">
                       {new Date(order.createdAt).toLocaleDateString('en-IN', {
@@ -157,11 +186,11 @@ export default function AdminOrdersPage() {
                       })}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <span className="font-semibold block">{order.customer.name}</span>
                     <span className="text-[10px] text-gray-400">{order.customer.phone}</span>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <span className="capitalize font-medium flex items-center gap-1 text-[var(--color-brand-chocolate-light)]">
                       {order.fulfillment === 'delivery' ? (
                         <Truck size={14} className="text-[var(--color-brand-info)]" />
@@ -171,26 +200,30 @@ export default function AdminOrdersPage() {
                       {order.fulfillment}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <span className="font-medium text-gray-700">
                       {order.items.reduce((s, i) => s + i.quantity, 0)} items
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 font-bold text-[var(--color-brand-primary-dark)]">
+                  <td className="py-3 px-4 font-bold text-[var(--color-brand-primary-dark)]">
                     {formatPrice(order.total)}
                   </td>
-                  <td className="py-3.5 px-4">
-                    <span className="font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-50 text-green-700">
+                  <td className="py-3 px-4">
+                    <span
+                      className={`badge badge-sm font-bold text-[10px] uppercase tracking-wider ${
+                        order.paymentStatus === 'paid' ? 'badge-success text-white' : 'badge-warning text-gray-900'
+                      }`}
+                    >
                       {order.paymentStatus}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <select
                       value={order.orderStatus}
                       onChange={(e) =>
                         handleStatusChange(order.id, e.target.value as OrderStatus)
                       }
-                      className="bg-gray-100 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--color-brand-chocolate)] border-none focus:ring-1 focus:ring-[var(--color-brand-primary-dark)]"
+                      className="select select-bordered select-xs font-semibold text-[var(--color-brand-chocolate)] focus:outline-[var(--color-brand-primary-dark)]"
                     >
                       <option value="placed">Placed</option>
                       <option value="confirmed">Confirmed</option>
@@ -201,10 +234,10 @@ export default function AdminOrdersPage() {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td className="py-3 px-4 text-right">
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-[var(--color-brand-primary-dark)]"
+                      className="btn btn-ghost btn-xs text-gray-600 hover:text-[var(--color-brand-primary-dark)]"
                       title="Inspect Order Details"
                     >
                       <Eye size={16} />
@@ -217,13 +250,13 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* Order Detail Modal */}
+      {/* DaisyUI Order Detail Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-gray-100 animate-slide-up max-h-[90vh] overflow-y-auto">
+        <div className="modal modal-open">
+          <div className="modal-box max-w-xl p-6 sm:p-8 border border-gray-100 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase text-[var(--color-brand-primary-dark)]">
+                <span className="badge badge-primary badge-outline text-[10px] font-mono font-bold uppercase mb-1">
                   Order Details
                 </span>
                 <h3 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)]">
@@ -232,15 +265,15 @@ export default function AdminOrdersPage() {
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-gray-400 hover:text-gray-600 p-1"
+                className="btn btn-sm btn-circle btn-ghost"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             <div className="space-y-6 text-xs">
               {/* Customer summary */}
-              <div className="bg-gray-50 p-4 rounded-xl space-y-1.5">
+              <div className="bg-gray-50 p-4 rounded-xl space-y-1.5 border border-gray-100">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Customer Name:</span>
                   <span className="font-bold text-gray-800">{selectedOrder.customer.name}</span>
@@ -282,7 +315,7 @@ export default function AdminOrdersPage() {
               </div>
 
               {/* Totals */}
-              <div className="bg-[var(--color-brand-cream)] p-4 rounded-xl space-y-1">
+              <div className="bg-[var(--color-brand-cream)] p-4 rounded-xl space-y-1 border border-amber-100">
                 <div className="flex justify-between text-gray-500">
                   <span>Subtotal</span>
                   <span>{formatPrice(selectedOrder.subtotal)}</span>
@@ -305,25 +338,25 @@ export default function AdminOrdersPage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleStatusChange(selectedOrder.id, 'preparing')}
-                    className="btn-secondary text-[11px] px-3 py-1.5"
+                    className="btn btn-sm btn-outline text-xs"
                   >
                     Start Baking
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedOrder.id, 'ready')}
-                    className="btn-secondary text-[11px] px-3 py-1.5"
+                    className="btn btn-sm btn-outline text-xs"
                   >
                     Mark Ready
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedOrder.id, 'out_for_delivery')}
-                    className="btn-secondary text-[11px] px-3 py-1.5"
+                    className="btn btn-sm btn-outline text-xs"
                   >
                     Send with Driver
                   </button>
                   <button
                     onClick={() => handleStatusChange(selectedOrder.id, 'delivered')}
-                    className="btn-primary text-[11px] px-3 py-1.5"
+                    className="btn btn-sm btn-primary text-xs"
                   >
                     Mark Delivered
                   </button>
@@ -331,6 +364,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
           </div>
+          <div className="modal-backdrop bg-black/50" onClick={() => setSelectedOrder(null)} />
         </div>
       )}
     </div>

@@ -118,8 +118,18 @@ export default function CartPage() {
   const itemCount = getItemCount();
   const freeDeliveryThreshold = 500;
   const isFreeDelivery = subtotal >= freeDeliveryThreshold;
-  const amountToFreeDelivery = Math.max(0, freeDeliveryThreshold - subtotal);
-  const freeDeliveryProgress = Math.min(100, (subtotal / freeDeliveryThreshold) * 100);
+
+  // Multi-tier celebration rewards milestone calculation
+  const nextReward = subtotal < 500
+    ? { goal: 500, label: 'FREE Express Delivery', diff: 500 - subtotal }
+    : subtotal < 800
+    ? { goal: 800, label: 'FREE Golden Sparkler Candle', diff: 800 - subtotal }
+    : subtotal < 1200
+    ? { goal: 1200, label: 'FREE Molten Belgian Brownie Cup', diff: 1200 - subtotal }
+    : null;
+
+  const maxRewardGoal = 1200;
+  const rewardProgress = Math.min(100, Math.round((subtotal / maxRewardGoal) * 100));
 
   const deliveryFee = isFreeDelivery ? 0 : 40;
   const discount = couponApplied ? discountAmount : 0;
@@ -240,41 +250,56 @@ export default function CartPage() {
           </ul>
         </div>
 
-        {/* Amazon-Style Free Delivery Progress Bar */}
+        {/* Amazon-Style Celebration Rewards & Free Delivery Progress Bar */}
         <div className="bg-white rounded-xl p-4 sm:p-5 mb-5 shadow-xs border border-gray-200/90">
-          <div className="flex items-center gap-3 mb-2.5">
-            {isFreeDelivery ? (
-              <CheckCircle2 size={24} className="text-[#007600] flex-shrink-0" />
-            ) : (
-              <Sparkles size={22} className="text-amber-500 flex-shrink-0" />
-            )}
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2.5">
               {isFreeDelivery ? (
-                <div className="text-sm sm:text-base font-bold text-[#007600]">
-                  Your order qualifies for FREE Express Delivery in Chennai!
-                  <span className="text-xs font-normal text-gray-600 block sm:inline sm:ml-2">
-                    (Orders above {formatPrice(freeDeliveryThreshold)})
-                  </span>
+                <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#007600] flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 size={20} />
                 </div>
               ) : (
-                <div className="text-sm sm:text-base text-gray-800 font-medium">
-                  Add{' '}
-                  <span className="font-extrabold text-[#B12704]">
-                    {formatPrice(amountToFreeDelivery)}
-                  </span>{' '}
-                  more of eligible fresh bakes to qualify for{' '}
-                  <span className="font-bold text-[#007600]">FREE Delivery</span>.
+                <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                  <Sparkles size={18} />
                 </div>
               )}
+              <div>
+                {nextReward ? (
+                  <div className="text-xs sm:text-sm text-gray-800">
+                    Add <span className="font-extrabold text-[#B12704]">{formatPrice(nextReward.diff)}</span> more to unlock <span className="font-bold text-[#007600]">{nextReward.label}</span>!
+                  </div>
+                ) : (
+                  <div className="text-xs sm:text-sm font-bold text-[#007600] flex items-center gap-1.5">
+                    <Sparkles size={16} /> All celebration rewards unlocked for this order!
+                  </div>
+                )}
+                <div className="text-[11px] text-gray-500 mt-0.5">
+                  Freshly baked in Chennai with express same-day dispatch
+                </div>
+              </div>
+            </div>
+
+            {/* Reward Milestone Badges */}
+            <div className="flex items-center gap-1.5 text-[10px] font-bold">
+              <span className={`badge badge-sm gap-1 ${subtotal >= 500 ? 'badge-success text-white' : 'badge-ghost text-gray-500'}`}>
+                {subtotal >= 500 ? '✓' : '○'} Free Delivery (₹500)
+              </span>
+              <span className={`badge badge-sm gap-1 ${subtotal >= 800 ? 'badge-warning' : 'badge-ghost text-gray-500'}`}>
+                {subtotal >= 800 ? '✓' : '○'} Sparkler (₹800)
+              </span>
+              <span className={`badge badge-sm gap-1 ${subtotal >= 1200 ? 'badge-primary' : 'badge-ghost text-gray-500'}`}>
+                {subtotal >= 1200 ? '✓' : '○'} Brownie Cup (₹1200)
+              </span>
             </div>
           </div>
+
           {/* Progress track */}
           <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden border border-gray-200">
             <div
               className={`h-full transition-all duration-500 rounded-full ${
-                isFreeDelivery ? 'bg-[#007600]' : 'bg-[#FFD814]'
+                subtotal >= 1200 ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500' : isFreeDelivery ? 'bg-[#007600]' : 'bg-[#FFD814]'
               }`}
-              style={{ width: `${freeDeliveryProgress}%` }}
+              style={{ width: `${rewardProgress}%` }}
             />
           </div>
         </div>
@@ -669,59 +694,73 @@ export default function CartPage() {
                 <MessageCircle size={16} /> Order Cart via WhatsApp
               </button>
 
-              {/* Coupon Accordion / Box */}
+              {/* DaisyUI Join Coupon Input & Promo Section */}
               <div className="mt-5 pt-4 border-t border-gray-200">
-                <label className="text-xs font-bold text-gray-800 mb-1.5 flex items-center justify-between">
+                <label className="text-xs font-bold text-gray-800 mb-2 flex items-center justify-between">
                   <span>Apply Promotional Code</span>
                   <Tag size={13} className="text-gray-400" />
                 </label>
-                <div className="flex gap-2 mb-2">
+                <div className="join w-full mb-2">
                   <input
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    placeholder="Enter code (e.g. YOYO10)"
-                    className="flex-1 px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[#FF9900] uppercase font-mono"
+                    placeholder="Enter promo code (e.g. YOYO10)"
+                    className="join-item input input-bordered input-sm flex-1 text-xs uppercase font-mono tracking-wider focus:outline-[#FF9900]"
                     disabled={couponApplied}
                   />
                   <button
+                    type="button"
                     onClick={() => handleApplyCoupon()}
                     disabled={couponApplied || !couponCode.trim()}
-                    className="px-3.5 py-2 bg-[#232F3E] text-white text-xs font-bold rounded-lg hover:bg-[#131921] disabled:opacity-50 transition-colors"
+                    className="join-item btn btn-neutral btn-sm text-xs font-bold px-4"
                   >
-                    {couponApplied ? 'Applied' : 'Apply'}
+                    {couponApplied ? 'Applied ✓' : 'Apply'}
                   </button>
                 </div>
 
                 {/* Popular Coupons Pills */}
                 {!couponApplied && (
-                  <div className="flex flex-wrap gap-1.5 text-[10px]">
+                  <div className="flex flex-wrap gap-1.5 text-[10px] mt-2">
                     <button
+                      type="button"
                       onClick={() => handleApplyCoupon('YOYO10')}
-                      className="px-2 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded font-mono font-bold hover:bg-amber-100"
+                      className="badge badge-warning badge-outline hover:badge-warning cursor-pointer font-mono font-bold transition-all"
                     >
                       YOYO10 (10% OFF)
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleApplyCoupon('FIRST50')}
-                      className="px-2 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded font-mono font-bold hover:bg-amber-100"
+                      className="badge badge-warning badge-outline hover:badge-warning cursor-pointer font-mono font-bold transition-all"
                     >
                       FIRST50 (₹50 OFF)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyCoupon('SWEET20')}
+                      className="badge badge-warning badge-outline hover:badge-warning cursor-pointer font-mono font-bold transition-all"
+                    >
+                      SWEET20 (20% OFF)
                     </button>
                   </div>
                 )}
 
                 {couponApplied && (
-                  <div className="text-xs text-[#007600] font-semibold flex items-center justify-between mt-1">
-                    <span>Coupon "{couponCode}" applied</span>
+                  <div className="alert alert-success text-xs py-2 px-3 mt-2 shadow-xs flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <CheckCircle2 size={15} />
+                      <span>Coupon "{couponCode}" applied (-{formatPrice(discount)})</span>
+                    </div>
                     <button
+                      type="button"
                       onClick={() => {
                         setCouponApplied(false);
                         setDiscountAmount(0);
                         setCouponCode('');
                         toast.success('Coupon removed');
                       }}
-                      className="text-xs text-red-600 hover:underline"
+                      className="btn btn-ghost btn-xs text-xs font-bold text-red-700 hover:bg-transparent hover:underline"
                     >
                       Remove
                     </button>

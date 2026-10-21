@@ -146,6 +146,10 @@ export default function AdminProductsPage() {
     }
   };
 
+  const inStockCount = products.filter((p) => p.inStock).length;
+  const lowStockCount = products.filter((p) => p.stockQuantity <= 10).length;
+  const bestsellerCount = products.filter((p) => p.bestseller).length;
+
   return (
     <div className="space-y-6 max-w-7xl">
       {/* Header */}
@@ -164,6 +168,30 @@ export default function AdminProductsPage() {
         >
           <Plus size={16} /> Add New Item
         </button>
+      </div>
+
+      {/* DaisyUI Stats Strip */}
+      <div className="stats stats-vertical sm:stats-horizontal shadow-xs border border-gray-200/80 bg-white w-full rounded-2xl">
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">Total Catalog</div>
+          <div className="stat-value text-2xl font-bold text-[var(--color-brand-chocolate)]">{products.length} items</div>
+          <div className="stat-desc text-xs text-gray-400">Fresh bakes & dessert menu</div>
+        </div>
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">In Stock Ready</div>
+          <div className="stat-value text-2xl font-bold text-[#007600]">{inStockCount} items</div>
+          <div className="stat-desc text-xs text-[#007600] font-semibold">{products.length - inStockCount} paused</div>
+        </div>
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">Low Stock Alert</div>
+          <div className="stat-value text-2xl font-bold text-red-600">{lowStockCount}</div>
+          <div className="stat-desc text-xs text-red-600 font-semibold">10 or fewer units in inventory</div>
+        </div>
+        <div className="stat py-4 px-6">
+          <div className="stat-title text-xs font-semibold text-gray-500">Top Bestsellers</div>
+          <div className="stat-value text-2xl font-bold text-amber-600">{bestsellerCount}</div>
+          <div className="stat-desc text-xs text-amber-600 font-semibold">Flagship signature items</div>
+        </div>
       </div>
 
       {/* Search & Filters */}
@@ -208,9 +236,9 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Product Table */}
-      <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/70 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="table table-zebra table-hover w-full text-left text-xs">
             <thead className="bg-gray-50 border-b border-gray-100 text-[var(--color-brand-muted)] uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3.5 px-4">Item Name</th>
@@ -221,31 +249,35 @@ export default function AdminProductsPage() {
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {filtered.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50/60 transition-colors">
-                  <td className="py-3.5 px-4 font-semibold text-[var(--color-brand-chocolate)]">
+                <tr key={product.id} className="hover:bg-amber-50/40 transition-colors">
+                  <td className="py-3 px-4 font-semibold text-[var(--color-brand-chocolate)]">
                     <div>{product.name}</div>
                     <span className="font-mono text-[10px] text-gray-400 font-normal">
                       {product.id}
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-gray-600">{product.category}</td>
-                  <td className="py-3.5 px-4 font-bold text-[var(--color-brand-primary-dark)]">
+                  <td className="py-3 px-4">
+                    <span className="badge badge-ghost text-[11px] font-semibold">
+                      {product.category}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 font-bold text-[var(--color-brand-primary-dark)]">
                     {formatPrice(product.price)}
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <span
-                      className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
+                      className={`badge badge-sm font-bold text-[10px] ${
                         product.stockQuantity <= 10
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-green-100 text-green-700'
+                          ? 'badge-error text-white'
+                          : 'badge-success text-white'
                       }`}
                     >
                       {product.stockQuantity} units
                     </span>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <button
                       onClick={() => handleToggleStock(product.id)}
                       className={`flex items-center gap-1 font-semibold text-[11px] ${
@@ -263,20 +295,20 @@ export default function AdminProductsPage() {
                       )}
                     </button>
                   </td>
-                  <td className="py-3.5 px-4 text-right space-x-1">
+                  <td className="py-3 px-4 text-right space-x-1">
                     <button
                       onClick={() => handleEdit(product)}
-                      className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100"
+                      className="btn btn-ghost btn-xs text-gray-600 hover:text-[var(--color-brand-primary-dark)]"
                       title="Edit Product"
                     >
-                      <Edit size={16} />
+                      <Edit size={15} />
                     </button>
                     <button
                       onClick={() => handleDelete(product.id, product.name)}
-                      className="p-1.5 rounded-lg text-red-500 hover:bg-red-50"
+                      className="btn btn-ghost btn-xs text-red-500 hover:bg-red-50"
                       title="Delete Product"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
                   </td>
                 </tr>
@@ -286,17 +318,17 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Edit / Add Modal */}
+      {/* Edit / Add DaisyUI Modal */}
       {editingProduct && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 animate-slide-up">
+        <div className="modal modal-open">
+          <div className="modal-box max-w-lg p-6 border border-gray-100 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
               <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
                 {isNew ? 'Add New Product' : `Edit ${editingProduct.name}`}
               </h3>
               <button
                 onClick={() => setEditingProduct(null)}
-                className="text-gray-400 hover:text-gray-600 p-1"
+                className="btn btn-sm btn-circle btn-ghost"
               >
                 <X size={18} />
               </button>
@@ -487,6 +519,7 @@ export default function AdminProductsPage() {
               </div>
             </form>
           </div>
+          <div className="modal-backdrop bg-black/50" onClick={() => setEditingProduct(null)} />
         </div>
       )}
     </div>
