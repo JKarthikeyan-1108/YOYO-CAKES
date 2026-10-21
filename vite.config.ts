@@ -27,6 +27,11 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 800,
   },
+  preview: {
+    host: '0.0.0.0',
+    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4173,
+    allowedHosts: true,
+  },
   // @ts-expect-error vitest config
   test: {
     globals: true,

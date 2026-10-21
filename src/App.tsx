@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 // Layouts & Boundary
 import Layout from '@/components/layout/Layout';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Customer Pages (Lazy loaded for optimal bundle size and page load speed)
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -94,6 +95,7 @@ export default function App() {
             </Route>
           </Routes>
         </Suspense>
+        <SpeedInsights />
       </BrowserRouter>
     </ErrorBoundary>
   );
