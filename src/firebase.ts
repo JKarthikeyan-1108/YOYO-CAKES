@@ -48,4 +48,22 @@ if (typeof window !== 'undefined') {
     });
 }
 
+// Initialize Firebase App Check with reCAPTCHA v3 in production if configured
+if (typeof window !== 'undefined' && import.meta.env.VITE_RECAPTCHA_SITE_KEY && import.meta.env.PROD) {
+  import('firebase/app-check')
+    .then(({ initializeAppCheck, ReCaptchaV3Provider }) => {
+      try {
+        initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+          isTokenAutoRefreshEnabled: true,
+        });
+      } catch (err) {
+        console.warn('Firebase App Check initialization skipped:', err);
+      }
+    })
+    .catch(() => {
+      // App Check unsupported in current browser environment
+    });
+}
+
 export default app;
