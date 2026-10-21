@@ -1,10 +1,23 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, ShoppingCart, Settings, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Outlet, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, ShoppingBag, ShoppingCart, Settings, ArrowLeft, ShieldCheck, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import toast from 'react-hot-toast';
 
 export default function AdminLayout() {
   const location = useLocation();
-  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const { user, isAdmin, logout } = useAuthStore();
+
+  // Guard: if not authenticated as admin, redirect to Admin login portal
+  if (!isAdmin) {
+    return <Navigate to="/login?admin=true" state={{ from: location }} replace />;
+  }
+
+  const handleSignOut = async () => {
+    await logout();
+    toast.success('Signed out of Administrator Portal');
+    navigate('/');
+  };
 
   const navItems = [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -63,12 +76,20 @@ export default function AdminLayout() {
           <div className="bg-white/5 rounded-xl p-3 text-xs">
             <div className="flex items-center gap-2 text-white/90 font-medium mb-1">
               <ShieldCheck size={14} className="text-[var(--color-brand-primary)]" />
-              <span>Admin Access</span>
+              <span>Admin Access Active</span>
             </div>
-            <p className="text-[11px] text-white/50 truncate">
-              {user?.email || 'Master Administrator'}
+            <p className="text-[11px] text-white/70 truncate font-mono">
+              {user?.email || 'admin@yoyocakes.com'}
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold bg-red-500/20 text-red-200 hover:bg-red-500/30 hover:text-white transition-colors"
+          >
+            <LogOut size={14} /> Sign Out of Admin
+          </button>
 
           <Link
             to="/"

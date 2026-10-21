@@ -11,13 +11,15 @@ import {
   Sparkles,
   PhoneCall,
   Flame,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
-import { CATEGORIES, PRODUCTS, formatPrice } from '@/data/products';
+import { useProductStore } from '@/stores/productStore';
+import { CATEGORIES, formatPrice } from '@/data/products';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -31,7 +33,8 @@ export default function Navbar() {
 
   const cartCount = useCartStore((s) => s.getItemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAdmin } = useAuthStore();
+  const products = useProductStore((s) => s.products);
 
   // Close search dropdown on click outside
   useEffect(() => {
@@ -45,7 +48,7 @@ export default function Navbar() {
   }, []);
 
   const searchResults = searchQuery.trim().length > 0
-    ? PRODUCTS.filter((p) => {
+    ? products.filter((p) => {
         const matchesCategory = selectedCategory === 'all' || p.categorySlug === selectedCategory;
         const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -339,6 +342,20 @@ export default function Navbar() {
                         <p className="text-xs font-bold text-gray-900">{user.displayName || 'Customer'}</p>
                         <p className="text-[11px] text-gray-500 truncate">{user.email || user.phoneNumber}</p>
                       </div>
+                      {isAdmin && (
+                        <Link
+                          to="/admin/products"
+                          className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-amber-50 text-amber-900 hover:bg-amber-100 text-xs font-bold mb-2 border border-amber-200"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <ShieldCheck size={13} className="text-amber-700" />
+                            Admin Products & Stock
+                          </span>
+                          <span className="text-[9px] bg-amber-200 px-1 py-0.5 rounded text-amber-950 font-extrabold uppercase">
+                            Staff
+                          </span>
+                        </Link>
+                      )}
                       <Link to="/account" className="block py-1.5 text-xs text-gray-700 hover:text-[var(--color-brand-primary-dark)] font-medium">
                         Your Profile & Addresses
                       </Link>
@@ -369,6 +386,12 @@ export default function Navbar() {
                           Start here.
                         </Link>
                       </p>
+                      <div className="mt-2 pt-2 border-t border-gray-100 text-[10px] text-gray-500">
+                        <Link to="/admin/login" className="text-[var(--color-brand-chocolate)] font-semibold hover:underline flex items-center justify-center gap-1">
+                          <ShieldCheck size={11} className="text-[var(--color-brand-primary-dark)]" />
+                          <span>Bakery Admin Portal</span>
+                        </Link>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -486,6 +509,16 @@ export default function Navbar() {
             >
               Customer Support & WhatsApp
             </Link>
+            <div className="pt-2 mt-2 border-t border-gray-100">
+              <Link
+                to={isAdmin ? '/admin' : '/admin/login'}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-1.5 py-2 text-xs font-bold text-amber-800 hover:text-amber-950"
+              >
+                <ShieldCheck size={14} className="text-amber-600" />
+                <span>{isAdmin ? 'Admin Dashboard' : 'Bakery Admin Portal'}</span>
+              </Link>
+            </div>
           </div>
         )}
       </header>

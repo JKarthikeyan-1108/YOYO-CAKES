@@ -14,7 +14,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
-import { PRODUCTS, CATEGORIES, getBestsellers } from '@/data/products';
+import { CATEGORIES } from '@/data/products';
+import { useProductStore } from '@/stores/productStore';
 
 const TESTIMONIALS = [
   {
@@ -93,17 +94,18 @@ export default function HomePage() {
     setPincodeStatus('✓ Fast 2-Hour Delivery & Midnight Slots Available in your area!');
   };
 
-  const cakes = PRODUCTS.filter((p) => p.categorySlug === 'cakes');
-  const bestsellers = getBestsellers().slice(0, 8);
-  const miniJars = PRODUCTS.filter((p) => p.categorySlug === 'mini-jar-cakes');
-  const brownies = PRODUCTS.filter((p) => p.categorySlug === 'brownies').slice(0, 4);
+  const products = useProductStore((s) => s.products);
+  const cakes = products.filter((p) => p.categorySlug === 'cakes');
+  const bestsellers = products.filter((p) => p.bestseller).slice(0, 8);
+  const miniJars = products.filter((p) => p.categorySlug === 'mini-jar-cakes');
+  const brownies = products.filter((p) => p.categorySlug === 'brownies').slice(0, 4);
 
   // Lightning Deals selection
   const dealProducts = [
-    PRODUCTS.find((p) => p.id === 'cake-001'),
-    PRODUCTS.find((p) => p.id === 'cake-002'),
-    PRODUCTS.find((p) => p.id === 'br-010'),
-    PRODUCTS.find((p) => p.id === 'tira-001'),
+    products.find((p) => p.id === 'cake-001'),
+    products.find((p) => p.id === 'cake-002'),
+    products.find((p) => p.id === 'br-010'),
+    products.find((p) => p.id === 'tira-001'),
   ].filter(Boolean);
 
   return (

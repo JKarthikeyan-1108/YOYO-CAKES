@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { isFirebaseConfigured } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -66,14 +65,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {!isFirebaseConfigured && (
-          <div className="bg-[var(--color-brand-warning)]/10 border border-[var(--color-brand-warning)]/30 rounded-xl p-4 mb-6 flex gap-3">
-            <AlertCircle size={18} className="text-[var(--color-brand-warning)] flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-[var(--color-brand-chocolate-light)]">
-              <span className="font-semibold">Demo Mode:</span> Firebase credentials are not yet configured in environment variables. Live accounts will be enabled upon Firebase setup.
-            </div>
-          </div>
-        )}
 
         {registeredSuccess ? (
           <div className="bg-white rounded-2xl shadow-elevated p-8 text-center border border-[var(--color-brand-primary-light)]/20">

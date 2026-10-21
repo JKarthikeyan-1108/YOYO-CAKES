@@ -12,12 +12,14 @@ import {
   RotateCcw
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
-import { PRODUCTS, CATEGORIES } from '@/data/products';
+import { CATEGORIES } from '@/data/products';
+import { useProductStore } from '@/stores/productStore';
 
 type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'rating-desc' | 'name-asc';
 type PriceRangeOption = 'all' | 'under-100' | '100-150' | '150-200' | 'over-200';
 
 export default function ShopPage() {
+  const products = useProductStore((s) => s.products);
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || '';
   const initialSearch = searchParams.get('search') || '';
@@ -32,7 +34,7 @@ export default function ShopPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...products];
 
     // Filter by search
     if (search.trim()) {
@@ -104,7 +106,7 @@ export default function ShopPage() {
     }
 
     return result;
-  }, [search, selectedCategory, priceRange, onlyBestsellers, minRating, sortBy]);
+  }, [products, search, selectedCategory, priceRange, onlyBestsellers, minRating, sortBy]);
 
   const handleCategoryChange = (slug: string) => {
     setSelectedCategory(slug);
@@ -149,10 +151,10 @@ export default function ShopPage() {
             }`}
           >
             <span>All Products</span>
-            <span className="badge badge-sm badge-ghost text-gray-500 font-bold">{PRODUCTS.length}</span>
+            <span className="badge badge-sm badge-ghost text-gray-500 font-bold">{products.length}</span>
           </button>
           {CATEGORIES.map((cat) => {
-            const count = PRODUCTS.filter((p) => p.categorySlug === cat.slug).length;
+            const count = products.filter((p) => p.categorySlug === cat.slug).length;
             return (
               <button
                 key={cat.id}

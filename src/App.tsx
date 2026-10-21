@@ -86,6 +86,9 @@ export default function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Route>
 
+            {/* Admin Portal Authentication Route */}
+            <Route path="/admin/login" element={<LoginPage />} />
+
             {/* Protected / Admin Portal Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />

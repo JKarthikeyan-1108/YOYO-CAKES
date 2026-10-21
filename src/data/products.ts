@@ -440,28 +440,45 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+export function getActiveCatalog(): Product[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('yoyo_custom_products_catalog');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {}
+  }
+  return [...PRODUCTS];
+}
+
 export function getProductById(id: string): Product | undefined {
-  return PRODUCTS.find(p => p.id === id);
+  const catalog = getActiveCatalog();
+  return catalog.find((p) => p.id === id) || PRODUCTS.find((p) => p.id === id);
 }
 
 export function getProductsByCategory(categorySlug: string): Product[] {
-  return PRODUCTS.filter(p => p.categorySlug === categorySlug);
+  return getActiveCatalog().filter((p) => p.categorySlug === categorySlug);
 }
 
 export function getFeaturedProducts(): Product[] {
-  return PRODUCTS.filter(p => p.featured);
+  return getActiveCatalog().filter((p) => p.featured);
 }
 
 export function getBestsellers(): Product[] {
-  return PRODUCTS.filter(p => p.bestseller);
+  return getActiveCatalog().filter((p) => p.bestseller);
 }
 
 export function searchProducts(query: string): Product[] {
   const lower = query.toLowerCase();
-  return PRODUCTS.filter(p =>
-    p.name.toLowerCase().includes(lower) ||
-    p.category.toLowerCase().includes(lower) ||
-    p.description.toLowerCase().includes(lower)
+  return getActiveCatalog().filter(
+    (p) =>
+      p.name.toLowerCase().includes(lower) ||
+      p.category.toLowerCase().includes(lower) ||
+      p.description.toLowerCase().includes(lower)
   );
 }
 

@@ -12,16 +12,14 @@ import {
   Upload,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { PRODUCTS, CATEGORIES, formatPrice, type Product } from '@/data/products';
+import { CATEGORIES, formatPrice, type Product } from '@/data/products';
+import { useProductStore } from '@/stores/productStore';
 import {
-  getProductsFromFirestore,
-  saveProductToFirestore,
-  deleteProductFromFirestore,
   uploadProductImageToStorage,
 } from '@/services/firestoreService';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const { products, addProduct, updateProduct, deleteProduct, toggleStock, fetchCatalog } = useProductStore();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -29,14 +27,8 @@ export default function AdminProductsPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
-    async function loadCatalog() {
-      const prods = await getProductsFromFirestore();
-      if (prods && prods.length > 0) {
-        setProducts(prods);
-      }
-    }
-    loadCatalog();
-  }, []);
+    fetchCatalog();
+  }, [fetchCatalog]);
 
   // Filtered products
   const filtered = products.filter((p) => {
@@ -61,12 +53,12 @@ export default function AdminProductsPage() {
       category: 'Cakes',
       categorySlug: 'cakes',
       description: '',
-      image: '/images/products/custom.jpg',
+      image: '/images/products/dream-cake.jpg',
       inStock: true,
       stockQuantity: 20,
       featured: false,
       bestseller: false,
-      ingredients: 'Configured by bakery owner',
+      ingredients: 'Artisanal ingredients handcrafted with love',
       allergens: 'Dairy, Wheat',
     };
     setEditingProduct(newProd);
@@ -102,46 +94,30 @@ export default function AdminProductsPage() {
     }
 
     if (isNew) {
-      setProducts([editingProduct, ...products]);
+      await addProduct(editingProduct);
       toast.success(`${editingProduct.name} added to catalog`);
     } else {
-      setProducts(
-        products.map((p) => (p.id === editingProduct.id ? editingProduct : p))
-      );
+      await updateProduct(editingProduct);
       toast.success(`${editingProduct.name} updated successfully`);
     }
 
-    // Persist to Cloud Firestore
-    await saveProductToFirestore(editingProduct);
     setEditingProduct(null);
   };
 
   const handleToggleStock = async (id: string) => {
     const target = products.find((p) => p.id === id);
     if (!target) return;
-    const newInStock = !target.inStock;
+    const willBeInStock = !target.inStock;
 
-    setProducts(
-      products.map((p) => {
-        if (p.id === id) {
-          return { ...p, inStock: newInStock };
-        }
-        return p;
-      })
-    );
-
-    // Persist to Cloud Firestore
-    await saveProductToFirestore({ id, inStock: newInStock });
+    await toggleStock(id);
     toast.success(
-      `${target.name} marked ${newInStock ? 'In Stock' : 'Out of Stock'}`
+      `${target.name} marked ${willBeInStock ? 'In Stock' : 'Out of Stock'}`
     );
   };
 
   const handleDelete = async (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-      setProducts(products.filter((p) => p.id !== id));
-      // Persist to Cloud Firestore
-      await deleteProductFromFirestore(id);
+      await deleteProduct(id);
       toast.success(`${name} deleted from catalog`);
     }
   };

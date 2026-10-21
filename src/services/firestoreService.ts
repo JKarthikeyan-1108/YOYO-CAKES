@@ -510,11 +510,19 @@ export async function getProductsFromFirestore(): Promise<FirestoreProduct[]> {
 export async function saveProductToFirestore(product: Partial<FirestoreProduct> & { id: string }): Promise<void> {
   if (!db) return;
   try {
-    const dataToSave = {
-      ...product,
-      pricePaise: product.price ? product.price * 100 : product.pricePaise,
-      updatedAt: serverTimestamp(),
-    };
+    const dataToSave: Record<string, any> = { ...product };
+    if (typeof product.price === 'number') {
+      dataToSave.pricePaise = Math.round(product.price * 100);
+    }
+    dataToSave.updatedAt = serverTimestamp();
+
+    // Strip any undefined fields so Firestore merge doesn't throw invalid-argument
+    Object.keys(dataToSave).forEach((key) => {
+      if (dataToSave[key] === undefined) {
+        delete dataToSave[key];
+      }
+    });
+
     await setDoc(doc(db, 'products', product.id), dataToSave, { merge: true });
   } catch (err) {
     console.warn('Error saving product to Firestore:', err);

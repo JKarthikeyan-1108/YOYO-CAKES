@@ -110,6 +110,7 @@ export default function Footer() {
                 { to: '/faq', label: 'Shelf Life & Eggless FAQs' },
                 { to: '/terms', label: 'Terms of Service' },
                 { to: '/privacy-policy', label: 'Privacy & Security Policy' },
+                { to: '/admin/login', label: 'Bakery Admin Portal (Staff)' },
               ].map((link) => (
                 <li key={link.to}>
                   <Link
