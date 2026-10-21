@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Search,
   Plus,
@@ -9,9 +9,16 @@ import {
   Save,
   X,
   Filter,
+  Upload,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { PRODUCTS, CATEGORIES, formatPrice, type Product } from '@/data/products';
+import {
+  getProductsFromFirestore,
+  saveProductToFirestore,
+  deleteProductFromFirestore,
+  uploadProductImageToStorage,
+} from '@/services/firestoreService';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>(PRODUCTS);
@@ -19,6 +26,17 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    async function loadCatalog() {
+      const prods = await getProductsFromFirestore();
+      if (prods && prods.length > 0) {
+        setProducts(prods);
+      }
+    }
+    loadCatalog();
+  }, []);
 
   // Filtered products
   const filtered = products.filter((p) => {
@@ -55,7 +73,22 @@ export default function AdminProductsPage() {
     setIsNew(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingProduct) return;
+    setUploadingImage(true);
+    try {
+      const url = await uploadProductImageToStorage(file, editingProduct.id);
+      setEditingProduct({ ...editingProduct, image: url });
+      toast.success('Image uploaded to Firebase Storage!');
+    } catch (err: any) {
+      toast.error(err?.message || 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
 
@@ -77,27 +110,38 @@ export default function AdminProductsPage() {
       );
       toast.success(`${editingProduct.name} updated successfully`);
     }
+
+    // Persist to Cloud Firestore
+    await saveProductToFirestore(editingProduct);
     setEditingProduct(null);
   };
 
-  const handleToggleStock = (id: string) => {
+  const handleToggleStock = async (id: string) => {
+    const target = products.find((p) => p.id === id);
+    if (!target) return;
+    const newInStock = !target.inStock;
+
     setProducts(
       products.map((p) => {
         if (p.id === id) {
-          const updated = { ...p, inStock: !p.inStock };
-          toast.success(
-            `${p.name} marked ${updated.inStock ? 'In Stock' : 'Out of Stock'}`
-          );
-          return updated;
+          return { ...p, inStock: newInStock };
         }
         return p;
       })
     );
+
+    // Persist to Cloud Firestore
+    await saveProductToFirestore({ id, inStock: newInStock });
+    toast.success(
+      `${target.name} marked ${newInStock ? 'In Stock' : 'Out of Stock'}`
+    );
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete ${name}?`)) {
       setProducts(products.filter((p) => p.id !== id));
+      // Persist to Cloud Firestore
+      await deleteProductFromFirestore(id);
       toast.success(`${name} deleted from catalog`);
     }
   };
@@ -352,6 +396,46 @@ export default function AdminProductsPage() {
                   }
                   className="input-field py-2 text-xs resize-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Product Image (Firebase Storage)
+                </label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={editingProduct.image || ''}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, image: e.target.value })
+                    }
+                    placeholder="https://... or /images/products/..."
+                    className="input-field py-2 text-xs flex-1"
+                  />
+                  <label className={`btn-secondary text-xs px-3 py-2 cursor-pointer flex items-center gap-1 ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <Upload size={14} />
+                    <span>{uploadingImage ? 'Uploading...' : 'Upload Image'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {editingProduct.image && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <img
+                      src={editingProduct.image}
+                      alt="Preview"
+                      className="w-10 h-10 object-cover rounded-md border"
+                    />
+                    <span className="text-[10px] text-gray-500 truncate max-w-xs">
+                      {editingProduct.image}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-6 pt-2">

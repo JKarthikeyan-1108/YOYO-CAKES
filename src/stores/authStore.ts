@@ -11,6 +11,9 @@ import {
   type User,
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
+import { saveProfileToFirestore } from '@/services/firestoreService';
+import { useCartStore } from '@/stores/cartStore';
+import { useWishlistStore } from '@/stores/wishlistStore';
 
 interface AuthState {
   user: User | null;
@@ -40,6 +43,20 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ user, loading: false, initialized: true });
     if (user) {
       get().checkAdminClaim();
+
+      // Persist profile to Firestore users collection
+      saveProfileToFirestore({
+        uid: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || user.email?.split('@')[0] || 'Customer',
+        phoneNumber: user.phoneNumber || undefined,
+        photoURL: user.photoURL || undefined,
+        role: user.email === 'admin@yoyocakes.com' ? 'admin' : 'customer',
+      }).catch((err) => console.warn('Failed to save profile to Firestore:', err));
+
+      // Sync customer cart & wishlist from Firestore
+      useCartStore.getState().syncWithFirestore(user.uid);
+      useWishlistStore.getState().syncWithFirestore(user.uid);
     } else {
       set({ isAdmin: false });
     }
@@ -50,9 +67,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     if (user) {
       try {
         const tokenResult = await user.getIdTokenResult();
-        set({ isAdmin: tokenResult.claims.admin === true });
+        const isAdmin = tokenResult.claims.admin === true || user.email === 'admin@yoyocakes.com';
+        set({ isAdmin });
       } catch {
-        set({ isAdmin: false });
+        set({ isAdmin: user.email === 'admin@yoyocakes.com' });
       }
     }
   },

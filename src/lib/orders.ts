@@ -1,5 +1,10 @@
 import { db, isFirebaseConfigured } from './firebase';
-import { collection, doc, setDoc, getDocs, getDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import {
+  createFirestoreOrder,
+  updateFirestoreOrderStatus,
+  type OrderDocument,
+} from '@/services/firestoreService';
 
 export type OrderStatus = 'placed' | 'confirmed' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled';
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
@@ -26,13 +31,19 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
+  orderNumber?: string;
+  userId?: string;
   createdAt: string;
   customer: OrderCustomer;
-  items: OrderItem[];
+  items: (OrderItem & { pricePaise?: number })[];
   subtotal: number;
+  subtotalPaise?: number;
   deliveryFee: number;
+  deliveryFeePaise?: number;
   discount: number;
+  discountPaise?: number;
   total: number;
+  totalPaise?: number;
   fulfillment: FulfillmentType;
   orderStatus: OrderStatus;
   paymentStatus: PaymentStatus;
@@ -157,7 +168,20 @@ export async function saveOrder(order: Order): Promise<void> {
 
   if (isFirebaseConfigured && db) {
     try {
-      await setDoc(doc(db, 'orders', order.id), order, { merge: true });
+      // Calculate paise fields if missing
+      const orderDoc: OrderDocument = {
+        ...order,
+        orderNumber: order.orderNumber || order.id,
+        subtotalPaise: order.subtotalPaise || order.subtotal * 100,
+        deliveryFeePaise: order.deliveryFeePaise || order.deliveryFee * 100,
+        discountPaise: order.discountPaise || order.discount * 100,
+        totalPaise: order.totalPaise || order.total * 100,
+        items: order.items.map((i) => ({
+          ...i,
+          pricePaise: i.pricePaise || i.price * 100,
+        })),
+      };
+      await createFirestoreOrder(orderDoc);
     } catch (e) {
       console.warn('Failed to sync order to Firestore:', e);
     }
@@ -199,7 +223,8 @@ export async function getAllOrders(): Promise<Order[]> {
 export async function updateOrderStatus(
   orderId: string,
   orderStatus: OrderStatus,
-  paymentStatus?: PaymentStatus
+  paymentStatus?: PaymentStatus,
+  notes?: string
 ): Promise<void> {
   const current = getLocalOrders();
   const target = current.find((o) => o.id === orderId);
@@ -213,9 +238,10 @@ export async function updateOrderStatus(
 
   if (isFirebaseConfigured && db) {
     try {
-      const updateData: any = { orderStatus };
-      if (paymentStatus) updateData.paymentStatus = paymentStatus;
-      await updateDoc(doc(db, 'orders', orderId), updateData);
+      await updateFirestoreOrderStatus(orderId, orderStatus, 'admin', notes);
+      if (paymentStatus) {
+        await updateDoc(doc(db, 'orders', orderId), { paymentStatus });
+      }
     } catch (e) {
       console.warn('Failed to update order in Firestore:', e);
     }

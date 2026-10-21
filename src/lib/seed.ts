@@ -25,14 +25,37 @@ export async function seedCatalogToFirestore(): Promise<{ success: boolean; coun
       batch.set(catRef, { ...cat, updatedAt: new Date().toISOString() }, { merge: true });
     }
 
-    // 2. Seed all 27 Products
+    // 2. Seed all 27 Products with integer paise
     for (const prod of PRODUCTS) {
       const prodRef = doc(db, 'products', prod.id);
-      batch.set(prodRef, { ...prod, updatedAt: new Date().toISOString() }, { merge: true });
+      batch.set(
+        prodRef,
+        {
+          ...prod,
+          pricePaise: prod.price * 100,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
     }
 
+    // 3. Seed Default Coupon (YOYO10)
+    const couponRef = doc(db, 'coupons', 'coupon-yoyo10');
+    batch.set(
+      couponRef,
+      {
+        id: 'coupon-yoyo10',
+        code: 'YOYO10',
+        discountPercentage: 10,
+        minOrderAmount: 200,
+        active: true,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+
     await batch.commit();
-    console.log(`Successfully seeded ${PRODUCTS.length} products and ${CATEGORIES.length} categories to Firestore.`);
+    console.log(`Successfully seeded ${PRODUCTS.length} products, categories, and coupons to Firestore.`);
     return { success: true, count: PRODUCTS.length };
   } catch (err: any) {
     console.error('Firestore catalog seeding error:', err);

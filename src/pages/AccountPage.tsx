@@ -1,26 +1,139 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Package, MapPin, Heart, LogOut, ArrowRight, ShieldCheck, Clock, ExternalLink } from 'lucide-react';
+import {
+  User,
+  Package,
+  MapPin,
+  Heart,
+  LogOut,
+  ShieldCheck,
+  ExternalLink,
+  Plus,
+  Trash2,
+  Check,
+  Bell,
+  Settings as SettingsIcon,
+} from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { getLocalOrders, type Order } from '@/lib/orders';
+import { getAllOrders, type Order } from '@/lib/orders';
+import {
+  getUserAddressesFromFirestore,
+  saveAddressToFirestore,
+  deleteAddressFromFirestore,
+  getUserSettingsFromFirestore,
+  saveUserSettingsToFirestore,
+  type SavedAddress,
+  type UserSettings,
+} from '@/services/firestoreService';
 import { formatPrice } from '@/data/products';
 import toast from 'react-hot-toast';
 
 export default function AccountPage() {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'orders' | 'profile' | 'addresses'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'profile' | 'addresses' | 'settings'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    name: '',
+    phone: '',
+    addressLine: '',
+    city: 'Chennai',
+    pincode: '',
+    isDefault: false,
+  });
+  const [settings, setSettings] = useState<UserSettings>({
+    userId: '',
+    theme: 'cream',
+    emailNotifications: true,
+    orderUpdates: true,
+    smsAlerts: false,
+  });
 
   useEffect(() => {
-    // Load customer orders
-    const all = getLocalOrders();
-    if (user?.email) {
-      setOrders(all.filter((o) => o.customer.email.toLowerCase() === user.email?.toLowerCase()));
-    } else {
-      setOrders(all);
+    async function loadData() {
+      if (!user) return;
+
+      // 1. Load orders
+      const all = await getAllOrders();
+      if (user.email) {
+        setOrders(
+          all.filter(
+            (o) =>
+              (o.userId && o.userId === user.uid) ||
+              o.customer.email.toLowerCase() === user.email?.toLowerCase()
+          )
+        );
+      } else {
+        setOrders(all);
+      }
+
+      // 2. Load addresses
+      const userAddrs = await getUserAddressesFromFirestore(user.uid);
+      setAddresses(userAddrs);
+
+      // 3. Load user settings
+      const userPrefs = await getUserSettingsFromFirestore(user.uid);
+      if (userPrefs) {
+        setSettings(userPrefs);
+      } else {
+        setSettings((prev) => ({ ...prev, userId: user.uid }));
+      }
     }
+
+    loadData();
   }, [user]);
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!newAddress.name || !newAddress.phone || !newAddress.addressLine || !newAddress.pincode) {
+      toast.error('Please complete all address fields.');
+      return;
+    }
+
+    const addrId = `addr-${Date.now().toString(36)}`;
+    const addressToSave: SavedAddress = {
+      id: addrId,
+      userId: user.uid,
+      name: newAddress.name,
+      phone: newAddress.phone,
+      addressLine: newAddress.addressLine,
+      city: newAddress.city,
+      pincode: newAddress.pincode,
+      isDefault: newAddress.isDefault,
+    };
+
+    await saveAddressToFirestore(addressToSave);
+    setAddresses((prev) => [...prev, addressToSave]);
+    setShowAddressModal(false);
+    setNewAddress({
+      name: '',
+      phone: '',
+      addressLine: '',
+      city: 'Chennai',
+      pincode: '',
+      isDefault: false,
+    });
+    toast.success('Address saved to Firestore!');
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    await deleteAddressFromFirestore(id);
+    setAddresses((prev) => prev.filter((a) => a.id !== id));
+    toast.success('Address removed');
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    await saveUserSettingsToFirestore({
+      ...settings,
+      userId: user.uid,
+    });
+    toast.success('Preferences updated in Firestore!');
+  };
 
   const handleLogout = async () => {
     try {
@@ -105,7 +218,17 @@ export default function AccountPage() {
                   : 'bg-white text-[var(--color-brand-chocolate-light)] hover:bg-[var(--color-brand-cream-dark)]'
               }`}
             >
-              <MapPin size={18} /> Saved Addresses
+              <MapPin size={18} /> Saved Addresses ({addresses.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                activeTab === 'settings'
+                  ? 'bg-[var(--color-brand-chocolate)] text-white shadow-sm'
+                  : 'bg-white text-[var(--color-brand-chocolate-light)] hover:bg-[var(--color-brand-cream-dark)]'
+              }`}
+            >
+              <SettingsIcon size={18} /> Preferences & Alerts
             </button>
             <Link
               to="/wishlist"
@@ -217,26 +340,228 @@ export default function AccountPage() {
                     />
                   </div>
                   <p className="text-xs text-[var(--color-brand-muted)] pt-2">
-                    Profile credentials are authenticated via Firebase Auth.
+                    Profile credentials and security managed via Firebase Authentication and Cloud Firestore.
                   </p>
                 </div>
               </div>
             )}
 
             {activeTab === 'addresses' && (
-              <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8 border border-[var(--color-brand-primary-light)]/20">
-                <h2 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)] mb-6">
-                  Saved Delivery Addresses
-                </h2>
-                <div className="p-5 border border-dashed border-[var(--color-brand-primary-light)] rounded-xl bg-[var(--color-brand-cream)]/50 text-center">
-                  <MapPin size={32} className="mx-auto text-[var(--color-brand-primary)] mb-2" />
-                  <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">
-                    Local Delivery Available Across City
-                  </p>
-                  <p className="text-xs text-[var(--color-brand-muted)] max-w-sm mx-auto mt-1">
-                    Your preferred delivery address is automatically captured and confirmed during checkout.
-                  </p>
+              <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8 border border-[var(--color-brand-primary-light)]/20 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)]">
+                    Saved Delivery Addresses
+                  </h2>
+                  <button
+                    onClick={() => setShowAddressModal(!showAddressModal)}
+                    className="btn-primary text-xs px-3.5 py-2 flex items-center gap-1.5"
+                  >
+                    <Plus size={14} /> Add Address
+                  </button>
                 </div>
+
+                {showAddressModal && (
+                  <form onSubmit={handleSaveAddress} className="p-5 border border-[var(--color-brand-primary-light)] rounded-xl bg-[var(--color-brand-cream)]/30 space-y-4">
+                    <h3 className="font-heading text-sm font-bold text-[var(--color-brand-chocolate)]">
+                      New Delivery Address
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Recipient Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={newAddress.name}
+                          onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                          placeholder="e.g. Karthik"
+                          className="input-field text-xs py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Contact Phone</label>
+                        <input
+                          type="tel"
+                          required
+                          value={newAddress.phone}
+                          onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                          placeholder="10-digit mobile number"
+                          className="input-field text-xs py-2"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Street Address</label>
+                        <input
+                          type="text"
+                          required
+                          value={newAddress.addressLine}
+                          onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
+                          placeholder="Flat / House No., Landmark, Area"
+                          className="input-field text-xs py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">City</label>
+                        <input
+                          type="text"
+                          required
+                          value={newAddress.city}
+                          onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                          className="input-field text-xs py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Pincode</label>
+                        <input
+                          type="text"
+                          required
+                          value={newAddress.pincode}
+                          onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
+                          placeholder="600001"
+                          className="input-field text-xs py-2"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddressModal(false)}
+                        className="btn-secondary text-xs px-3 py-1.5"
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn-primary text-xs px-4 py-1.5">
+                        Save to Firestore
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {addresses.length === 0 ? (
+                  <div className="p-8 border border-dashed border-[var(--color-brand-primary-light)] rounded-xl bg-[var(--color-brand-cream)]/50 text-center">
+                    <MapPin size={32} className="mx-auto text-[var(--color-brand-primary)] mb-2" />
+                    <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">
+                      No saved addresses yet
+                    </p>
+                    <p className="text-xs text-[var(--color-brand-muted)] max-w-sm mx-auto mt-1">
+                      Add a delivery address now or save it during checkout for fast 1-click reordering.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {addresses.map((addr) => (
+                      <div
+                        key={addr.id}
+                        className="p-4 border border-[var(--color-brand-primary-light)]/40 rounded-xl relative hover:border-[var(--color-brand-primary)] transition-colors bg-white shadow-sm"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-bold text-sm text-[var(--color-brand-chocolate)]">
+                            {addr.name}
+                          </h4>
+                          <button
+                            onClick={() => handleDeleteAddress(addr.id)}
+                            className="text-gray-400 hover:text-red-600 transition-colors"
+                            title="Delete address"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          {addr.addressLine}, {addr.city} – {addr.pincode}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-2 font-mono">
+                          📞 {addr.phone}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8 border border-[var(--color-brand-primary-light)]/20">
+                <h2 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)] mb-6 flex items-center gap-2">
+                  <Bell size={20} className="text-[var(--color-brand-primary-dark)]" />
+                  Account Preferences & Notifications
+                </h2>
+                <form onSubmit={handleSaveSettings} className="space-y-6 max-w-lg">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      Storefront Theme Mode
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['cream', 'dark', 'system'] as const).map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSettings({ ...settings, theme: t })}
+                          className={`py-2 px-3 text-xs font-medium rounded-lg border capitalize transition-all ${
+                            settings.theme === t
+                              ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] font-bold shadow-sm'
+                              : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      Notification Preferences
+                    </label>
+
+                    <label className="flex items-center gap-3 p-3 border rounded-xl border-gray-200 cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={settings.emailNotifications}
+                        onChange={(e) =>
+                          setSettings({ ...settings, emailNotifications: e.target.checked })
+                        }
+                        className="rounded text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]"
+                      />
+                      <span className="text-xs text-gray-700">
+                        Email Notifications (Order receipts, promos, and invoices)
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 p-3 border rounded-xl border-gray-200 cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={settings.orderUpdates}
+                        onChange={(e) =>
+                          setSettings({ ...settings, orderUpdates: e.target.checked })
+                        }
+                        className="rounded text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]"
+                      />
+                      <span className="text-xs text-gray-700">
+                        Order Real-time Status Alerts (Baking, Dispatch, Out for Delivery)
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 p-3 border rounded-xl border-gray-200 cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={settings.smsAlerts}
+                        onChange={(e) =>
+                          setSettings({ ...settings, smsAlerts: e.target.checked })
+                        }
+                        className="rounded text-[var(--color-brand-primary)] focus:ring-[var(--color-brand-primary)]"
+                      />
+                      <span className="text-xs text-gray-700">
+                        SMS & WhatsApp Delivery Notifications
+                      </span>
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn-primary text-xs px-6 py-2.5 shadow-md flex items-center gap-2"
+                  >
+                    <Check size={14} /> Save Preferences to Firestore
+                  </button>
+                </form>
               </div>
             )}
           </div>
@@ -245,3 +570,4 @@ export default function AccountPage() {
     </div>
   );
 }
+

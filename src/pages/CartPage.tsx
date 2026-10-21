@@ -4,23 +4,30 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { formatPrice } from '@/data/products';
+import { validateCouponInFirestore } from '@/services/firestoreService';
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, getSubtotal } = useCartStore();
   const [couponCode, setCouponCode] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const subtotal = getSubtotal();
   const deliveryFee = subtotal >= 500 ? 0 : 40; // Free delivery above ₹500
-  const discount = couponApplied ? Math.round(subtotal * 0.1) : 0;
+  const discount = couponApplied ? discountAmount : 0;
   const total = subtotal - discount + deliveryFee;
 
-  const handleApplyCoupon = () => {
-    if (couponCode.trim().toUpperCase() === 'YOYO10') {
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    const res = await validateCouponInFirestore(couponCode, subtotal);
+    if (res.valid) {
       setCouponApplied(true);
-      toast.success('Coupon applied! 10% discount');
+      setDiscountAmount(res.discount);
+      toast.success(res.message || 'Coupon applied successfully!');
     } else {
-      toast.error('Invalid coupon code');
+      setCouponApplied(false);
+      setDiscountAmount(0);
+      toast.error(res.message || 'Invalid coupon code');
     }
   };
 

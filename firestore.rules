@@ -2,72 +2,93 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions
+    // Security Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
     
     function isAdmin() {
-      return isAuthenticated() && request.auth.token.admin == true;
+      return isAuthenticated() && (request.auth.token.admin == true);
     }
     
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Products: Public can read active catalog; only admins can create/update/delete
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if isAdmin();
+    // 1. users: Customer profile documents
+    // Customers can read & write their own profile; cannot self-grant 'role' or 'admin'
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && (!request.resource.data.keys().hasAny(['role', 'admin']) || request.resource.data.role == 'customer');
+      allow update: if (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'admin'])) || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    // Categories: Public can read; only admins can manage
+    // 2. userSettings: Theme, notification preferences
+    match /userSettings/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // 3. addresses: Saved delivery addresses
+    match /addresses/{addressId} {
+      allow read, write: if (isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid) && (request.resource == null || request.resource.data.userId == request.auth.uid)) || isAdmin();
+    }
+
+    // 4. categories: Bakery categories (Cakes, Brownies, etc.)
     match /categories/{categoryId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Orders:
-    // - Customers can read their own orders
-    // - Customers can create orders with unverified/placed initial status
-    // - Only admin or trusted backend can change paymentStatus or orderStatus
-    match /orders/{orderId} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.customer.email == request.auth.token.email);
-      allow create: if true; // Allows guest checkout as well
-      allow update, delete: if isAdmin();
-    }
-
-    // Users / Customer profiles:
-    // Customers can read and modify only their own data
-    // Role or admin claims cannot be modified by customer
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow write: if (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'admin'])) || isAdmin();
-    }
-
-    // Business Settings:
-    // Public can read general business info; only admins can write
-    match /businessSettings/{docId} {
+    // 5. products: 27 signature bakery items with exact prices
+    match /products/{productId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Inventory & Payment Audit Events:
-    // Write-only by backend or admins
-    match /inventoryEvents/{eventId} {
-      allow read, write: if isAdmin();
+    // 6. carts: Persisted customer shopping carts
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
-    match /paymentEvents/{eventId} {
-      allow read, write: if isAdmin();
+    // 7. wishlists: Persisted customer favorites
+    match /wishlists/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
-    // Reviews:
-    // Public read; authenticated users can post reviews
-    match /reviews/{reviewId} {
+    // 8. orders: Customer orders with snapshots
+    match /orders/{orderId} {
+      allow read: if isAdmin() 
+                  || (isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.customer.email == request.auth.token.email));
+      allow create: if true; // Allows customer and guest checkout
+      allow update, delete: if isAdmin();
+    }
+
+    // 9. payments: Verified payment references (no secret keys)
+    match /payments/{paymentId} {
+      allow read: if isAdmin() 
+                  || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // 10. coupons: Promotion codes (e.g. YOYO10)
+    match /coupons/{couponId} {
       allow read: if true;
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // 11. orderStatusHistory: Audit log of fulfillment transitions
+    match /orderStatusHistory/{historyId} {
+      allow read: if isAdmin() 
+                  || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Business Settings (configurable phone, delivery fees, pickup address)
+    match /businessSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

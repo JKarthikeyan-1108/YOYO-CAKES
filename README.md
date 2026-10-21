@@ -161,50 +161,115 @@ npm run build
 
 ---
 
-## 🔒 Firebase Security Rules & Admin Provisioning
+## 🗄️ Cloud Firestore Architecture (11 Collections)
+
+Cloud Firestore is configured as the **sole application database** for YOYO CAKES (Project ID: `yoyo-c46c3`). No external SQL, MongoDB, or Prisma databases are used.
+
+### Schema & Collections:
+
+1. **`users`** — Customer & Admin profiles (`uid`, `email`, `displayName`, `photoURL`, `phoneNumber`, `role`, timestamps).
+2. **`userSettings`** — Preferences (`userId`, `theme: cream|dark|system`, `emailNotifications`, `orderUpdates`, `smsAlerts`).
+3. **`addresses`** — Saved customer delivery addresses (`id`, `userId`, `name`, `phone`, `addressLine`, `city`, `pincode`, `isDefault`).
+4. **`categories`** — Bakery categories (`id`, `name`, `slug`, `description`, `image`).
+5. **`products`** — All 27 signature bakery items with integer paise (`pricePaise = price * 100`), stock counts, categories, tags.
+6. **`carts`** — Persistent customer carts synchronized across sessions (`userId`, `items: [{ productId, quantity, snapshot }]`).
+7. **`wishlists`** — Persistent customer wishlists (`userId`, `productIds: []`).
+8. **`orders`** — Historical and active orders (`id`, `orderNumber`, `userId`, `customer`, `items`, `subtotalPaise`, `deliveryFeePaise`, `discountPaise`, `totalPaise`, `orderStatus`, `paymentStatus`, `fulfillment`, `razorpayOrderId`, `razorpayPaymentId`).
+9. **`payments`** — Payment audit logs (`id`, `orderId`, `userId`, `amountPaise`, `currency: INR`, `razorpayPaymentId`, `status: captured`).
+10. **`coupons`** — Discount codes (`id`, `code`, `discountPercentage`, `maxDiscount`, `minOrderAmount`, `active`).
+11. **`orderStatusHistory`** — Status audit log (`id`, `orderId`, `userId`, `status`, `notes`, `updatedBy`, `timestamp`).
+
+---
+
+## 🔒 Security Rules & Trusted Operations
 
 ### Firestore Rules (`firestore.rules`)
-- **Products & Categories**: Public read; write restricted to authenticated admins (`token.admin == true`).
-- **Orders**: Customers can read only their own orders (`customer.email == request.auth.token.email`); admins can read and update all orders.
-- **Profiles**: Customers can update personal details, but cannot alter `role` or `admin` claims.
+- **Customer Privacy**: Users can read and write only their own records in `users`, `userSettings`, `addresses`, `carts`, `wishlists`, and `orders`.
+- **Admin Isolation**: Role escalation is strictly prohibited. Customers cannot grant themselves admin roles or alter order statuses.
+- **Public Catalog**: Products and categories are publicly readable; only administrators can create, update, or delete items.
 
-### Admin Provisioning
-To grant administrator access to a user email in production, set a custom claim via Firebase Admin SDK script:
+### Storage Rules (`storage.rules`)
+- Validates image MIME types (`image/*`).
+- Product images: Admin-only uploads, maximum 5MB.
+- Customer avatar/profile images: Authenticated owner only, maximum 2MB.
 
-```javascript
-// admin-provision.js (Node.js server with firebase-admin)
-const admin = require('firebase-admin');
-admin.initializeApp();
+### Trusted Cloud Functions (`functions/src/index.ts`)
+- **`createRazorpayOrder`**: Generates Razorpay orders with integer paise validation without exposing backend secrets.
+- **`verifyRazorpayPayment`**: Computes HMAC SHA256 signature verification server-side using `RAZORPAY_KEY_SECRET`.
+- **`setAdminClaim`**: Grants custom Firebase Auth admin claims (`{ admin: true }`).
+- **`validateCoupon`**: Validates coupons against Firestore `coupons` collection.
+- **`onOrderStatusChanged`**: Automatic background trigger auditing all order transitions into `orderStatusHistory`.
 
-async function makeAdmin(email) {
-  const user = await admin.auth().getUserByEmail(email);
-  await admin.auth().setCustomUserClaims(user.uid, { admin: true });
-  console.log(`Admin claim granted to ${email}`);
-}
+---
 
-makeAdmin('admin@yoyocakes.in');
+## ⚡ Firebase CLI & Deployment Guide
+
+### 1. Authenticate & Select Project
+
+```bash
+# Login to Firebase
+firebase login
+
+# Set active project
+firebase use yoyo-c46c3
 ```
 
+### 2. Deploy Firestore Rules & Indexes
+
+```bash
+# Deploy security rules and compound indexes
+firebase deploy --only firestore:rules,firestore:indexes
+```
+
+### 3. Deploy Storage Rules
+
+```bash
+# Deploy storage security rules
+firebase deploy --only storage
+```
+
+### 4. Deploy Cloud Functions
+
+```bash
+# Deploy trusted backend functions
+firebase deploy --only functions
+```
+
+### 5. Build & Deploy Frontend
+
+```bash
+# Build frontend with Vite
+npm run build
+
+# Deploy to Firebase Hosting
+firebase deploy --only hosting
+```
+
+*(Alternatively, deploy the frontend to Vercel and deploy rules/functions to Firebase separately).*
+
 ---
 
-## 💳 Razorpay Payment Lifecycle
+## 📌 Manual Firebase Console Checklist
 
-1. Customer proceeds to checkout and selects Delivery or Pickup.
-2. Orders above ₹500 receive automatic free delivery (₹40 applied for smaller orders).
-3. The order triggers Razorpay Checkout with the computed amount in paise.
-4. On payment completion, the verified `razorpay_payment_id` is recorded and the order status is updated to `confirmed` and `paid`.
-5. Order data is persisted locally and synchronized to Cloud Firestore.
-6. The customer is redirected to their live tracking page (`/order/:id`).
+Complete these one-time steps in the [Firebase Console](https://console.firebase.google.com/project/yoyo-c46c3):
+
+1. **Authentication**:
+   - Go to **Build > Authentication > Sign-in method**.
+   - Enable **Email/Password**.
+   - Enable **Google** (add support email).
+2. **Cloud Firestore**:
+   - Go to **Build > Firestore Database**.
+   - Ensure the database is created in **Native mode**.
+   - Location: Default region (e.g., `asia-south1` or `us-central1`).
+3. **Firebase Storage**:
+   - Go to **Build > Storage**.
+   - Ensure bucket `yoyo-c46c3.firebasestorage.app` is enabled.
+4. **Environment Variables**:
+   - Go to **Project Settings > General > Your apps > Web app**.
+   - Copy `apiKey` and `appId` into `.env` as `VITE_FIREBASE_API_KEY` and `VITE_FIREBASE_APP_ID`.
+5. **Initial Data Seeding**:
+   - In the YOYO CAKES Admin Portal (`/admin/settings`), click **"Sync 27 Items to Firestore"** to automatically populate all products, categories, and initial coupons into Cloud Firestore.
 
 ---
-
-## 🚢 Deployment
-
-### Deploying Frontend to Vercel
-1. Push the repository to GitHub.
-2. Import project into [Vercel](https://vercel.com).
-3. Framework preset: **Vite**.
-4. Configure environment variables (`VITE_FIREBASE_*`, `VITE_RAZORPAY_KEY_ID`).
-5. Click **Deploy**.
 
 © 2026 YOYO CAKES. Every bite, a little happiness.

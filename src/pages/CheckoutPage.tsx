@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { formatPrice } from '@/data/products';
 import { saveOrder, type Order } from '@/lib/orders';
 import { openRazorpayCheckout } from '@/lib/razorpay';
+import { getUserAddressesFromFirestore, type SavedAddress } from '@/services/firestoreService';
 
 type FulfillmentType = 'delivery' | 'pickup';
 
@@ -18,6 +19,7 @@ export default function CheckoutPage() {
   const [processing, setProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
 
   // Form state
   const [form, setForm] = useState({
@@ -25,10 +27,30 @@ export default function CheckoutPage() {
     email: user?.email || '',
     phone: '',
     address: '',
-    city: '',
+    city: 'Chennai',
     pincode: '',
     instructions: '',
     agreeTerms: false,
+  });
+
+  // Load saved Firestore addresses for authenticated customer
+  useState(() => {
+    if (user?.uid) {
+      getUserAddressesFromFirestore(user.uid).then((addrs) => {
+        setSavedAddresses(addrs);
+        if (addrs.length > 0) {
+          const def = addrs.find((a) => a.isDefault) || addrs[0];
+          setForm((prev) => ({
+            ...prev,
+            name: prev.name || def.name,
+            phone: prev.phone || def.phone,
+            address: prev.address || def.addressLine,
+            city: prev.city || def.city,
+            pincode: prev.pincode || def.pincode,
+          }));
+        }
+      });
+    }
   });
 
   const subtotal = getSubtotal();
@@ -78,6 +100,7 @@ export default function CheckoutPage() {
         onSuccess: async (rzpRes) => {
           const newOrder: Order = {
             id: generatedOrderId,
+            userId: user?.uid,
             createdAt: new Date().toISOString(),
             customer: {
               name: form.name,
@@ -314,6 +337,39 @@ export default function CheckoutPage() {
                   <h2 className="font-heading text-lg font-semibold text-[var(--color-brand-chocolate)] mb-4 flex items-center gap-2">
                     <MapPin size={18} className="text-[var(--color-brand-primary-dark)]" /> Delivery Address
                   </h2>
+
+                  {savedAddresses.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-gray-600 mb-2">Select from your saved addresses:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {savedAddresses.map((addr) => (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => {
+                              setForm((prev) => ({
+                                ...prev,
+                                name: addr.name,
+                                phone: addr.phone,
+                                address: addr.addressLine,
+                                city: addr.city,
+                                pincode: addr.pincode,
+                              }));
+                              toast.success(`Selected address for ${addr.name}`);
+                            }}
+                            className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+                              form.address === addr.addressLine
+                                ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] font-bold'
+                                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                            }`}
+                          >
+                            📍 {addr.name} ({addr.city})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-[var(--color-brand-chocolate)] mb-1.5 block">
