@@ -167,24 +167,24 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full justify-center py-3 text-sm mt-2"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FFD814] to-[#F7CA00] hover:from-[#F7CA00] hover:to-[#E5B500] text-[#0F1111] font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 border border-[#FCD200]"
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? 'Creating Account...' : 'Create your YOYO CAKES account'}
               </button>
             </form>
 
             {/* Divider */}
             <div className="flex items-center my-6">
-              <div className="flex-1 border-t border-gray-200" />
-              <span className="px-4 text-xs text-[var(--color-brand-muted)] uppercase">or</span>
-              <div className="flex-1 border-t border-gray-200" />
+              <div className="flex-1 border-t border-[var(--color-brand-primary-light)]/40" />
+              <span className="px-4 text-[11px] font-bold text-[var(--color-brand-muted)] uppercase tracking-wider">or</span>
+              <div className="flex-1 border-t border-[var(--color-brand-primary-light)]/40" />
             </div>
 
             {/* Google OAuth Button */}
             <button
               onClick={handleGoogleLogin}
               type="button"
-              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium text-[var(--color-brand-chocolate)] shadow-sm"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-[var(--color-brand-primary-light)]/70 bg-white hover:bg-[var(--color-brand-cream)] transition-all text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] shadow-xs"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -209,7 +209,7 @@ export default function RegisterPage() {
 
             <p className="text-center text-xs text-[var(--color-brand-muted)] mt-6">
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-[var(--color-brand-primary-dark)] hover:underline">
+              <Link to="/login" className="font-extrabold text-[var(--color-brand-primary-dark)] hover:underline">
                 Sign in
               </Link>
             </p>
