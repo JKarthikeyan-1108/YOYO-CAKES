@@ -57,13 +57,24 @@ export interface UserSettings {
 export interface SavedAddress {
   id: string;
   userId: string;
-  name: string;
+  recipientName: string;
   phone: string;
-  addressLine: string;
+  addressLine1: string;
+  addressLine2?: string;
+  locality: string;
   city: string;
-  pincode: string;
+  state: string;
+  postalCode: string;
+  latitude: number;
+  longitude: number;
+  deliveryInstructions?: string;
   isDefault?: boolean;
   createdAt?: string | Timestamp;
+  updatedAt?: string | Timestamp;
+  // Legacy aliases for backwards compatibility
+  name?: string;
+  addressLine?: string;
+  pincode?: string;
 }
 
 export interface FirestoreCategory {
@@ -232,7 +243,31 @@ export async function getUserAddressesFromFirestore(userId: string): Promise<Sav
   try {
     const q = query(collection(db, 'addresses'), where('userId', '==', userId));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as SavedAddress));
+    return snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        userId: data.userId || userId,
+        recipientName: data.recipientName || data.name || 'Customer',
+        phone: data.phone || '',
+        addressLine1: data.addressLine1 || data.addressLine || '',
+        addressLine2: data.addressLine2 || '',
+        locality: data.locality || '',
+        city: data.city || 'Chennai',
+        state: data.state || 'Tamil Nadu',
+        postalCode: data.postalCode || data.pincode || '600001',
+        latitude: typeof data.latitude === 'number' ? data.latitude : 13.085,
+        longitude: typeof data.longitude === 'number' ? data.longitude : 80.2101,
+        deliveryInstructions: data.deliveryInstructions || '',
+        isDefault: Boolean(data.isDefault),
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        // Legacy compatibility
+        name: data.recipientName || data.name,
+        addressLine: data.addressLine1 || data.addressLine,
+        pincode: data.postalCode || data.pincode,
+      } as SavedAddress;
+    });
   } catch (err) {
     console.warn('Error fetching addresses from Firestore:', err);
     return [];
@@ -242,12 +277,61 @@ export async function getUserAddressesFromFirestore(userId: string): Promise<Sav
 export async function saveAddressToFirestore(address: SavedAddress): Promise<void> {
   if (!db) return;
   try {
-    await setDoc(doc(db, 'addresses', address.id), {
-      ...address,
-      createdAt: serverTimestamp(),
-    }, { merge: true });
+    const docData: Record<string, any> = {
+      userId: address.userId,
+      recipientName: address.recipientName || address.name || 'Customer',
+      phone: address.phone,
+      addressLine1: address.addressLine1 || address.addressLine || '',
+      addressLine2: address.addressLine2 || '',
+      locality: address.locality || '',
+      city: address.city || 'Chennai',
+      state: address.state || 'Tamil Nadu',
+      postalCode: address.postalCode || address.pincode || '600001',
+      latitude: address.latitude,
+      longitude: address.longitude,
+      deliveryInstructions: address.deliveryInstructions || '',
+      isDefault: Boolean(address.isDefault),
+      updatedAt: serverTimestamp(),
+    };
+
+    if (address.createdAt) {
+      docData.createdAt = address.createdAt;
+    } else {
+      docData.createdAt = serverTimestamp();
+    }
+
+    // If this address is set as default, unset other addresses for this user
+    if (address.isDefault) {
+      const existing = await getUserAddressesFromFirestore(address.userId);
+      const batch = writeBatch(db);
+      existing.forEach((addr) => {
+        if (addr.id !== address.id && addr.isDefault) {
+          batch.update(doc(db, 'addresses', addr.id), { isDefault: false });
+        }
+      });
+      batch.set(doc(db, 'addresses', address.id), docData, { merge: true });
+      await batch.commit();
+      return;
+    }
+
+    await setDoc(doc(db, 'addresses', address.id), docData, { merge: true });
   } catch (err) {
     console.warn('Error saving address to Firestore:', err);
+  }
+}
+
+export async function setDefaultAddressInFirestore(userId: string, addressId: string): Promise<void> {
+  if (!db) return;
+  try {
+    const existing = await getUserAddressesFromFirestore(userId);
+    const batch = writeBatch(db);
+    existing.forEach((addr) => {
+      const isTarget = addr.id === addressId;
+      batch.update(doc(db, 'addresses', addr.id), { isDefault: isTarget });
+    });
+    await batch.commit();
+  } catch (err) {
+    console.warn('Error setting default address in Firestore:', err);
   }
 }
 

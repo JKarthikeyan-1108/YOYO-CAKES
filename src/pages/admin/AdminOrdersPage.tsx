@@ -7,6 +7,9 @@ import {
   Eye,
   RefreshCw,
   X,
+  MapPin,
+  Navigation,
+  ExternalLink,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -283,11 +286,60 @@ export default function AdminOrdersPage() {
                   <span className="font-semibold text-gray-800">{selectedOrder.customer.phone} • {selectedOrder.customer.email}</span>
                 </div>
                 {selectedOrder.fulfillment === 'delivery' && (
-                  <div className="pt-2 border-t border-gray-200">
-                    <span className="text-gray-500 block">Delivery Address:</span>
-                    <p className="font-medium text-gray-800 mt-0.5">
-                      {selectedOrder.customer.address}, {selectedOrder.customer.city} — {selectedOrder.customer.pincode}
+                  <div className="pt-2 border-t border-gray-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 font-semibold flex items-center gap-1">
+                        <MapPin size={13} className="text-[var(--color-brand-primary-dark)]" />
+                        Doorstep Delivery Address:
+                      </span>
+                      {selectedOrder.distanceKm && (
+                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                          ~{selectedOrder.distanceKm} km from bakery
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p className="font-semibold text-gray-900 text-xs leading-relaxed">
+                      {selectedOrder.deliveryAddressSnapshot?.addressLine1 || selectedOrder.customer.address}
+                      {selectedOrder.deliveryAddressSnapshot?.addressLine2 ? `, ${selectedOrder.deliveryAddressSnapshot.addressLine2}` : ''}
+                      {selectedOrder.deliveryAddressSnapshot?.locality ? `, ${selectedOrder.deliveryAddressSnapshot.locality}` : ''}
+                      , {selectedOrder.deliveryAddressSnapshot?.city || selectedOrder.customer.city} — {selectedOrder.deliveryAddressSnapshot?.postalCode || selectedOrder.customer.pincode}
                     </p>
+
+                    {selectedOrder.customer.instructions && (
+                      <p className="text-[11px] bg-amber-50 text-amber-900 p-2 rounded-lg border border-amber-200">
+                        <span className="font-bold">Instructions:</span> {selectedOrder.customer.instructions}
+                      </p>
+                    )}
+
+                    {/* GPS Coordinates & Google Turn-by-turn Navigation Button */}
+                    {selectedOrder.deliveryAddressSnapshot?.latitude && (
+                      <div className="pt-1 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-1 font-mono text-[11px] text-gray-600 bg-gray-100 px-2.5 py-1 rounded-lg">
+                          <Navigation size={12} className="text-blue-600" />
+                          <span>
+                            {selectedOrder.deliveryAddressSnapshot.latitude.toFixed(5)}° N, {selectedOrder.deliveryAddressSnapshot.longitude.toFixed(5)}° E
+                          </span>
+                        </div>
+
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${selectedOrder.deliveryAddressSnapshot.latitude},${selectedOrder.deliveryAddressSnapshot.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg flex items-center gap-1 shadow-xs"
+                        >
+                          <ExternalLink size={11} /> Driver Turn-by-Turn GPS
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {selectedOrder.fulfillment === 'pickup' && (
+                  <div className="pt-2 border-t border-gray-200">
+                    <span className="text-gray-500 font-semibold block">Fulfillment Method:</span>
+                    <span className="inline-block mt-1 font-bold text-xs bg-blue-100 text-blue-900 px-2.5 py-1 rounded-lg">
+                      🏬 Customer Bakery Store Pickup
+                    </span>
                   </div>
                 )}
               </div>

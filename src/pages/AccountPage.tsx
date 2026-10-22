@@ -146,11 +146,22 @@ export default function AccountPage() {
       id: addrId,
       userId: user.uid,
       name: newAddress.name,
+      recipientName: newAddress.name,
       phone: newAddress.phone,
       addressLine: newAddress.addressLine,
+      addressLine1: newAddress.addressLine,
+      addressLine2: '',
+      locality: newAddress.city,
       city: newAddress.city,
+      state: 'Tamil Nadu',
+      postalCode: newAddress.pincode,
       pincode: newAddress.pincode,
+      latitude: 13.085,
+      longitude: 80.2101,
+      deliveryInstructions: '',
       isDefault: newAddress.isDefault,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     await saveAddressToFirestore(addressToSave);

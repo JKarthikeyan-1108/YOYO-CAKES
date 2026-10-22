@@ -11,7 +11,8 @@ import {
   Lock,
   Sparkles,
   Store,
-  MapPin
+  MapPin,
+  AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
@@ -26,6 +27,16 @@ import {
   saveAddressToFirestore, 
   type SavedAddress 
 } from '@/services/firestoreService';
+import InteractiveGoogleMap, { type LocationCoordinates } from '@/components/delivery/InteractiveGoogleMap';
+import AddressFormModal from '@/components/delivery/AddressFormModal';
+import SavedAddressesSelector from '@/components/delivery/SavedAddressesSelector';
+import { 
+  checkDeliveryServiceabilityApi, 
+  fetchDeliverySettings,
+  type ServiceabilityResponse,
+  type DeliverySettings,
+  FALLBACK_DELIVERY_SETTINGS
+} from '@/services/deliveryService';
 
 type FulfillmentType = 'delivery' | 'pickup';
 type PaymentChoice = 'razorpay' | 'cod';
@@ -72,6 +83,12 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('new');
 
+  const [deliverySettings, setDeliverySettings] = useState<DeliverySettings>(FALLBACK_DELIVERY_SETTINGS);
+  const [serviceability, setServiceability] = useState<ServiceabilityResponse | null>(null);
+  const [checkingServiceability, setCheckingServiceability] = useState(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<SavedAddress | null>(null);
+
   // Form state pre-filled with user profile & selected delivery location
   const [form, setForm] = useState({
     name: user?.displayName || '',
@@ -79,11 +96,56 @@ export default function CheckoutPage() {
     phone: '',
     address: '',
     landmark: '',
+    locality: '',
     city: currentLocation?.city || 'Chennai',
+    state: 'Tamil Nadu',
     pincode: currentLocation?.pincode || '600001',
+    latitude: 13.085,
+    longitude: 80.2101,
     instructions: '',
     agreeTerms: true,
   });
+
+  // Load delivery rules from backend
+  useEffect(() => {
+    fetchDeliverySettings()
+      .then((cfg) => setDeliverySettings(cfg))
+      .catch(() => {});
+  }, []);
+
+  // Check delivery serviceability whenever coordinates or cart value changes
+  useEffect(() => {
+    if (fulfillment !== 'delivery') {
+      setServiceability(null);
+      return;
+    }
+
+    let isMounted = true;
+    setCheckingServiceability(true);
+
+    const timer = setTimeout(() => {
+      checkDeliveryServiceabilityApi({
+        latitude: form.latitude,
+        longitude: form.longitude,
+        subtotal: getSubtotal(),
+        fulfillment: 'delivery',
+      })
+        .then((res) => {
+          if (isMounted) {
+            setServiceability(res);
+            setCheckingServiceability(false);
+          }
+        })
+        .catch(() => {
+          if (isMounted) setCheckingServiceability(false);
+        });
+    }, 200);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [form.latitude, form.longitude, fulfillment, items]);
 
   // Keep delivery city and pincode updated from location store
   useEffect(() => {
@@ -109,11 +171,17 @@ export default function CheckoutPage() {
           setSelectedAddressId(def.id);
           setForm((prev) => ({
             ...prev,
-            name: def.name || prev.name,
+            name: def.recipientName || def.name || prev.name,
             phone: def.phone || prev.phone,
-            address: def.addressLine || prev.address,
+            address: def.addressLine1 || def.addressLine || prev.address,
+            landmark: def.addressLine2 || prev.landmark,
+            locality: def.locality || prev.locality,
             city: def.city || prev.city,
-            pincode: def.pincode || prev.pincode,
+            state: def.state || prev.state,
+            pincode: def.postalCode || def.pincode || prev.pincode,
+            latitude: typeof def.latitude === 'number' ? def.latitude : prev.latitude,
+            longitude: typeof def.longitude === 'number' ? def.longitude : prev.longitude,
+            instructions: def.deliveryInstructions || prev.instructions,
           }));
         }
       });
@@ -121,19 +189,54 @@ export default function CheckoutPage() {
   }, [user]);
 
   const subtotal = getSubtotal();
-  const deliveryFee = fulfillment === 'delivery' ? (subtotal >= 500 ? 0 : 40) : 0;
+  const deliveryFee =
+    fulfillment === 'delivery'
+      ? serviceability?.deliveryFee ?? (subtotal >= deliverySettings.freeDeliveryThreshold ? 0 : deliverySettings.baseDeliveryFee)
+      : 0;
   const total = subtotal + deliveryFee;
 
   const handleAddressSelect = (addr: SavedAddress) => {
     setSelectedAddressId(addr.id);
     setForm((prev) => ({
       ...prev,
-      name: addr.name,
-      phone: addr.phone,
-      address: addr.addressLine,
-      city: addr.city,
-      pincode: addr.pincode,
+      name: addr.recipientName || addr.name || prev.name,
+      phone: addr.phone || prev.phone,
+      address: addr.addressLine1 || addr.addressLine || prev.address,
+      landmark: addr.addressLine2 || '',
+      locality: addr.locality || '',
+      city: addr.city || prev.city,
+      state: addr.state || prev.state,
+      pincode: addr.postalCode || addr.pincode || prev.pincode,
+      latitude: typeof addr.latitude === 'number' ? addr.latitude : prev.latitude,
+      longitude: typeof addr.longitude === 'number' ? addr.longitude : prev.longitude,
+      instructions: addr.deliveryInstructions || prev.instructions,
     }));
+  };
+
+  const handleMapLocationPicked = (loc: LocationCoordinates) => {
+    setForm((prev) => ({
+      ...prev,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+      address: loc.street || prev.address || loc.formattedAddress || '',
+      locality: loc.locality || prev.locality,
+      city: loc.city || prev.city,
+      state: loc.state || prev.state,
+      pincode: loc.postalCode || prev.pincode,
+    }));
+  };
+
+  const handleAddressSaved = (saved: SavedAddress) => {
+    setSavedAddresses((prev) => {
+      const exists = prev.some((a) => a.id === saved.id);
+      if (exists) {
+        return prev.map((a) => (a.id === saved.id ? saved : a));
+      }
+      return [saved, ...prev];
+    });
+    handleAddressSelect(saved);
+    setIsAddressModalOpen(false);
+    setEditingAddress(null);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -154,9 +257,16 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (fulfillment === 'delivery' && (!form.address.trim() || !form.city.trim() || !form.pincode.trim())) {
-      toast.error('Please provide a complete delivery address');
-      return;
+    if (fulfillment === 'delivery') {
+      if (!form.address.trim() || !form.city.trim() || !form.pincode.trim()) {
+        toast.error('Please provide a complete delivery address');
+        return;
+      }
+
+      if (serviceability && !serviceability.serviceable) {
+        toast.error(serviceability.reason || 'This address is outside our delivery radius. Please switch to Store Pickup.');
+        return;
+      }
     }
 
     if (!form.agreeTerms) {
@@ -174,11 +284,17 @@ export default function CheckoutPage() {
         saveAddressToFirestore({
           id: generateAddressId(),
           userId: user.uid,
-          name: form.name,
+          recipientName: form.name,
           phone: form.phone,
-          addressLine: form.landmark ? `${form.address} (Landmark: ${form.landmark})` : form.address,
+          addressLine1: form.address,
+          addressLine2: form.landmark,
+          locality: form.locality || form.city,
           city: form.city,
-          pincode: form.pincode,
+          state: form.state,
+          postalCode: form.pincode,
+          latitude: form.latitude,
+          longitude: form.longitude,
+          deliveryInstructions: form.instructions,
           isDefault: savedAddresses.length === 0,
         }).catch(() => {});
       }
@@ -211,9 +327,36 @@ export default function CheckoutPage() {
         discount: 0,
         total,
         fulfillment,
+        distanceKm: fulfillment === 'delivery' ? serviceability?.distanceKm : 0,
         orderStatus: 'confirmed',
         paymentStatus: paymentChoice === 'razorpay' ? 'paid' : 'pending',
         paymentMethod: paymentChoice === 'razorpay' ? 'Razorpay' : 'Cash on Delivery',
+        deliveryAddressSnapshot:
+          fulfillment === 'delivery'
+            ? {
+                recipientName: form.name,
+                phone: form.phone,
+                addressLine1: form.address,
+                addressLine2: form.landmark || '',
+                locality: form.locality || form.city,
+                city: form.city,
+                state: form.state,
+                postalCode: form.pincode,
+                latitude: form.latitude,
+                longitude: form.longitude,
+                deliveryInstructions: form.instructions || '',
+                capturedAt: getIsoTimestamp(),
+              }
+            : undefined,
+        pickupLocation:
+          fulfillment === 'pickup'
+            ? {
+                name: deliverySettings.storeName,
+                address: deliverySettings.pickupAddress,
+                phone: '8428855444',
+                instructions: deliverySettings.pickupInstructions,
+              }
+            : undefined,
       };
 
       // CASE 1: CASH ON DELIVERY / PAY ON DELIVERY (Like Amazon Pay on Delivery)
@@ -553,231 +696,347 @@ export default function CheckoutPage() {
             {/* Left 8 Cols: Accordion Steps */}
             <div className="lg:col-span-8 space-y-6">
               
-              {/* STEP 1: DELIVERY ADDRESS */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7">
-                <div className="flex items-center justify-between mb-5">
+              {/* STEP 1: DELIVERY ADDRESS & GPS PINPOINT */}
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-7 space-y-5">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="w-7 h-7 rounded-full bg-[var(--color-brand-primary-dark)] text-white font-bold text-xs flex items-center justify-center">
                       1
                     </span>
                     <h2 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
-                      Delivery Address
+                      {fulfillment === 'delivery' ? 'Delivery Address & GPS Location' : 'Bakery Store Pickup Details'}
                     </h2>
                   </div>
-                  {savedAddresses.length > 0 && (
+                  {savedAddresses.length > 0 && fulfillment === 'delivery' && (
                     <span className="text-xs text-[var(--color-brand-primary-dark)] font-semibold">
                       {savedAddresses.length} saved address{savedAddresses.length > 1 ? 'es' : ''}
                     </span>
                   )}
                 </div>
 
-                {/* Fulfillment Choice */}
-                <div className="grid grid-cols-2 p-1 bg-gray-100 rounded-xl mb-6">
+                {/* Fulfillment Choice Tabs */}
+                <div className="grid grid-cols-2 p-1 bg-gray-100 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setFulfillment('delivery')}
-                    className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       fulfillment === 'delivery'
-                        ? 'bg-white text-gray-900 shadow-xs'
+                        ? 'bg-white text-gray-900 shadow-xs ring-1 ring-gray-200'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    <Truck size={14} className="text-[var(--color-brand-primary-dark)]" />
+                    <Truck size={15} className="text-[var(--color-brand-primary-dark)]" />
                     Doorstep Delivery
                   </button>
                   <button
                     type="button"
                     onClick={() => setFulfillment('pickup')}
-                    className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       fulfillment === 'pickup'
-                        ? 'bg-white text-gray-900 shadow-xs'
+                        ? 'bg-white text-gray-900 shadow-xs ring-1 ring-gray-200'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    <Store size={14} className="text-[var(--color-brand-primary-dark)]" />
-                    Bakery Store Pickup
+                    <Store size={15} className="text-[var(--color-brand-primary-dark)]" />
+                    Bakery Store Pickup (Free)
                   </button>
                 </div>
 
-                {/* Saved Address Cards */}
-                {savedAddresses.length > 0 && (
-                  <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                    {savedAddresses.map((addr) => (
-                      <div
-                        key={addr.id}
-                        onClick={() => handleAddressSelect(addr)}
-                        className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                          selectedAddressId === addr.id
-                            ? 'border-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)]/50 ring-2 ring-[var(--color-brand-primary-dark)]/15'
-                            : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-[var(--color-brand-chocolate)]">{addr.name}</span>
-                          {addr.isDefault && (
-                            <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">{addr.addressLine}</p>
-                        <p className="text-xs text-gray-500 mt-1">{addr.city} - {addr.pincode}</p>
-                        <p className="text-xs text-gray-500 font-mono mt-0.5">📞 {addr.phone}</p>
+                {/* FULFILLMENT MODE A: DOORSTEP DELIVERY */}
+                {fulfillment === 'delivery' ? (
+                  <div className="space-y-5">
+                    {/* Saved Addresses Selector */}
+                    {savedAddresses.length > 0 && (
+                      <SavedAddressesSelector
+                        addresses={savedAddresses}
+                        selectedAddressId={selectedAddressId}
+                        onSelectAddress={handleAddressSelect}
+                        onAddNewAddress={() => {
+                          setEditingAddress(null);
+                          setIsAddressModalOpen(true);
+                        }}
+                        onEditAddress={(addr) => {
+                          setEditingAddress(addr);
+                          setIsAddressModalOpen(true);
+                        }}
+                        onAddressDeleted={(delId) => {
+                          setSavedAddresses((prev) => prev.filter((a) => a.id !== delId));
+                          if (selectedAddressId === delId) setSelectedAddressId('new');
+                        }}
+                        userId={user?.uid}
+                      />
+                    )}
+
+                    {/* Interactive Google Map with GPS Button */}
+                    <div className="pt-2 border-t border-gray-100 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block">
+                          Pinpoint Delivery Gate on Google Map
+                        </label>
+                        <span className="text-[11px] text-gray-500 font-medium">
+                          Drag pin or tap GPS
+                        </span>
                       </div>
-                    ))}
-                    <div
-                      onClick={() => {
-                        setSelectedAddressId('new');
-                        setForm((prev) => ({
-                          ...prev,
-                          address: '',
-                          landmark: '',
-                        }));
-                      }}
-                      className={`p-4 rounded-xl border border-dashed cursor-pointer flex flex-col items-center justify-center text-center transition-all ${
-                        selectedAddressId === 'new'
-                          ? 'border-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)]/50'
-                          : 'border-gray-300 hover:border-gray-400 bg-gray-50'
-                      }`}
-                    >
-                      <span className="text-xs font-bold text-[var(--color-brand-primary-dark)]">+ Add New Address</span>
-                    </div>
-                  </div>
-                )}
 
-                {/* Form Fields for Address */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                      placeholder="Receiver's full name"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/10 text-sm outline-none bg-white font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
-                      Mobile Number (For Delivery Updates) *
-                    </label>
-                    <div className="flex rounded-xl border border-gray-300 focus-within:border-[var(--color-brand-primary-dark)] overflow-hidden">
-                      <span className="bg-gray-100 px-3 py-2.5 text-xs font-semibold text-gray-600 border-r border-gray-300 flex items-center">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        name="phone"
-                        maxLength={10}
-                        value={form.phone}
-                        onChange={handleChange}
-                        required
-                        placeholder="10-digit phone"
-                        className="w-full px-3 py-2.5 text-sm outline-none font-medium"
+                      <InteractiveGoogleMap
+                        initialCoords={{ latitude: form.latitude, longitude: form.longitude }}
+                        onLocationSelected={handleMapLocationPicked}
+                        maxRadiusKm={deliverySettings.maxRadiusKm}
+                        height="260px"
                       />
                     </div>
-                  </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
-                      Street Address / Flat / Building *
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={form.address}
-                      onChange={handleChange}
-                      required
-                      placeholder="House/Flat No., Apartment name, Street name"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/10 text-sm outline-none bg-white font-medium"
-                    />
-                  </div>
+                    {/* Live Serviceability & Distance Status Card */}
+                    {checkingServiceability && (
+                      <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 flex items-center gap-2 animate-pulse">
+                        <span className="loading loading-spinner loading-xs text-amber-700" />
+                        <span>Validating kitchen road distance & serviceability...</span>
+                      </div>
+                    )}
 
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
-                      Landmark (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      name="landmark"
-                      value={form.landmark}
-                      onChange={handleChange}
-                      placeholder="e.g. Near Metro Station / Behind Temple"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
-                    />
-                  </div>
+                    {!checkingServiceability && serviceability?.serviceable && (
+                      <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-xs text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+                        <div>
+                          <div className="font-bold flex items-center gap-1.5 text-emerald-800">
+                            <CheckCircle size={15} className="text-emerald-600" />
+                            <span>Serviceable Delivery Area</span>
+                          </div>
+                          <p className="text-[11px] text-emerald-700 mt-0.5">
+                            Road distance: <span className="font-semibold">{serviceability.distanceKm} km</span> from kitchen • Dispatch ETA: <span className="font-semibold">~{serviceability.estimatedMinutes} mins</span>
+                          </p>
+                        </div>
+                        <div className="text-right sm:self-center">
+                          <span className="text-[11px] uppercase tracking-wider text-emerald-600 font-semibold block">Delivery Fee</span>
+                          <span className="font-extrabold text-sm text-emerald-900">
+                            {serviceability.deliveryFee === 0 ? 'FREE' : formatPrice(serviceability.deliveryFee)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block">
-                        Pincode *
-                      </label>
-                      <button
-                        type="button"
-                        onClick={openLocationModal}
-                        className="text-[11px] font-semibold text-[var(--color-brand-primary-dark)] hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <MapPin size={12} />
-                        Change Hub / GPS
-                      </button>
+                    {!checkingServiceability && serviceability && !serviceability.serviceable && (
+                      <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-950 space-y-2.5 shadow-xs">
+                        <div className="font-bold flex items-center gap-1.5 text-rose-800">
+                          <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
+                          <span>Delivery Unavailable for Selected Location</span>
+                        </div>
+                        <p className="text-xs text-rose-800 leading-relaxed">
+                          {serviceability.reason}
+                        </p>
+                        <div className="pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setFulfillment('pickup')}
+                            className="btn btn-sm bg-[var(--color-brand-primary-dark)] hover:bg-[#85300B] text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Store size={14} /> Switch to Bakery Store Pickup (Free)
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Manual Address Input Form Fields */}
+                    <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Recipient Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={form.name}
+                          onChange={handleChange}
+                          required
+                          placeholder="Receiver's full name"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Mobile Number (For Delivery Updates) *
+                        </label>
+                        <div className="flex rounded-xl border border-gray-300 focus-within:border-[var(--color-brand-primary-dark)] overflow-hidden">
+                          <span className="bg-gray-100 px-3 py-2.5 text-xs font-semibold text-gray-600 border-r border-gray-300 flex items-center">
+                            +91
+                          </span>
+                          <input
+                            type="tel"
+                            name="phone"
+                            maxLength={10}
+                            value={form.phone}
+                            onChange={handleChange}
+                            required
+                            placeholder="10-digit phone"
+                            className="w-full px-3 py-2.5 text-sm outline-none font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Street Address / Flat / Building *
+                        </label>
+                        <input
+                          type="text"
+                          name="address"
+                          value={form.address}
+                          onChange={handleChange}
+                          required
+                          placeholder="House/Flat No., Apartment name, Street name"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Apartment / Landmark (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          name="landmark"
+                          value={form.landmark}
+                          onChange={handleChange}
+                          placeholder="e.g. Near Metro / Behind Temple"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block">
+                            Pincode *
+                          </label>
+                          <button
+                            type="button"
+                            onClick={openLocationModal}
+                            className="text-[11px] font-semibold text-[var(--color-brand-primary-dark)] hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <MapPin size={12} /> Change Hub / GPS
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          name="pincode"
+                          maxLength={6}
+                          value={form.pincode}
+                          onChange={handleChange}
+                          required
+                          placeholder="600001"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium font-mono"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          City *
+                        </label>
+                        <input
+                          type="text"
+                          name="city"
+                          value={form.city}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 bg-gray-50 text-sm outline-none font-medium"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          required
+                          placeholder="Order confirmation email"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      name="pincode"
-                      maxLength={6}
-                      value={form.pincode}
-                      onChange={handleChange}
-                      required
-                      placeholder="600001"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
-                    />
-                  </div>
 
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={form.city}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 bg-gray-50 text-sm outline-none font-medium"
-                    />
+                    {user && (
+                      <label className="flex items-center gap-2 mt-4 text-xs text-gray-600 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={saveAddressToBook}
+                          onChange={(e) => setSaveAddressToBook(e.target.checked)}
+                          className="rounded accent-[var(--color-brand-primary-dark)]"
+                        />
+                        <span>Save this address to my YOYO CAKES address book for 1-click checkout next time</span>
+                      </label>
+                    )}
                   </div>
+                ) : (
+                  /* FULFILLMENT MODE B: BAKERY STORE PICKUP */
+                  <div className="space-y-4">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-3">
+                      <div className="flex items-center gap-2 text-[var(--color-brand-chocolate)] font-bold text-sm">
+                        <Store size={18} className="text-[var(--color-brand-primary-dark)]" />
+                        <span>{deliverySettings.storeName}</span>
+                      </div>
 
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="Order confirmation email"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
-                    />
+                      <p className="text-xs text-gray-700 leading-relaxed font-medium">
+                        📍 {deliverySettings.pickupAddress}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-amber-200/60 text-xs text-gray-600">
+                        <div>
+                          <span className="font-semibold block text-gray-900">⏰ Pick-up Hours:</span>
+                          <span>Mon – Sun: 9:00 AM – 10:00 PM</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold block text-gray-900">📞 Kitchen Helpline:</span>
+                          <span>+91 84288 55444 / +91 63796 03744</span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white border border-amber-100 text-[11px] text-amber-900">
+                        ✨ <strong>Zero Delivery Fee:</strong> No delivery charges apply on store pickups. Your fresh cake will be packed in a refrigerated bakery gift box ready for pickup!
+                      </div>
+                    </div>
+
+                    {/* Pickup Customer Verification Info */}
+                    <div className="grid sm:grid-cols-2 gap-4 pt-1">
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Collector's Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={form.name}
+                          onChange={handleChange}
+                          required
+                          placeholder="Person picking up cake"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] text-sm outline-none bg-white font-medium"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 block">
+                          Mobile Number (For Ready-to-Collect SMS) *
+                        </label>
+                        <div className="flex rounded-xl border border-gray-300 focus-within:border-[var(--color-brand-primary-dark)] overflow-hidden">
+                          <span className="bg-gray-100 px-3 py-2.5 text-xs font-semibold text-gray-600 border-r border-gray-300 flex items-center">
+                            +91
+                          </span>
+                          <input
+                            type="tel"
+                            name="phone"
+                            maxLength={10}
+                            value={form.phone}
+                            onChange={handleChange}
+                            required
+                            placeholder="10-digit mobile"
+                            className="w-full px-3 py-2.5 text-sm outline-none font-medium"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                {user && selectedAddressId === 'new' && (
-                  <label className="flex items-center gap-2 mt-4 text-xs text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={saveAddressToBook}
-                      onChange={(e) => setSaveAddressToBook(e.target.checked)}
-                      className="rounded accent-[var(--color-brand-primary-dark)]"
-                    />
-                    <span>Save this address to my YOYO CAKES address book for 1-click checkout next time</span>
-                  </label>
                 )}
               </div>
 
@@ -990,15 +1249,15 @@ export default function CheckoutPage() {
                   {/* Prominent Amazon Place Order Button */}
                   <button
                     type="submit"
-                    disabled={processing}
-                    className="w-full py-3.5 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 border border-[#FCD200] mb-3"
+                    disabled={processing || (fulfillment === 'delivery' && Boolean(serviceability && !serviceability.serviceable))}
+                    className="w-full py-3.5 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 border border-[#FCD200] mb-3 cursor-pointer"
                   >
                     {processing ? (
                       <span className="inline-block animate-spin mr-2">⏳</span>
+                    ) : fulfillment === 'delivery' && serviceability && !serviceability.serviceable ? (
+                      'Address Outside Delivery Radius'
                     ) : (
-                      <>
-                        {paymentChoice === 'razorpay' ? 'Place Your Order & Pay' : 'Place Your Order (Pay on Delivery)'}
-                      </>
+                      paymentChoice === 'razorpay' ? 'Place Your Order & Pay' : 'Place Your Order (Pay on Delivery)'
                     )}
                   </button>
 
@@ -1076,6 +1335,17 @@ export default function CheckoutPage() {
           </div>
         </form>
       </main>
+
+      {/* Interactive Delivery Address & GPS Form Modal */}
+      <AddressFormModal
+        isOpen={isAddressModalOpen}
+        onClose={() => {
+          setIsAddressModalOpen(false);
+          setEditingAddress(null);
+        }}
+        onAddressSaved={handleAddressSaved}
+        editingAddress={editingAddress}
+      />
     </div>
   );
 }

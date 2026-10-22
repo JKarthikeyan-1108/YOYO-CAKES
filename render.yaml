@@ -1,13 +1,43 @@
 # Render Deployment Blueprint for YOYO CAKES
-# For zero-cost, high-speed CDN hosting with automatic Let's Encrypt SSL.
+# Production Architecture:
+# - Frontend: React + TypeScript + Vite (Hosted on Vercel)
+# - Backend: Node.js + Express + TypeScript API (Hosted on Render)
 services:
+  # Node.js + Express Backend API
   - type: web
-    name: yoyo-cakes
+    name: yoyo-cakes-api
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm --prefix server install && npm --prefix server run build
+    startCommand: npm --prefix server start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        value: yoyo-c46c3
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: GOOGLE_MAPS_SERVER_API_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+  # Static Web Service (Optional fallback / staging mirror)
+  - type: web
+    name: yoyo-cakes-web
     runtime: static
     buildCommand: npm run build
     staticPublishPath: ./dist
     routes:
-      # Single Page App rewrite rule for React Router
       - type: rewrite
         source: /*
         destination: /index.html

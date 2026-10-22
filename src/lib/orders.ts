@@ -31,6 +31,28 @@ export interface OrderItem {
   includeCandles?: boolean;
 }
 
+export interface DeliveryAddressSnapshot {
+  recipientName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  locality: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  latitude: number;
+  longitude: number;
+  deliveryInstructions?: string;
+  capturedAt?: string;
+}
+
+export interface PickupLocationInfo {
+  name: string;
+  address: string;
+  phone?: string;
+  instructions?: string;
+}
+
 export interface Order {
   id: string;
   orderNumber?: string;
@@ -52,6 +74,9 @@ export interface Order {
   paymentMethod: string;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
+  deliveryAddressSnapshot?: DeliveryAddressSnapshot;
+  pickupLocation?: PickupLocationInfo;
+  distanceKm?: number;
 }
 
 const LOCAL_STORAGE_KEY = 'yoyo_cakes_orders';
