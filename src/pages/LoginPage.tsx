@@ -31,7 +31,7 @@ export default function LoginPage() {
   const redirectParam = new URLSearchParams(location.search).get('redirect');
   const from = redirectParam || (location.state as any)?.from?.pathname || '/';
 
-  const { login, adminLogin, loginWithGoogle, loginWithPhone, confirmPhoneOtp, error, clearError, loading } = useAuthStore();
+  const { user, isAdmin, login, adminLogin, loginWithGoogle, loginWithPhone, confirmPhoneOtp, error, clearError, loading } = useAuthStore();
 
   const isAdminIntent = new URLSearchParams(location.search).get('admin') === 'true' || location.pathname.includes('/admin');
   const [selectedTab, setSelectedTab] = useState<LoginTab | null>(null);
@@ -40,6 +40,17 @@ export default function LoginPage() {
     setSelectedTab(tab);
     clearError();
   };
+
+  // If already authenticated, redirect immediately away from login
+  useEffect(() => {
+    if (user) {
+      if (isAdmin && isAdminIntent) {
+        navigate('/admin/products', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+    }
+  }, [user, isAdmin, isAdminIntent, from, navigate]);
 
   // Email Form
   const [email, setEmail] = useState('');

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
@@ -11,13 +11,20 @@ export default function RegisterPage() {
   const redirectParam = new URLSearchParams(location.search).get('redirect');
   const from = redirectParam || '/';
 
-  const { register, loginWithGoogle, error, clearError, loading } = useAuthStore();
+  const { user, register, loginWithGoogle, error, clearError, loading } = useAuthStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [registeredSuccess, setRegisteredSuccess] = useState(false);
+
+  // If already authenticated, redirect immediately away from register
+  useEffect(() => {
+    if (user && !registeredSuccess) {
+      navigate(from, { replace: true });
+    }
+  }, [user, registeredSuccess, from, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

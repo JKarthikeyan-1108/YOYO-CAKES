@@ -12,10 +12,12 @@ import {
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { getAllOrders, type Order } from '@/lib/orders';
-import { PRODUCTS, formatPrice } from '@/data/products';
+import { formatPrice } from '@/data/products';
+import { useProductStore } from '@/stores/productStore';
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const products = useProductStore((s) => s.products);
 
   useEffect(() => {
     async function load() {
@@ -37,8 +39,8 @@ export default function AdminDashboardPage() {
 
   const completedOrders = orders.filter((o) => o.orderStatus === 'delivered').length;
 
-  // Low stock products from catalog (stockQuantity <= 15)
-  const lowStockProducts = PRODUCTS.filter((p) => p.stockQuantity <= 15);
+  // Low stock products from catalog (inStock with stockQuantity <= 15)
+  const lowStockProducts = products.filter((p) => p.inStock && p.stockQuantity <= 15);
 
   // Recent 5 orders
   const recentOrders = [...orders].slice(0, 5);
@@ -224,48 +226,90 @@ export default function AdminDashboardPage() {
               No orders registered yet. New customer orders will show up here immediately.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-gray-100 text-[var(--color-brand-muted)] uppercase tracking-wider">
-                    <th className="pb-3 font-semibold">Order ID</th>
-                    <th className="pb-3 font-semibold">Customer</th>
-                    <th className="pb-3 font-semibold">Total</th>
-                    <th className="pb-3 font-semibold">Status</th>
-                    <th className="pb-3 font-semibold text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {recentOrders.map((o) => (
-                    <tr key={o.id} className="hover:bg-gray-50/70 transition-colors">
-                      <td className="py-3 font-mono font-bold text-[var(--color-brand-chocolate)]">
-                        {o.id}
-                      </td>
-                      <td className="py-3">
-                        <span className="font-semibold block">{o.customer.name}</span>
-                        <span className="text-[10px] text-[var(--color-brand-muted)]">{o.fulfillment}</span>
-                      </td>
-                      <td className="py-3 font-bold text-[var(--color-brand-primary-dark)]">
-                        {formatPrice(o.total)}
-                      </td>
-                      <td className="py-3">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)]">
+            <>
+              {/* Mobile Card List (< sm) */}
+              <div className="sm:hidden space-y-2.5">
+                {recentOrders.map((o) => (
+                  <div
+                    key={o.id}
+                    className="p-3 rounded-xl border border-gray-100 bg-gray-50/50 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <span className="font-mono font-bold text-[var(--color-brand-chocolate)] block">
+                        #{o.id}
+                      </span>
+                      <span className="font-semibold text-gray-800 block text-[11px] mt-0.5">
+                        {o.customer.name}
+                      </span>
+                      <span className="text-[10px] text-gray-400 capitalize">{o.fulfillment}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="text-right">
+                        <span className="font-bold text-[var(--color-brand-primary-dark)] block">
+                          {formatPrice(o.total)}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)]">
                           {o.orderStatus.replace('_', ' ')}
                         </span>
-                      </td>
-                      <td className="py-3 text-right">
-                        <Link
-                          to={`/order/${o.id}`}
-                          className="p-1.5 rounded-lg text-gray-500 hover:text-[var(--color-brand-primary-dark)] inline-flex"
-                        >
-                          <Eye size={16} />
-                        </Link>
-                      </td>
+                      </div>
+                      <Link
+                        to={`/order/${o.id}`}
+                        className="p-2 rounded-lg text-gray-500 hover:text-[var(--color-brand-primary-dark)] min-w-[36px] min-h-[36px] flex items-center justify-center bg-white shadow-2xs"
+                        aria-label={`View order ${o.id}`}
+                      >
+                        <Eye size={15} />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table (sm+) */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-[var(--color-brand-muted)] uppercase tracking-wider">
+                      <th className="pb-3 font-semibold">Order ID</th>
+                      <th className="pb-3 font-semibold">Customer</th>
+                      <th className="pb-3 font-semibold">Total</th>
+                      <th className="pb-3 font-semibold">Status</th>
+                      <th className="pb-3 font-semibold text-right">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {recentOrders.map((o) => (
+                      <tr key={o.id} className="hover:bg-gray-50/70 transition-colors">
+                        <td className="py-3 font-mono font-bold text-[var(--color-brand-chocolate)]">
+                          #{o.id}
+                        </td>
+                        <td className="py-3">
+                          <span className="font-semibold block text-gray-800">{o.customer.name}</span>
+                          <span className="text-[10px] text-[var(--color-brand-muted)] capitalize">{o.fulfillment}</span>
+                        </td>
+                        <td className="py-3 font-bold text-[var(--color-brand-primary-dark)]">
+                          {formatPrice(o.total)}
+                        </td>
+                        <td className="py-3">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)]">
+                            {o.orderStatus.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right">
+                          <Link
+                            to={`/order/${o.id}`}
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-[var(--color-brand-primary-dark)] inline-flex"
+                            aria-label={`View order ${o.id}`}
+                          >
+                            <Eye size={16} />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 
