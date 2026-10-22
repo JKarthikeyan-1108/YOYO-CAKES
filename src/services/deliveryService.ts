@@ -1,5 +1,7 @@
 import { auth } from '@/firebase';
 
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 export interface DeliverySettings {
   storeName: string;
   storeAddress: string;
@@ -226,7 +228,7 @@ export async function checkDeliveryServiceabilityApi(params: {
       authHeader = `Bearer ${token}`;
     }
 
-    const response = await fetch('/api/delivery/check-serviceability', {
+    const response = await fetch(`${API_BASE_URL}/api/delivery/check-serviceability`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -261,7 +263,7 @@ export async function checkDeliveryServiceabilityApi(params: {
  */
 export async function fetchDeliverySettings(): Promise<DeliverySettings> {
   try {
-    const response = await fetch('/api/delivery/settings');
+    const response = await fetch(`${API_BASE_URL}/api/delivery/settings`);
     if (response.ok) {
       return await response.json();
     }
@@ -284,7 +286,7 @@ export async function updateDeliverySettingsApi(
 
   const token = await currentUser.getIdToken();
 
-  const response = await fetch('/api/delivery/settings', {
+  const response = await fetch(`${API_BASE_URL}/api/delivery/settings`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -10,7 +10,7 @@ import {
   Store,
   CheckCircle2
 } from 'lucide-react';
-import { FALLBACK_DELIVERY_SETTINGS, estimateRoadDistanceKm } from '@/services/deliveryService';
+import { API_BASE_URL, FALLBACK_DELIVERY_SETTINGS, estimateRoadDistanceKm } from '@/services/deliveryService';
 
 export interface LocationCoordinates {
   latitude: number;
@@ -135,7 +135,7 @@ export default function InteractiveGoogleMap({
 
       // 2. Fallback reverse geocoding via server API or local estimation
       try {
-        const resp = await fetch('/api/delivery/reverse-geocode', {
+        const resp = await fetch(`${API_BASE_URL}/api/delivery/reverse-geocode`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ latitude: lat, longitude: lng }),
