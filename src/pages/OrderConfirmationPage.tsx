@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft, Printer } from 'lucide-react';
+import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft, Printer, MapPin, ExternalLink, Store } from 'lucide-react';
 import { getOrderById, type Order, type OrderStatus } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
 
@@ -133,25 +133,71 @@ export default function OrderConfirmationPage() {
                     <span className="font-medium text-[var(--color-brand-chocolate)]">{order.customer.email}</span>
                   </div>
                   {order.fulfillment === 'delivery' ? (
-                    <div className="pt-2 border-t border-[var(--color-brand-primary-light)]/20">
-                      <span className="text-[var(--color-brand-muted)] block mb-1">Delivery Address:</span>
-                      <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">
-                        {order.customer.address}, {order.customer.city} — {order.customer.pincode}
-                      </p>
-                      {order.customer.instructions && (
-                        <p className="text-xs italic text-[var(--color-brand-muted)] mt-1">
-                          Note: "{order.customer.instructions}"
-                        </p>
+                    <div className="pt-2 border-t border-[var(--color-brand-primary-light)]/20 space-y-1.5">
+                      <span className="text-[var(--color-brand-muted)] block text-xs">Delivery Address:</span>
+                      {order.deliveryAddressSnapshot ? (
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--color-brand-chocolate)]">
+                            {order.deliveryAddressSnapshot.addressLine1}
+                            {order.deliveryAddressSnapshot.addressLine2 && `, ${order.deliveryAddressSnapshot.addressLine2}`}
+                          </p>
+                          <p className="text-xs text-[var(--color-brand-chocolate)]/80">
+                            {order.deliveryAddressSnapshot.locality ? `${order.deliveryAddressSnapshot.locality}, ` : ''}
+                            {order.deliveryAddressSnapshot.city} – {order.deliveryAddressSnapshot.postalCode}
+                          </p>
+                          {order.deliveryAddressSnapshot.latitude && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-gray-700 bg-white px-2 py-0.5 rounded-md border border-gray-200 shadow-2xs">
+                                <MapPin size={11} className="text-[var(--color-brand-primary-dark)]" />
+                                {order.deliveryAddressSnapshot.latitude.toFixed(4)}, {order.deliveryAddressSnapshot.longitude.toFixed(4)}
+                              </span>
+                              {typeof order.distanceKm === 'number' && (
+                                <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                  {order.distanceKm} km from bakery
+                                </span>
+                              )}
+                              <a
+                                href={`https://www.google.com/maps?q=${order.deliveryAddressSnapshot.latitude},${order.deliveryAddressSnapshot.longitude}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--color-brand-primary-dark)] hover:underline"
+                              >
+                                <span>Open in Maps</span>
+                                <ExternalLink size={11} />
+                              </a>
+                            </div>
+                          )}
+                          {order.deliveryAddressSnapshot.deliveryInstructions && (
+                            <p className="text-xs italic text-[var(--color-brand-muted)] mt-1.5">
+                              Instructions: "{order.deliveryAddressSnapshot.deliveryInstructions}"
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">
+                            {order.customer.address}, {order.customer.city} — {order.customer.pincode}
+                          </p>
+                          {order.customer.instructions && (
+                            <p className="text-xs italic text-[var(--color-brand-muted)] mt-1">
+                              Note: "{order.customer.instructions}"
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   ) : (
-                    <div className="pt-2 border-t border-[var(--color-brand-primary-light)]/20">
-                      <span className="text-[var(--color-brand-muted)] block mb-1">Pickup Store:</span>
-                      <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">
-                        YOYO CAKES Main Kitchen
+                    <div className="pt-2 border-t border-[var(--color-brand-primary-light)]/20 space-y-1">
+                      <span className="text-[var(--color-brand-muted)] block text-xs">Pickup Store:</span>
+                      <p className="text-sm font-semibold text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
+                        <Store size={15} className="text-[var(--color-brand-primary-dark)]" />
+                        {order.pickupLocation?.name || 'YOYO CAKES Main Kitchen'}
                       </p>
                       <p className="text-xs text-[var(--color-brand-muted)]">
-                        Store pickup ready within 2 hours of confirmation.
+                        {order.pickupLocation?.address || 'Plot 14, 2nd Avenue, Anna Nagar East, Chennai'}
+                      </p>
+                      <p className="text-xs text-[#007600] font-semibold mt-1">
+                        ✓ Store pickup ready within 2 hours of confirmation.
                       </p>
                     </div>
                   )}

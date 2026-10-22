@@ -20,7 +20,10 @@ import {
   ChevronRight,
   Headphones,
   Heart,
+  Edit2,
+  ExternalLink,
 } from 'lucide-react';
+import AddressFormModal from '@/components/delivery/AddressFormModal';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -52,14 +55,7 @@ export default function AccountPage() {
 
   const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [newAddress, setNewAddress] = useState({
-    name: '',
-    phone: '',
-    addressLine: '',
-    city: 'Chennai',
-    pincode: '',
-    isDefault: false,
-  });
+  const [editingAddress, setEditingAddress] = useState<SavedAddress | null>(null);
 
   const [profileName, setProfileName] = useState(user?.displayName || '');
   const [profilePhone, setProfilePhone] = useState(user?.phoneNumber || '');
@@ -133,49 +129,16 @@ export default function AccountPage() {
     });
   }, [orders, orderSearchQuery, orderFilter]);
 
-  const handleSaveAddress = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    if (!newAddress.name || !newAddress.phone || !newAddress.addressLine || !newAddress.pincode) {
-      toast.error('Please complete all address fields.');
-      return;
-    }
-
-    const addrId = `addr-${Date.now().toString(36)}`;
-    const addressToSave: SavedAddress = {
-      id: addrId,
-      userId: user.uid,
-      name: newAddress.name,
-      recipientName: newAddress.name,
-      phone: newAddress.phone,
-      addressLine: newAddress.addressLine,
-      addressLine1: newAddress.addressLine,
-      addressLine2: '',
-      locality: newAddress.city,
-      city: newAddress.city,
-      state: 'Tamil Nadu',
-      postalCode: newAddress.pincode,
-      pincode: newAddress.pincode,
-      latitude: 13.085,
-      longitude: 80.2101,
-      deliveryInstructions: '',
-      isDefault: newAddress.isDefault,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    await saveAddressToFirestore(addressToSave);
-    setAddresses((prev) => [...prev, addressToSave]);
-    setShowAddressModal(false);
-    setNewAddress({
-      name: '',
-      phone: '',
-      addressLine: '',
-      city: 'Chennai',
-      pincode: '',
-      isDefault: false,
+  const handleAddressSavedFromModal = (saved: SavedAddress) => {
+    setAddresses((prev) => {
+      const exists = prev.some((a) => a.id === saved.id);
+      if (exists) {
+        return prev.map((a) => (a.id === saved.id ? saved : a));
+      }
+      return [saved, ...prev];
     });
-    toast.success('Address saved to your address book!');
+    setShowAddressModal(false);
+    setEditingAddress(null);
   };
 
   const handleDeleteAddress = async (id: string) => {
@@ -657,117 +620,31 @@ export default function AccountPage() {
                 </p>
               </div>
               <button
-                onClick={() => setShowAddressModal(!showAddressModal)}
-                className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs rounded-full shadow-2xs flex items-center gap-1.5 transition-all"
+                onClick={() => {
+                  setEditingAddress(null);
+                  setShowAddressModal(true);
+                }}
+                className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs rounded-full shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <Plus size={14} /> Add Address
               </button>
             </div>
 
-            {/* Add Address Form Modal / Inline Box */}
-            {showAddressModal && (
-              <form
-                onSubmit={handleSaveAddress}
-                className="mb-6 p-5 border border-amber-300 rounded-xl bg-amber-50/40 space-y-4 animate-fade-in"
-              >
-                <h3 className="font-heading text-sm font-bold text-[#0F1111]">
-                  Add a New Delivery Address
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.name}
-                      onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                      placeholder="e.g. Karthikeyan"
-                      className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[#FF9900]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                      10-Digit Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={newAddress.phone}
-                      onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                      placeholder="e.g. 9876543210"
-                      className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[#FF9900]"
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                      Street Address & Flat / House No.
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.addressLine}
-                      onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
-                      placeholder="Flat / Door No., Building Name, Street, Landmark"
-                      className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[#FF9900]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.city}
-                      onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[#FF9900]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                      Pincode
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.pincode}
-                      onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
-                      placeholder="600001"
-                      className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[#FF9900]"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddressModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs rounded-lg shadow-2xs"
-                  >
-                    Save Address
-                  </button>
-                </div>
-              </form>
-            )}
-
             {/* Address Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Add Address Card */}
               <button
-                onClick={() => setShowAddressModal(true)}
-                className="h-48 border-2 border-dashed border-gray-300 hover:border-[#FF9900] hover:bg-amber-50/20 rounded-2xl flex flex-col items-center justify-center p-6 text-gray-500 hover:text-gray-800 transition-all group"
+                onClick={() => {
+                  setEditingAddress(null);
+                  setShowAddressModal(true);
+                }}
+                className="h-56 border-2 border-dashed border-gray-300 hover:border-[#FF9900] hover:bg-amber-50/20 rounded-2xl flex flex-col items-center justify-center p-6 text-gray-500 hover:text-gray-800 transition-all group cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-amber-100 flex items-center justify-center text-gray-400 group-hover:text-amber-700 mb-2 transition-colors">
                   <Plus size={24} />
                 </div>
-                <span className="font-bold text-sm">Add Address</span>
+                <span className="font-bold text-sm">Add New Address</span>
+                <span className="text-[11px] text-gray-400 mt-0.5">With interactive Google Map</span>
               </button>
 
               {addresses.map((addr) => (
@@ -778,7 +655,7 @@ export default function AccountPage() {
                   <div>
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-extrabold text-sm text-[#0F1111]">
-                        {addr.name}
+                        {addr.recipientName || addr.name}
                       </h4>
                       {addr.isDefault && (
                         <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-bold">
@@ -786,19 +663,55 @@ export default function AccountPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 leading-relaxed mb-3">
-                      {addr.addressLine}, {addr.city} – {addr.pincode}
+                    <p className="text-xs text-gray-700 font-medium leading-relaxed mb-1">
+                      {addr.addressLine1 || addr.addressLine}
+                      {addr.addressLine2 && `, ${addr.addressLine2}`}
                     </p>
-                    <p className="text-xs text-gray-700 font-mono">
-                      📞 Phone: {addr.phone}
+                    <p className="text-xs text-gray-500 mb-2">
+                      {addr.locality ? `${addr.locality}, ` : ''}{addr.city} – {addr.postalCode || addr.pincode}
                     </p>
+                    <p className="text-xs text-gray-600 font-mono">
+                      📞 {addr.phone}
+                    </p>
+
+                    {typeof addr.latitude === 'number' && (
+                      <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">
+                          <MapPin size={10} className="text-amber-700" />
+                          {addr.latitude.toFixed(4)}, {addr.longitude?.toFixed(4)}
+                        </span>
+                        <a
+                          href={`https://www.google.com/maps?q=${addr.latitude},${addr.longitude}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-0.5 text-[11px] font-bold text-amber-800 hover:text-amber-950 hover:underline"
+                        >
+                          <span>Map</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      </div>
+                    )}
+
+                    {addr.deliveryInstructions && (
+                      <p className="text-[11px] text-gray-500 italic mt-2 bg-gray-50 p-1.5 rounded">
+                        Note: "{addr.deliveryInstructions}"
+                      </p>
+                    )}
                   </div>
 
                   <div className="pt-4 border-t border-gray-100 mt-4 flex items-center justify-between text-xs">
-                    <span className="text-gray-400 text-[11px]">Saved in Firestore</span>
+                    <button
+                      onClick={() => {
+                        setEditingAddress(addr);
+                        setShowAddressModal(true);
+                      }}
+                      className="text-amber-800 hover:text-amber-950 flex items-center gap-1 font-semibold text-xs cursor-pointer"
+                    >
+                      <Edit2 size={12} /> Edit
+                    </button>
                     <button
                       onClick={() => handleDeleteAddress(addr.id)}
-                      className="text-red-600 hover:underline flex items-center gap-1 font-semibold"
+                      className="text-red-600 hover:text-red-800 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                     >
                       <Trash2 size={12} /> Remove
                     </button>
@@ -1013,6 +926,17 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+
+      {/* Address Form Modal with Interactive Google Map */}
+      <AddressFormModal
+        isOpen={showAddressModal}
+        onClose={() => {
+          setShowAddressModal(false);
+          setEditingAddress(null);
+        }}
+        onAddressSaved={handleAddressSavedFromModal}
+        editingAddress={editingAddress}
+      />
     </div>
   );
 }
