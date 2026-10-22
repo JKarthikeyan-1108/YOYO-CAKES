@@ -21,13 +21,15 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { RecaptchaVerifier, type ConfirmationResult } from 'firebase/auth';
+import BrandLogo from '@/components/common/BrandLogo';
 
 type LoginTab = 'phone' | 'email' | 'admin';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || '/';
+  const redirectParam = new URLSearchParams(location.search).get('redirect');
+  const from = redirectParam || (location.state as any)?.from?.pathname || '/';
 
   const { login, adminLogin, loginWithGoogle, loginWithPhone, confirmPhoneOtp, error, clearError, loading } = useAuthStore();
 
@@ -223,18 +225,8 @@ export default function LoginPage() {
 
             {/* Top Brand Header */}
             <div className="relative z-10">
-              <Link to="/" className="inline-flex items-center gap-3 group mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FFD814] to-[#F7CA00] text-[#0F1111] flex items-center justify-center font-heading text-2xl font-black shadow-md transition-transform group-hover:scale-105">
-                  Y
-                </div>
-                <div>
-                  <span className="font-heading text-2xl font-black text-white tracking-wide block leading-none">
-                    YOYO CAKES
-                  </span>
-                  <span className="text-[11px] font-semibold tracking-widest text-[#FFD814] uppercase block mt-1">
-                    Chennai's Artisanal Cloud Bakery
-                  </span>
-                </div>
+              <Link to="/" className="inline-block group mb-8">
+                <BrandLogo variant="white" size="lg" />
               </Link>
 
               <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-4">
@@ -328,8 +320,8 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                <Link to="/" className="lg:hidden w-10 h-10 rounded-xl bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] flex items-center justify-center font-heading font-black text-lg">
-                  Y
+                <Link to="/" className="lg:hidden flex-shrink-0">
+                  <BrandLogo variant="icon" size="sm" />
                 </Link>
               </div>
 

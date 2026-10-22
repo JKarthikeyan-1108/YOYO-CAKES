@@ -35,4 +35,6 @@ functions/lib
 *serviceAccount*.json
 *serviceAccountKey*.json
 serviceAccountKey.json
-
+# Python cache
+__pycache__/
+*.py[cod]

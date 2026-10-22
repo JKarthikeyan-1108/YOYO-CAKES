@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Minus,
   Plus,
@@ -15,11 +15,13 @@ import {
   Share2,
   Sparkles,
   HelpCircle,
+  Lock,
 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import { useAuthStore } from '@/stores/authStore';
 import { formatPrice, PRODUCTS } from '@/data/products';
 import { validateCouponInFirestore } from '@/services/firestoreService';
 
@@ -108,9 +110,20 @@ export default function CartPage() {
 
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist);
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const [couponCode, setCouponCode] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
+
+  const handleProceedToCheckout = () => {
+    if (!user) {
+      toast.error('Please sign in or create an account to place your order.');
+      navigate('/login?redirect=/checkout');
+      return;
+    }
+    navigate('/checkout');
+  };
   const [discountAmount, setDiscountAmount] = useState(0);
   const [isGiftOrder, setIsGiftOrder] = useState(false);
 
@@ -677,13 +690,17 @@ export default function CartPage() {
                 </div>
               </label>
 
-              {/* Amazon Gold Button: Proceed to Buy */}
-              <Link
-                to="/checkout"
-                className="w-full py-3.5 bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] border border-[#FCD200] text-[#0F1111] font-bold rounded-full text-center block shadow-xs transition-all text-sm mb-3 active:scale-[0.99]"
+              {/* Amazon Gold Button: Proceed to Buy with Auth Gate */}
+              <button
+                type="button"
+                onClick={handleProceedToCheckout}
+                className="w-full py-3.5 bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] border border-[#FCD200] text-[#0F1111] font-bold rounded-full text-center flex items-center justify-center gap-2 shadow-xs transition-all text-sm mb-3 active:scale-[0.99] cursor-pointer"
               >
-                Proceed to Buy ({itemCount} items)
-              </Link>
+                {!user && <Lock size={15} className="text-gray-700" />}
+                <span>
+                  {user ? `Proceed to Buy (${itemCount} items)` : `Sign In to Buy (${itemCount} items)`}
+                </span>
+              </button>
 
               {/* WhatsApp Quick Order Button */}
               <button

@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ShoppingCart, 
   Heart, 
@@ -95,6 +95,11 @@ export default function ProductDetailPage() {
   const [newReviewerName, setNewReviewerName] = useState('');
   const [newRating, setNewRating] = useState(5);
   const [newReviewText, setNewReviewText] = useState('');
+
+  // Always scroll to top when product ID loads or changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [id]);
 
   if (!product) {
     return (

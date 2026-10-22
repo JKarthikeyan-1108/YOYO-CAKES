@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import BrandLogo from '@/components/common/BrandLogo';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectParam = new URLSearchParams(location.search).get('redirect');
+  const from = redirectParam || '/';
+
   const { register, loginWithGoogle, error, clearError, loading } = useAuthStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -33,6 +38,9 @@ export default function RegisterPage() {
       await register(email, password);
       setRegisteredSuccess(true);
       toast.success('Registration successful! Verification email sent.');
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 1500);
     } catch {
       // Error handled by store
     }
@@ -41,7 +49,7 @@ export default function RegisterPage() {
   const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle();
-      navigate('/');
+      navigate(from, { replace: true });
     } catch {
       // Error handled by store
     }
@@ -52,12 +60,10 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <div className="w-16 h-16 rounded-full bg-[var(--color-brand-primary)] text-[var(--color-brand-chocolate)] flex items-center justify-center font-heading text-2xl font-black shadow-sm mx-auto mb-4">
-              Y
-            </div>
+          <Link to="/" className="inline-block mb-3">
+            <BrandLogo size="lg" />
           </Link>
-          <h1 className="font-heading text-2xl font-bold text-[var(--color-brand-chocolate)]">
+          <h1 className="font-heading text-2xl font-bold text-[var(--color-brand-chocolate)] mt-2">
             Create an Account
           </h1>
           <p className="text-sm text-[var(--color-brand-muted)] mt-1">

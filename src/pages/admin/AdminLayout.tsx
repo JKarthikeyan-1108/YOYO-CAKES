@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, ShoppingCart, Settings, ArrowLeft, ShieldCheck, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import BrandLogo from '@/components/common/BrandLogo';
 import toast from 'react-hot-toast';
 
 export default function AdminLayout() {
@@ -32,16 +33,11 @@ export default function AdminLayout() {
       <aside className="w-full lg:w-64 bg-[var(--color-brand-chocolate)] text-white flex-shrink-0 flex flex-col justify-between p-6">
         <div>
           {/* Brand */}
-          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/10">
-            <div className="w-10 h-10 rounded-full bg-[var(--color-brand-primary)] text-[var(--color-brand-chocolate)] flex items-center justify-center font-heading text-lg font-black shadow-sm">
-              Y
-            </div>
-            <div>
-              <h2 className="font-heading text-lg font-bold text-white">YOYO CAKES</h2>
-              <span className="text-[10px] font-mono tracking-widest text-white/50 uppercase block">
-                Admin Management
-              </span>
-            </div>
+          <div className="mb-8 pb-6 border-b border-white/10">
+            <BrandLogo variant="white" size="md" />
+            <span className="text-[10px] font-mono tracking-widest text-amber-200/60 uppercase block mt-1">
+              Admin Portal
+            </span>
           </div>
 
           {/* Navigation Links */}

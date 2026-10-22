@@ -12,29 +12,36 @@ import {
   PhoneCall,
   Flame,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Plus
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productStore';
+import { useLocationStore } from '@/stores/locationStore';
+import BrandLogo from '@/components/common/BrandLogo';
+import DeliveryLocationModal from '@/components/common/DeliveryLocationModal';
 import { CATEGORIES, formatPrice } from '@/data/products';
+import toast from 'react-hot-toast';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
-  const [currentPincode, setCurrentPincode] = useState('600001');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const cartCount = useCartStore((s) => s.getItemCount());
+  const addItemToCart = useCartStore((s) => s.addItem);
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const { user, logout, isAdmin } = useAuthStore();
   const products = useProductStore((s) => s.products);
+
+  const { currentLocation, openModal: openLocationModal } = useLocationStore();
 
   // Close search dropdown on click outside
   useEffect(() => {
@@ -45,6 +52,22 @@ export default function Navbar() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut: Cmd+K or Ctrl+K opens and focuses search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setIsSearchOpen(true);
+      }
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const searchResults = searchQuery.trim().length > 0
@@ -112,37 +135,35 @@ export default function Navbar() {
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
 
-              <Link to="/" className="flex items-center gap-2.5 group">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--color-brand-primary-dark)] text-white flex items-center justify-center font-heading text-lg sm:text-xl font-bold shadow-xs transition-transform group-hover:scale-105">
-                  Y
-                </div>
-                <div>
-                  <span className="font-heading text-xl sm:text-2xl font-black tracking-tight text-[var(--color-brand-chocolate)] leading-none block">
-                    YOYO CAKES
-                  </span>
-                  <span className="text-[10px] text-[var(--color-brand-muted)] font-medium tracking-wider hidden sm:block">
-                    Every bite, a little happiness
-                  </span>
-                </div>
+              <Link to="/" className="group inline-flex items-center">
+                <BrandLogo size="md" />
               </Link>
             </div>
 
-            {/* Amazon-Style "Deliver to" Location Selector */}
+            {/* Delivery Location Selector Pill */}
             <button
-              onClick={() => setLocationModalOpen(true)}
-              className="hidden xl:flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-left transition-colors text-xs text-gray-700"
+              type="button"
+              onClick={openLocationModal}
+              className="hidden lg:flex items-center gap-2 p-2 rounded-xl hover:bg-amber-50/70 border border-transparent hover:border-amber-200 text-left transition-all text-xs text-gray-700 cursor-pointer group"
             >
-              <MapPin size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
-              <div>
-                <span className="text-[10px] text-gray-500 block leading-tight">Deliver to</span>
-                <span className="font-bold text-gray-900 leading-tight">Chennai {currentPincode}</span>
+              <div className="w-8 h-8 rounded-lg bg-amber-100/70 text-amber-800 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <MapPin size={16} className="text-amber-700" />
+              </div>
+              <div className="min-w-0 max-w-[140px]">
+                <span className="text-[10px] text-gray-500 block leading-tight font-medium">Deliver to</span>
+                <span className="font-extrabold text-gray-900 leading-tight block truncate text-xs">
+                  {currentLocation.area}
+                </span>
+                <span className="text-[10px] text-emerald-700 font-semibold block leading-tight">
+                  ⚡ {currentLocation.estimatedTime}
+                </span>
               </div>
             </button>
 
-            {/* Central Amazon Search Bar with Live Autocomplete */}
+            {/* Central Search Bar with Live Autocomplete & Quick Add */}
             <div ref={searchContainerRef} className="flex-1 max-w-2xl mx-1 sm:mx-2 relative">
               <form onSubmit={handleSearch}>
-                <div className="flex rounded-xl overflow-hidden border border-gray-300 focus-within:border-[var(--color-brand-primary-dark)] focus-within:ring-2 focus-within:ring-[#FFD814]/40 shadow-xs transition-all bg-white">
+                <div className="flex rounded-xl overflow-hidden border border-gray-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-[#FFD814]/40 shadow-xs transition-all bg-white">
                   {/* Category Dropdown */}
                   <select
                     value={selectedCategory}
@@ -158,31 +179,41 @@ export default function Navbar() {
                   </select>
 
                   {/* Search Input */}
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onFocus={() => setIsSearchOpen(true)}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setIsSearchOpen(true);
-                    }}
-                    placeholder="Search Matilda, Dream Cake, Tiramisu, Brownies..."
-                    className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400"
-                  />
+                  <div className="relative flex-1 flex items-center">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onFocus={() => setIsSearchOpen(true)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setIsSearchOpen(true);
+                      }}
+                      placeholder="Search Matilda, Dream Cake, Tiramisu, Brownies..."
+                      className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400 pr-12"
+                    />
 
-                  {/* Clear button if typed */}
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="px-2 text-gray-400 hover:text-gray-600 text-xs"
-                      aria-label="Clear search"
-                    >
-                      <X size={15} />
-                    </button>
-                  )}
+                    {/* Keyboard shortcut indicator */}
+                    {!searchQuery && (
+                      <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md font-mono mr-2 pointer-events-none select-none">
+                        ⌘K
+                      </span>
+                    )}
 
-                  {/* Amazon Gold Search Button */}
+                    {/* Clear button if typed */}
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        className="px-2 text-gray-400 hover:text-gray-600 text-xs mr-1"
+                        aria-label="Clear search"
+                      >
+                        <X size={15} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Search Button */}
                   <button
                     type="submit"
                     aria-label="Search"
@@ -202,41 +233,61 @@ export default function Navbar() {
                         <div>
                           <div className="p-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
                             <span>Matching Bakery Treats ({searchResults.length})</span>
-                            <span className="text-[11px]">Press Enter to view all</span>
+                            <span className="text-[11px]">Click item or Add to Cart</span>
                           </div>
                           <div className="divide-y divide-gray-100">
                             {searchResults.map((item) => (
-                              <button
+                              <div
                                 key={item.id}
-                                type="button"
-                                onClick={() => handleSelectProduct(item.id)}
-                                className="w-full text-left p-3 hover:bg-[var(--color-brand-cream)]/60 transition-colors flex items-center gap-3 group"
+                                className="w-full p-3 hover:bg-[var(--color-brand-cream)]/60 transition-colors flex items-center justify-between gap-3 group"
                               >
-                                <img
-                                  src={item.image || `/images/categories/${item.categorySlug}.jpg`}
-                                  alt={item.name}
-                                  className="w-11 h-11 rounded-lg object-cover flex-shrink-0 bg-gray-100 border border-gray-200"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h4 className="text-xs font-bold text-gray-900 truncate group-hover:text-[var(--color-brand-primary-dark)]">
-                                      {item.name}
-                                    </h4>
-                                    {item.bestseller && (
-                                      <span className="bg-[#FFD814] text-[#0F1111] text-[9px] font-black uppercase px-1.5 py-0.2 rounded-xs">
-                                        Best Seller
-                                      </span>
-                                    )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectProduct(item.id)}
+                                  className="flex items-center gap-3 flex-1 min-w-0 text-left cursor-pointer"
+                                >
+                                  <img
+                                    src={item.image || `/images/categories/${item.categorySlug}.jpg`}
+                                    alt={item.name}
+                                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200 group-hover:scale-105 transition-transform"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <h4 className="text-xs sm:text-sm font-bold text-gray-900 truncate group-hover:text-amber-800">
+                                        {item.name}
+                                      </h4>
+                                      {item.bestseller && (
+                                        <span className="bg-[#FFD814] text-[#0F1111] text-[9px] font-black uppercase px-1.5 py-0.2 rounded-xs">
+                                          Best Seller
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 truncate">{item.category}</p>
+                                    <span className="font-heading text-xs font-black text-gray-900 sm:hidden">
+                                      {formatPrice(item.price)}
+                                    </span>
                                   </div>
-                                  <p className="text-[11px] text-gray-500 truncate">{item.category}</p>
-                                </div>
-                                <div className="text-right flex-shrink-0">
-                                  <span className="font-heading text-xs font-extrabold text-gray-900 block">
+                                </button>
+
+                                <div className="flex items-center gap-2.5 flex-shrink-0">
+                                  <span className="font-heading text-xs sm:text-sm font-extrabold text-gray-900 hidden sm:block">
                                     {formatPrice(item.price)}
                                   </span>
-                                  <span className="text-[10px] text-emerald-600 font-semibold">Fresh Daily</span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addItemToCart(item);
+                                      toast.success(`${item.name} added to cart!`);
+                                    }}
+                                    className="p-1.5 sm:px-3 sm:py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] active:scale-95 text-[#0F1111] font-bold text-xs rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer"
+                                    title="Add to cart"
+                                  >
+                                    <Plus size={14} />
+                                    <span className="hidden sm:inline">Add</span>
+                                  </button>
                                 </div>
-                              </button>
+                              </div>
                             ))}
                           </div>
                           <div className="p-3 bg-gray-50 border-t border-gray-100 text-center">
@@ -465,6 +516,29 @@ export default function Navbar() {
         {/* Mobile Flyout Menu */}
         {mobileOpen && (
           <div className="lg:hidden bg-white border-b border-gray-200 p-4 space-y-3 animate-slide-up shadow-lg">
+            {/* Mobile Delivery Location Selector */}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                openLocationModal();
+              }}
+              className="w-full p-3 bg-amber-50/80 rounded-xl mb-3 flex items-center justify-between border border-amber-200 text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <MapPin size={18} className="text-amber-700" />
+                <div>
+                  <span className="text-[10px] text-gray-500 block font-medium">Deliver to</span>
+                  <span className="text-xs font-bold text-gray-900 block">
+                    {currentLocation.area}, {currentLocation.city} – {currentLocation.pincode}
+                  </span>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                Change
+              </span>
+            </button>
+
             <div className="p-3 bg-gray-50 rounded-xl mb-3 flex items-center justify-between">
               <span className="text-xs font-bold text-gray-800">
                 {user ? `Signed in as ${user.displayName || user.email}` : 'Welcome, Guest'}
@@ -523,44 +597,8 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Pincode Selector Modal */}
-      {locationModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-elevated border border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-heading font-bold text-base text-gray-900 flex items-center gap-2">
-                <MapPin size={18} className="text-[var(--color-brand-primary-dark)]" />
-                Choose your location
-              </h3>
-              <button onClick={() => setLocationModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                <X size={18} />
-              </button>
-            </div>
-            <p className="text-xs text-gray-600 mb-4">
-              Select your delivery pincode to check local bakery delivery speed and slot availability.
-            </p>
-            <div className="flex gap-2 mb-4">
-              <input
-                type="text"
-                maxLength={6}
-                value={currentPincode}
-                onChange={(e) => setCurrentPincode(e.target.value.replace(/\D/g, ''))}
-                placeholder="Enter 6-digit Pincode"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono outline-none focus:border-[var(--color-brand-primary-dark)]"
-              />
-              <button
-                onClick={() => setLocationModalOpen(false)}
-                className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs font-bold rounded-lg"
-              >
-                Apply
-              </button>
-            </div>
-            <p className="text-[11px] text-gray-500">
-              Popular delivery zones: Chennai Central (600001), Anna Nagar (600040), T. Nagar (600017), Velachery (600042).
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Interactive Delivery Location Modal */}
+      <DeliveryLocationModal />
     </>
   );
 }

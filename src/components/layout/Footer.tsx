@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock, ArrowUp, ShieldCheck, Heart } from 'lucide-react';
+import BrandLogo from '@/components/common/BrandLogo';
 
 function InstagramIcon({ size = 18 }: { size?: number }) {
   return (
@@ -42,16 +43,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           {/* Brand Info */}
           <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-10 h-10 rounded-full bg-[#FFD814] text-[#0F1111] flex items-center justify-center font-heading text-xl font-black shadow-xs">
-                Y
-              </div>
-              <div>
-                <h3 className="font-heading text-xl font-bold text-white tracking-tight">YOYO CAKES</h3>
-                <p className="text-[10px] text-white/60 tracking-wider uppercase font-semibold">
-                  Every bite, a little happiness
-                </p>
-              </div>
+            <div className="mb-4">
+              <BrandLogo variant="white" size="md" />
             </div>
             <p className="text-white/70 text-xs leading-relaxed mb-6">
               Chennai's favorite handcrafted cloud bakery. Specializing in decadent 5-in-1 Torte cakes, molten Belgian brownies, and authentic Italian tiramisu, prepared in small fresh batches daily.
