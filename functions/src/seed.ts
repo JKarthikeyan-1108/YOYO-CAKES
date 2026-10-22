@@ -1,9 +1,23 @@
 import * as admin from 'firebase-admin';
+import * as path from 'path';
+import * as fs from 'fs';
+
+const serviceAccountPath = path.resolve(__dirname, '../serviceAccountKey.json');
 
 if (!admin.apps.length) {
-  admin.initializeApp({
-    projectId: process.env.FIREBASE_PROJECT_ID || 'yoyo-c46c3',
-  });
+  if (fs.existsSync(serviceAccountPath)) {
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: 'https://yoyo-c46c3-default-rtdb.firebaseio.com',
+      projectId: 'yoyo-c46c3',
+    });
+  } else {
+    admin.initializeApp({
+      projectId: process.env.FIREBASE_PROJECT_ID || 'yoyo-c46c3',
+      databaseURL: 'https://yoyo-c46c3-default-rtdb.firebaseio.com',
+    });
+  }
 }
 
 const db = admin.firestore();
@@ -47,50 +61,91 @@ export const PRODUCTS = [
 ];
 
 export async function seed(): Promise<void> {
-  console.log('Connecting to Cloud Firestore (Project: yoyo-c46c3)...');
-  const batch = db.batch();
+  // 1. Seed Realtime Database
+  console.log('Connecting to Firebase Realtime Database (https://yoyo-c46c3-default-rtdb.firebaseio.com)...');
+  const rtdb = admin.database();
 
-  // 1. Categories
+  const categoriesObj: Record<string, any> = {};
   for (const cat of CATEGORIES) {
-    batch.set(
-      db.collection('categories').doc(cat.id),
-      {
-        ...cat,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-  }
-
-  // 2. Products with integer paise
-  for (const prod of PRODUCTS) {
-    batch.set(
-      db.collection('products').doc(prod.id),
-      {
-        ...prod,
-        pricePaise: prod.price * 100,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-  }
-
-  // 3. Coupons
-  batch.set(
-    db.collection('coupons').doc('coupon-yoyo10'),
-    {
-      id: 'coupon-yoyo10',
-      code: 'YOYO10',
-      discountPercentage: 10,
-      minOrderAmount: 200,
-      active: true,
+    categoriesObj[cat.id] = {
+      ...cat,
       updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
+    };
+  }
+  await rtdb.ref('categories').set(categoriesObj);
+
+  const productsObj: Record<string, any> = {};
+  for (const prod of PRODUCTS) {
+    productsObj[prod.id] = {
+      ...prod,
+      pricePaise: prod.price * 100,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+  await rtdb.ref('products').set(productsObj);
+
+  await rtdb.ref('coupons/coupon-yoyo10').set({
+    id: 'coupon-yoyo10',
+    code: 'YOYO10',
+    discountPercentage: 10,
+    minOrderAmount: 200,
+    active: true,
+    updatedAt: new Date().toISOString(),
+  });
+
+  console.log(
+    `✅ Realtime Database successfully seeded with ${CATEGORIES.length} categories, ${PRODUCTS.length} products with integer paise, and coupon YOYO10!`
   );
 
-  await batch.commit();
-  console.log(`Successfully seeded ${CATEGORIES.length} categories, ${PRODUCTS.length} products with integer paise, and coupon YOYO10!`);
+  // 2. Cloud Firestore sync (if database exists)
+  try {
+    console.log('Attempting Cloud Firestore batch sync...');
+    const batch = db.batch();
+
+    for (const cat of CATEGORIES) {
+      batch.set(
+        db.collection('categories').doc(cat.id),
+        {
+          ...cat,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+    }
+
+    for (const prod of PRODUCTS) {
+      batch.set(
+        db.collection('products').doc(prod.id),
+        {
+          ...prod,
+          pricePaise: prod.price * 100,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+    }
+
+    batch.set(
+      db.collection('coupons').doc('coupon-yoyo10'),
+      {
+        id: 'coupon-yoyo10',
+        code: 'YOYO10',
+        discountPercentage: 10,
+        minOrderAmount: 200,
+        active: true,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+
+    await batch.commit();
+    console.log(`✅ Cloud Firestore batch commit succeeded!`);
+  } catch (fsErr: any) {
+    console.log(
+      'ℹ️ Cloud Firestore sync note (Firebase Console has not initialized Firestore Database yet; Realtime Database is fully live):',
+      fsErr?.message || fsErr
+    );
+  }
 }
 
 if (process.argv[1]?.endsWith('seed.js') || process.argv[1]?.endsWith('seed.ts')) {

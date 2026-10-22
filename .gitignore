@@ -31,3 +31,8 @@ functions/lib
 .taste-skill/
 .agents/repos/
 
+# Credentials & Service Accounts
+*serviceAccount*.json
+*serviceAccountKey*.json
+serviceAccountKey.json
+

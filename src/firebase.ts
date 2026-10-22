@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getDatabase, type Database } from 'firebase/database';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 
@@ -9,6 +10,7 @@ export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyYOYOCAKESDEMOKEY1234567890abcdef',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'yoyo-c46c3.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'yoyo-c46c3',
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || 'https://yoyo-c46c3-default-rtdb.firebaseio.com',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'yoyo-c46c3.firebasestorage.app',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
@@ -30,6 +32,9 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Export the Firestore database instance as db
 export const db: Firestore = getFirestore(app);
+
+// Export the Realtime Database instance as rtdb
+export const rtdb: Database = getDatabase(app);
 
 // Export Firebase Storage instance
 export const storage: FirebaseStorage = getStorage(app);

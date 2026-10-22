@@ -13,7 +13,8 @@ import {
   Timestamp,
   writeBatch,
 } from 'firebase/firestore';
-import { db, storage, isFirebaseConfigured } from '@/firebase';
+import { ref as rtdbRef, get as rtdbGet, set as rtdbSet, remove as rtdbRemove } from 'firebase/database';
+import { db, rtdb, storage, isFirebaseConfigured } from '@/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Product } from '@/data/products';
 import { PRODUCTS, CATEGORIES } from '@/data/products';
@@ -309,43 +310,51 @@ export async function syncWishlistToFirestore(userId: string, productIds: string
 
 // --- ORDERS & TRACKING ---
 export async function createFirestoreOrder(order: OrderDocument): Promise<void> {
-  if (!db) return;
-  try {
-    // 1. Save main order document
-    await setDoc(doc(db, 'orders', order.id), order, { merge: true });
+  // 1. Save to Realtime Database
+  if (rtdb) {
+    try {
+      await rtdbSet(rtdbRef(rtdb, `orders/${order.id}`), order);
+    } catch (err) {
+      console.warn('Error saving order to Realtime Database:', err);
+    }
+  }
 
-    // 2. Record initial orderStatusHistory entry
-    const historyId = `hist-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
-    const historyItem: OrderStatusHistoryItem = {
-      id: historyId,
-      orderId: order.id,
-      userId: order.userId,
-      status: order.orderStatus,
-      notes: `Order created via ${order.fulfillment} and payment marked as ${order.paymentStatus}`,
-      updatedBy: 'system',
-      timestamp: new Date().toISOString(),
-    };
-    await setDoc(doc(db, 'orderStatusHistory', historyId), historyItem);
+  // 2. Save to Firestore
+  if (db) {
+    try {
+      await setDoc(doc(db, 'orders', order.id), order, { merge: true });
 
-    // 3. Record payment reference in 'payments' collection
-    if (order.paymentStatus === 'paid') {
-      const paymentId = `pay-${order.id}`;
-      const paymentItem: PaymentDocument = {
-        id: paymentId,
+      const historyId = `hist-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+      const historyItem: OrderStatusHistoryItem = {
+        id: historyId,
         orderId: order.id,
         userId: order.userId,
-        amount: order.total,
-        amountPaise: order.totalPaise,
-        currency: 'INR',
-        razorpayOrderId: order.razorpayOrderId,
-        razorpayPaymentId: order.razorpayPaymentId,
-        status: 'captured',
-        createdAt: new Date().toISOString(),
+        status: order.orderStatus,
+        notes: `Order created via ${order.fulfillment} and payment marked as ${order.paymentStatus}`,
+        updatedBy: 'system',
+        timestamp: new Date().toISOString(),
       };
-      await setDoc(doc(db, 'payments', paymentId), paymentItem);
+      await setDoc(doc(db, 'orderStatusHistory', historyId), historyItem);
+
+      if (order.paymentStatus === 'paid') {
+        const paymentId = `pay-${order.id}`;
+        const paymentItem: PaymentDocument = {
+          id: paymentId,
+          orderId: order.id,
+          userId: order.userId,
+          amount: order.total,
+          amountPaise: order.totalPaise,
+          currency: 'INR',
+          razorpayOrderId: order.razorpayOrderId,
+          razorpayPaymentId: order.razorpayPaymentId,
+          status: 'captured',
+          createdAt: new Date().toISOString(),
+        };
+        await setDoc(doc(db, 'payments', paymentId), paymentItem);
+      }
+    } catch (err) {
+      console.warn('Error creating order in Firestore:', err);
     }
-  } catch (err) {
-    console.warn('Error creating order in Firestore:', err);
   }
 }
 
@@ -355,25 +364,35 @@ export async function updateFirestoreOrderStatus(
   updatedBy: string = 'admin',
   notes?: string
 ): Promise<void> {
-  if (!db) return;
-  try {
-    await updateDoc(doc(db, 'orders', orderId), {
-      orderStatus: newStatus,
-      updatedAt: new Date().toISOString(),
-    });
+  if (rtdb) {
+    try {
+      await rtdbSet(rtdbRef(rtdb, `orders/${orderId}/orderStatus`), newStatus);
+      await rtdbSet(rtdbRef(rtdb, `orders/${orderId}/updatedAt`), new Date().toISOString());
+    } catch (err) {
+      console.warn('Error updating order status in RTDB:', err);
+    }
+  }
 
-    const historyId = `hist-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
-    const historyItem: OrderStatusHistoryItem = {
-      id: historyId,
-      orderId,
-      status: newStatus,
-      notes: notes || `Order advanced to ${newStatus}`,
-      updatedBy,
-      timestamp: new Date().toISOString(),
-    };
-    await setDoc(doc(db, 'orderStatusHistory', historyId), historyItem);
-  } catch (err) {
-    console.warn('Error updating order status in Firestore:', err);
+  if (db) {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), {
+        orderStatus: newStatus,
+        updatedAt: new Date().toISOString(),
+      });
+
+      const historyId = `hist-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+      const historyItem: OrderStatusHistoryItem = {
+        id: historyId,
+        orderId,
+        status: newStatus,
+        notes: notes || `Order advanced to ${newStatus}`,
+        updatedBy,
+        timestamp: new Date().toISOString(),
+      };
+      await setDoc(doc(db, 'orderStatusHistory', historyId), historyItem);
+    } catch (err) {
+      console.warn('Error updating order status in Firestore:', err);
+    }
   }
 }
 
@@ -485,81 +504,145 @@ export async function seedAllCollectionsToFirestore(): Promise<{ success: boolea
   }
 }
 
-// --- PRODUCTS & CATEGORIES CRUD ---
+// --- PRODUCTS & CATEGORIES CRUD (Dual Cloud Firestore + Realtime Database Support) ---
 export async function getProductsFromFirestore(): Promise<FirestoreProduct[]> {
-  if (!db) return PRODUCTS.map((p) => ({ ...p, pricePaise: p.price * 100 }));
-  try {
-    const q = query(collection(db, 'products'), orderBy('name', 'asc'));
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      return snap.docs.map((d) => {
-        const data = d.data() as FirestoreProduct;
-        return {
-          ...data,
-          id: d.id,
-          pricePaise: data.pricePaise || (data.price ? data.price * 100 : 0),
-        };
-      });
+  // 1. Try Firestore if available
+  if (db) {
+    try {
+      const q = query(collection(db, 'products'), orderBy('name', 'asc'));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        return snap.docs.map((d) => {
+          const data = d.data() as FirestoreProduct;
+          return {
+            ...data,
+            id: d.id,
+            pricePaise: data.pricePaise || (data.price ? data.price * 100 : 0),
+          };
+        });
+      }
+    } catch {
+      // Graceful fallback to Realtime Database
     }
-  } catch (err) {
-    console.warn('Error reading products from Firestore, falling back to local catalog:', err);
   }
+
+  // 2. Query Firebase Realtime Database
+  if (rtdb) {
+    try {
+      const snap = await rtdbGet(rtdbRef(rtdb, 'products'));
+      if (snap.exists()) {
+        const val = snap.val();
+        const list = Object.values(val) as FirestoreProduct[];
+        if (list.length > 0) {
+          return list.map((p) => ({
+            ...p,
+            pricePaise: p.pricePaise || (p.price ? p.price * 100 : 0),
+          }));
+        }
+      }
+    } catch (rtdbErr) {
+      console.warn('Error reading products from Realtime Database:', rtdbErr);
+    }
+  }
+
   return PRODUCTS.map((p) => ({ ...p, pricePaise: p.price * 100 }));
 }
 
 export async function saveProductToFirestore(product: Partial<FirestoreProduct> & { id: string }): Promise<void> {
-  if (!db) return;
-  try {
-    const dataToSave: Record<string, any> = { ...product };
-    if (typeof product.price === 'number') {
-      dataToSave.pricePaise = Math.round(product.price * 100);
+  const dataToSave: Record<string, any> = { ...product };
+  if (typeof product.price === 'number') {
+    dataToSave.pricePaise = Math.round(product.price * 100);
+  }
+  dataToSave.updatedAt = new Date().toISOString();
+
+  // Strip undefined
+  Object.keys(dataToSave).forEach((key) => {
+    if (dataToSave[key] === undefined) {
+      delete dataToSave[key];
     }
-    dataToSave.updatedAt = serverTimestamp();
+  });
 
-    // Strip any undefined fields so Firestore merge doesn't throw invalid-argument
-    Object.keys(dataToSave).forEach((key) => {
-      if (dataToSave[key] === undefined) {
-        delete dataToSave[key];
-      }
-    });
+  // 1. Write to Realtime Database
+  if (rtdb) {
+    try {
+      await rtdbSet(rtdbRef(rtdb, `products/${product.id}`), dataToSave);
+    } catch (err) {
+      console.warn('Error saving product to Realtime Database:', err);
+    }
+  }
 
-    await setDoc(doc(db, 'products', product.id), dataToSave, { merge: true });
-  } catch (err) {
-    console.warn('Error saving product to Firestore:', err);
+  // 2. Write to Firestore if available
+  if (db) {
+    try {
+      await setDoc(doc(db, 'products', product.id), { ...dataToSave, updatedAt: serverTimestamp() }, { merge: true });
+    } catch {
+      // Ignored if Firestore is not initialized
+    }
   }
 }
 
 export async function deleteProductFromFirestore(id: string): Promise<void> {
-  if (!db) return;
-  try {
-    await deleteDoc(doc(db, 'products', id));
-  } catch (err) {
-    console.warn('Error deleting product from Firestore:', err);
+  if (rtdb) {
+    try {
+      await rtdbRemove(rtdbRef(rtdb, `products/${id}`));
+    } catch (err) {
+      console.warn('Error deleting product from Realtime Database:', err);
+    }
+  }
+
+  if (db) {
+    try {
+      await deleteDoc(doc(db, 'products', id));
+    } catch {
+      // Ignored if Firestore is not initialized
+    }
   }
 }
 
 export async function getCategoriesFromFirestore(): Promise<FirestoreCategory[]> {
-  if (!db) return CATEGORIES.map((c) => ({ ...c }));
-  try {
-    const snap = await getDocs(collection(db, 'categories'));
-    if (!snap.empty) {
-      return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FirestoreCategory));
+  // 1. Try Realtime Database first for low latency
+  if (rtdb) {
+    try {
+      const snap = await rtdbGet(rtdbRef(rtdb, 'categories'));
+      if (snap.exists()) {
+        const val = snap.val();
+        return Object.values(val) as FirestoreCategory[];
+      }
+    } catch {
+      // Fallback
     }
-  } catch (err) {
-    console.warn('Error reading categories from Firestore:', err);
+  }
+
+  if (db) {
+    try {
+      const snap = await getDocs(collection(db, 'categories'));
+      if (!snap.empty) {
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FirestoreCategory));
+      }
+    } catch {
+      // Fallback
+    }
   }
   return CATEGORIES.map((c) => ({ ...c }));
 }
 
 export async function saveCategoryToFirestore(category: FirestoreCategory): Promise<void> {
-  if (!db) return;
-  try {
-    await setDoc(doc(db, 'categories', category.id), {
-      ...category,
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
-  } catch (err) {
-    console.warn('Error saving category to Firestore:', err);
+  const dataToSave = { ...category, updatedAt: new Date().toISOString() };
+
+  if (rtdb) {
+    try {
+      await rtdbSet(rtdbRef(rtdb, `categories/${category.id}`), dataToSave);
+    } catch (err) {
+      console.warn('Error saving category to Realtime Database:', err);
+    }
+  }
+
+  if (db) {
+    try {
+      await setDoc(doc(db, 'categories', category.id), { ...category, updatedAt: serverTimestamp() }, { merge: true });
+    } catch {
+      // Ignored
+    }
   }
 }
 

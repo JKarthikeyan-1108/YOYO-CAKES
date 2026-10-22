@@ -1,8 +1,26 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs';
 
-admin.initializeApp();
+const serviceAccountPath = path.resolve(__dirname, '../serviceAccountKey.json');
+
+if (!admin.apps.length) {
+  if (fs.existsSync(serviceAccountPath)) {
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: 'https://yoyo-c46c3-default-rtdb.firebaseio.com',
+      projectId: 'yoyo-c46c3',
+    });
+  } else {
+    admin.initializeApp({
+      databaseURL: 'https://yoyo-c46c3-default-rtdb.firebaseio.com',
+    });
+  }
+}
+
 const db = admin.firestore();
 
 // 1. TRUSTED BACKEND OPERATION: ASSIGN ADMIN ROLE
