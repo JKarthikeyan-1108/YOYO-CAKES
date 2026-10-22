@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { useAuthStore } from '@/stores/authStore';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Layouts & Boundary
 import Layout from '@/components/layout/Layout';
