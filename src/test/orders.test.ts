@@ -1,5 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getLocalOrders, saveOrder, getOrderById, updateOrderStatus, type Order } from '../lib/orders';
+
+vi.mock('@/services/firestoreService', () => ({
+  createFirestoreOrder: vi.fn().mockResolvedValue(undefined),
+  updateFirestoreOrderStatus: vi.fn().mockResolvedValue(undefined),
+}));
 
 describe('Orders Lifecycle & State Management', () => {
   beforeEach(() => {

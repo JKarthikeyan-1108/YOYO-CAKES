@@ -370,23 +370,65 @@ if (auth && isFirebaseConfigured) {
 
 function getAuthErrorMessage(code: string): string {
   switch (code) {
+    // Email / password
     case 'auth/user-not-found':
-      return 'No account found with this email address.';
+      return 'No account found with this email address. Please check your email or register.';
     case 'auth/wrong-password':
-      return 'Incorrect password. Please try again.';
-    case 'auth/email-already-in-use':
-      return 'An account with this email already exists.';
-    case 'auth/weak-password':
-      return 'Password must be at least 6 characters.';
-    case 'auth/invalid-email':
-      return 'Please enter a valid email address.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please try again later.';
-    case 'auth/popup-closed-by-user':
-      return 'Sign in was cancelled.';
+      return 'Incorrect password. Please try again or reset your password.';
     case 'auth/invalid-credential':
-      return 'Invalid credentials. Please check your email and password.';
+      return 'Invalid email or password. Please check your credentials and try again.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address (e.g. name@example.com).';
+    case 'auth/email-already-in-use':
+      return 'An account already exists with this email address. Try signing in instead.';
+    case 'auth/weak-password':
+      return 'Your password is too weak. Please choose at least 8 characters.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support.';
+
+    // Google / OAuth
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'Google sign-in was cancelled. Please try again.';
+    case 'auth/popup-blocked':
+      return 'Sign-in popup was blocked by your browser. Please allow popups for this site.';
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized for sign-in. Please contact support.';
+    case 'auth/operation-not-allowed':
+      return 'This sign-in method is not enabled. Please contact support.';
+
+    // Rate limiting & network
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Your account has been temporarily locked. Try again later or reset your password.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection and try again.';
+    case 'auth/internal-error':
+      return 'An internal error occurred. Please try again.';
+
+    // Phone
+    case 'auth/invalid-phone-number':
+      return 'Please enter a valid phone number with country code (e.g. +91 98765 43210).';
+    case 'auth/invalid-verification-code':
+      return 'Invalid OTP code. Please check and try again.';
+    case 'auth/code-expired':
+      return 'OTP has expired. Please request a new one.';
+    case 'auth/missing-verification-code':
+      return 'Please enter the OTP sent to your phone.';
+    case 'auth/session-expired':
+      return 'Your session has expired. Please sign in again.';
+
+    // Token / session
+    case 'auth/id-token-expired':
+    case 'auth/id-token-revoked':
+      return 'Your session has expired. Please sign in again.';
+    case 'auth/requires-recent-login':
+      return 'For security, please sign in again to continue.';
+
+    // Account linking
+    case 'auth/account-exists-with-different-credential':
+      return 'An account already exists with this email using a different sign-in method. Try a different method.';
+
     default:
-      return 'An error occurred. Please try again.';
+      return 'An unexpected error occurred. Please try again.';
   }
 }

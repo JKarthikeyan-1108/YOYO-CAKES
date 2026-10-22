@@ -1,21 +1,31 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  ShoppingCart, 
-  Heart, 
-  User, 
-  Search, 
-  Menu, 
-  X, 
-  MapPin, 
-  ChevronDown, 
+import {
+  ShoppingCart,
+  Heart,
+  User,
+  Search,
+  Menu,
+  X,
+  MapPin,
+  ChevronDown,
   Sparkles,
   PhoneCall,
   Flame,
   ArrowRight,
   ShieldCheck,
-  Plus
+  Plus,
+  Home,
+  Package,
+  Cake,
+  Coffee,
+  IceCream,
+  BookOpen,
+  Settings,
+  ClipboardList,
+  MessageSquare,
+  ChevronRight,
 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -34,16 +44,47 @@ export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   const cartCount = useCartStore((s) => s.getItemCount());
   const addItemToCart = useCartStore((s) => s.addItem);
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const { user, logout, isAdmin } = useAuthStore();
   const products = useProductStore((s) => s.products);
-
   const { currentLocation, openModal: openLocationModal } = useLocationStore();
 
-  // Close search dropdown on click outside
+  // Lock body scroll when drawer open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  // Close drawer on Escape, trap focus within drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (mobileOpen) {
+          setMobileOpen(false);
+          hamburgerRef.current?.focus();
+        }
+        if (isSearchOpen) setIsSearchOpen(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileOpen, isSearchOpen]);
+
+  // Close search on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
@@ -54,20 +95,8 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Keyboard shortcut: Cmd+K or Ctrl+K opens and focuses search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-        setIsSearchOpen(true);
-      }
-      if (e.key === 'Escape') {
-        setIsSearchOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+  const closeMobileMenu = useCallback(() => {
+    setMobileOpen(false);
   }, []);
 
   const searchResults = searchQuery.trim().length > 0
@@ -100,18 +129,37 @@ export default function Navbar() {
     navigate(`/shop?search=${encodeURIComponent(query)}`);
   };
 
+  // Mobile nav items
+  const navLinks = [
+    { to: '/', label: 'Home', icon: Home },
+    { to: '/shop', label: 'All Products', icon: Package },
+    { to: '/shop?category=cakes', label: 'Cakes', icon: Cake },
+    { to: '/shop?category=tiramisu-desserts', label: 'Tiramisu & Desserts', icon: Coffee },
+    { to: '/shop?category=brownies', label: 'Brownies', icon: IceCream },
+    { to: '/shop?category=tea-cakes-pies', label: 'Tea Cakes & Pies', icon: BookOpen },
+    { to: '/shop?category=mini-jar-cakes', label: 'Mini Jar Cakes', icon: IceCream },
+  ];
+
+  const accountLinks = [
+    { to: '/account', label: 'My Orders', icon: ClipboardList },
+    { to: '/account', label: 'My Profile', icon: User },
+    { to: '/account', label: 'Account Settings', icon: Settings },
+    { to: '/wishlist', label: 'Wishlist', icon: Heart },
+    { to: '/contact', label: 'Contact', icon: MessageSquare },
+  ];
+
   return (
     <>
-      {/* Top Announcement Bar (Amazon Prime / Delivery Promo style) */}
+      {/* Top Announcement Bar */}
       <div className="bg-[var(--color-brand-chocolate)] text-white text-xs font-semibold py-1.5 px-4 tracking-wide">
         <div className="container-main flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="bg-[#FFD814] text-[#0F1111] text-[10px] font-black uppercase px-2 py-0.5 rounded-sm tracking-wider">
+          <div className="flex items-center gap-2 truncate">
+            <span className="bg-[#FFD814] text-[#0F1111] text-[10px] font-black uppercase px-2 py-0.5 rounded-sm tracking-wider flex-shrink-0">
               FREE DELIVERY
             </span>
-            <span>On all handcrafted orders above ₹500 across Chennai • Fresh same-day bakes</span>
+            <span className="truncate text-[11px]">On all handcrafted orders above ₹500 across Chennai</span>
           </div>
-          <div className="hidden md:flex items-center gap-4 text-[11px] text-white/80">
+          <div className="hidden md:flex items-center gap-4 text-[11px] text-white/80 flex-shrink-0">
             <a href="tel:+918428855444" className="hover:text-white flex items-center gap-1">
               <PhoneCall size={12} /> Helpline: +91 84288 55444
             </a>
@@ -121,32 +169,36 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Main Amazon-Style Navigation Bar */}
+      {/* Main Navigation Bar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs">
         <div className="container-main py-2.5 sm:py-3">
-          <div className="flex items-center gap-3 sm:gap-6 justify-between">
-            {/* Mobile Menu Toggle & Brand Logo */}
-            <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-4 justify-between">
+            {/* Hamburger + Logo */}
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100"
-                aria-label="Toggle Navigation"
+                ref={hamburgerRef}
+                onClick={() => setMobileOpen(true)}
+                className="lg:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Open navigation menu"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-nav-drawer"
               >
-                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+                <Menu size={22} />
               </button>
 
-              <Link to="/" className="group inline-flex items-center">
+              <Link to="/" className="group inline-flex items-center" aria-label="YOYO CAKES Home">
                 <BrandLogo size="md" />
               </Link>
             </div>
 
-            {/* Delivery Location Selector Pill */}
+            {/* Delivery Location (desktop only) */}
             <button
               type="button"
               onClick={openLocationModal}
               className="hidden lg:flex items-center gap-2 p-2 rounded-xl hover:bg-amber-50/70 border border-transparent hover:border-amber-200 text-left transition-all text-xs text-gray-700 cursor-pointer group"
+              aria-label="Change delivery location"
             >
-              <div className="w-8 h-8 rounded-lg bg-amber-100/70 text-amber-800 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-lg bg-amber-100/70 text-amber-800 flex items-center justify-center flex-shrink-0">
                 <MapPin size={16} className="text-amber-700" />
               </div>
               <div className="min-w-0 max-w-[140px]">
@@ -160,7 +212,7 @@ export default function Navbar() {
               </div>
             </button>
 
-            {/* Central Search Bar with Live Autocomplete & Quick Add */}
+            {/* Central Search Bar */}
             <div ref={searchContainerRef} className="flex-1 max-w-2xl mx-1 sm:mx-2 relative">
               <form onSubmit={handleSearch}>
                 <div className="flex rounded-xl overflow-hidden border border-gray-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-[#FFD814]/40 shadow-xs transition-all bg-white">
@@ -169,6 +221,7 @@ export default function Navbar() {
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="hidden md:block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-2.5 border-r border-gray-300 outline-none hover:bg-gray-200 cursor-pointer"
+                    aria-label="Filter by category"
                   >
                     <option value="all">All Cakes</option>
                     {CATEGORIES.map((cat) => (
@@ -189,23 +242,22 @@ export default function Navbar() {
                         setSearchQuery(e.target.value);
                         setIsSearchOpen(true);
                       }}
-                      placeholder="Search Matilda, Dream Cake, Tiramisu, Brownies..."
-                      className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400 pr-12"
+                      placeholder="Search cakes, tiramisu, brownies..."
+                      className="w-full px-3.5 py-2.5 text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400"
+                      aria-label="Search products"
+                      aria-autocomplete="list"
+                      aria-controls={isSearchOpen ? 'search-results' : undefined}
                     />
-
-                    {/* Keyboard shortcut indicator */}
                     {!searchQuery && (
                       <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md font-mono mr-2 pointer-events-none select-none">
                         ⌘K
                       </span>
                     )}
-
-                    {/* Clear button if typed */}
                     {searchQuery && (
                       <button
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="px-2 text-gray-400 hover:text-gray-600 text-xs mr-1"
+                        className="px-2 text-gray-400 hover:text-gray-600 mr-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
                         aria-label="Clear search"
                       >
                         <X size={15} />
@@ -213,32 +265,38 @@ export default function Navbar() {
                     )}
                   </div>
 
-                  {/* Search Button */}
+                  {/* Search Submit Button */}
                   <button
                     type="submit"
                     aria-label="Search"
-                    className="bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] px-4 sm:px-5 flex items-center justify-center text-gray-900 transition-colors border-l border-gray-200"
+                    className="bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] px-4 sm:px-5 flex items-center justify-center text-gray-900 transition-colors border-l border-gray-200 min-w-[44px] min-h-[44px]"
                   >
                     <Search size={18} />
                   </button>
                 </div>
               </form>
 
-              {/* Instant Search Autocomplete Overlay */}
+              {/* Search Autocomplete Overlay */}
               {isSearchOpen && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden animate-fade-in">
+                <div
+                  id="search-results"
+                  role="listbox"
+                  className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden animate-fade-in"
+                >
                   {searchQuery.trim().length > 0 ? (
                     <div>
                       {searchResults.length > 0 ? (
                         <div>
                           <div className="p-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
-                            <span>Matching Bakery Treats ({searchResults.length})</span>
+                            <span>Matching items ({searchResults.length})</span>
                             <span className="text-[11px]">Click item or Add to Cart</span>
                           </div>
                           <div className="divide-y divide-gray-100">
                             {searchResults.map((item) => (
                               <div
                                 key={item.id}
+                                role="option"
+                                aria-selected="false"
                                 className="w-full p-3 hover:bg-[var(--color-brand-cream)]/60 transition-colors flex items-center justify-between gap-3 group"
                               >
                                 <button
@@ -249,26 +307,19 @@ export default function Navbar() {
                                   <img
                                     src={item.image || `/images/categories/${item.categorySlug}.jpg`}
                                     alt={item.name}
-                                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200 group-hover:scale-105 transition-transform"
+                                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200"
+                                    loading="lazy"
                                   />
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <h4 className="text-xs sm:text-sm font-bold text-gray-900 truncate group-hover:text-amber-800">
-                                        {item.name}
-                                      </h4>
-                                      {item.bestseller && (
-                                        <span className="bg-[#FFD814] text-[#0F1111] text-[9px] font-black uppercase px-1.5 py-0.2 rounded-xs">
-                                          Best Seller
-                                        </span>
-                                      )}
-                                    </div>
+                                    <h4 className="text-xs sm:text-sm font-bold text-gray-900 truncate group-hover:text-amber-800">
+                                      {item.name}
+                                    </h4>
                                     <p className="text-[11px] text-gray-500 truncate">{item.category}</p>
                                     <span className="font-heading text-xs font-black text-gray-900 sm:hidden">
                                       {formatPrice(item.price)}
                                     </span>
                                   </div>
                                 </button>
-
                                 <div className="flex items-center gap-2.5 flex-shrink-0">
                                   <span className="font-heading text-xs sm:text-sm font-extrabold text-gray-900 hidden sm:block">
                                     {formatPrice(item.price)}
@@ -280,8 +331,9 @@ export default function Navbar() {
                                       addItemToCart(item);
                                       toast.success(`${item.name} added to cart!`);
                                     }}
-                                    className="p-1.5 sm:px-3 sm:py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] active:scale-95 text-[#0F1111] font-bold text-xs rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer"
+                                    className="p-2 sm:px-3 sm:py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] active:scale-95 text-[#0F1111] font-bold text-xs rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer min-w-[44px] min-h-[44px] justify-center"
                                     title="Add to cart"
+                                    aria-label={`Add ${item.name} to cart`}
                                   >
                                     <Plus size={14} />
                                     <span className="hidden sm:inline">Add</span>
@@ -302,8 +354,8 @@ export default function Navbar() {
                         </div>
                       ) : (
                         <div className="p-6 text-center text-gray-500">
-                          <p className="text-xs font-bold text-gray-800 mb-1">No exact matches found for "{searchQuery}"</p>
-                          <p className="text-[11px] mb-3">Try checking our popular handcrafted categories instead:</p>
+                          <p className="text-xs font-bold text-gray-800 mb-1">No matches for "{searchQuery}"</p>
+                          <p className="text-[11px] mb-3">Try our popular categories:</p>
                           <div className="flex flex-wrap justify-center gap-2">
                             {['Dream Cake', 'Brownies', 'Tiramisu', 'Jar Cakes'].map((tag) => (
                               <button
@@ -320,11 +372,10 @@ export default function Navbar() {
                       )}
                     </div>
                   ) : (
-                    /* Trending Searches when input is empty & clicked */
                     <div className="p-4">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-gray-800 mb-3">
                         <Flame size={15} className="text-red-500" />
-                        <span>Trending Chennai Favorites</span>
+                        <span>Trending Favorites</span>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {[
@@ -357,9 +408,9 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Right Action Icons (Account, Returns & Orders, Wishlist, Cart) */}
-            <div className="flex items-center gap-1 sm:gap-3">
-              {/* Returns & Orders */}
+            {/* Right Action Icons */}
+            <div className="flex items-center gap-0.5 sm:gap-2">
+              {/* Returns & Orders (desktop) */}
               <Link
                 to={user ? '/account' : '/login'}
                 className="hidden lg:flex flex-col p-1.5 rounded-lg hover:bg-gray-100 text-left transition-colors"
@@ -368,16 +419,17 @@ export default function Navbar() {
                 <span className="text-xs font-bold text-gray-900">& Orders</span>
               </Link>
 
-              {/* Account Dropdown */}
-              <div className="relative group">
+              {/* Account Dropdown (desktop) */}
+              <div className="relative group hidden sm:block">
                 <Link
                   to={user ? '/account' : '/login'}
-                  className="flex items-center gap-1 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
+                  className="flex items-center gap-1 p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors min-w-[44px] min-h-[44px]"
+                  aria-label={user ? 'My Account' : 'Sign in'}
                 >
                   <User size={20} className="text-gray-700" />
                   <div className="hidden sm:block text-left">
                     <span className="text-[10px] text-gray-500 font-medium block leading-tight">
-                      {user ? `Hello, ${user.displayName?.split(' ')[0] || 'Customer'}` : 'Hello, Sign in'}
+                      {user ? `Hello, ${user.displayName?.split(' ')[0] || 'You'}` : 'Hello, Sign in'}
                     </span>
                     <span className="text-xs font-bold text-gray-900 leading-tight flex items-center">
                       Account <ChevronDown size={12} className="ml-0.5 text-gray-500" />
@@ -385,7 +437,7 @@ export default function Navbar() {
                   </div>
                 </Link>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown */}
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-elevated border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 p-3 z-50">
                   {user ? (
                     <div>
@@ -437,24 +489,18 @@ export default function Navbar() {
                           Start here.
                         </Link>
                       </p>
-                      <div className="mt-2 pt-2 border-t border-gray-100 text-[10px] text-gray-500">
-                        <Link to="/admin/login" className="text-[var(--color-brand-chocolate)] font-semibold hover:underline flex items-center justify-center gap-1">
-                          <ShieldCheck size={11} className="text-[var(--color-brand-primary-dark)]" />
-                          <span>Bakery Admin Portal</span>
-                        </Link>
-                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Wishlist */}
+              {/* Wishlist (desktop/tablet) */}
               <Link
                 to="/wishlist"
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative"
-                aria-label="Wishlist"
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative min-w-[44px] min-h-[44px] justify-center"
+                aria-label={`Wishlist${wishlistCount > 0 ? `, ${wishlistCount} items` : ''}`}
               >
-                <Heart size={20} className={wishlistCount > 0 ? "text-red-500 fill-red-500" : ""} />
+                <Heart size={20} className={wishlistCount > 0 ? 'text-red-500 fill-red-500' : ''} />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center shadow-xs">
                     {wishlistCount}
@@ -462,11 +508,11 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* Amazon-Style Cart Badge */}
+              {/* Cart */}
               <Link
                 to="/cart"
-                className="flex items-center gap-1.5 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-900 transition-colors relative"
-                aria-label="Cart"
+                className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-gray-100 text-gray-900 transition-colors relative min-w-[44px] min-h-[44px] justify-center"
+                aria-label={`Shopping cart, ${cartCount} items`}
               >
                 <div className="relative">
                   <ShoppingCart size={24} className="text-gray-900" />
@@ -480,7 +526,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Amazon-Style Sub-Navigation Bar */}
+        {/* Sub-Navigation Bar (desktop) */}
         <div className="bg-[#232F3E] text-white text-xs font-medium overflow-x-auto scrollbar-none">
           <div className="container-main flex items-center gap-4 sm:gap-6 py-2 whitespace-nowrap">
             <Link to="/shop" className="flex items-center gap-1.5 hover:text-[#FFD814] font-bold">
@@ -495,109 +541,230 @@ export default function Navbar() {
             <Link to="/shop?category=brownies" className="hover:text-[#FFD814]">
               Fudgy Brownies
             </Link>
-            <Link to="/shop?category=tiramisu" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=tiramisu-desserts" className="hover:text-[#FFD814]">
               Italian Tiramisu
             </Link>
-            <Link to="/shop?category=jar-cakes" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=mini-jar-cakes" className="hover:text-[#FFD814]">
               Jar Cakes
             </Link>
-            <Link to="/shop?category=tea-cakes" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=tea-cakes-pies" className="hover:text-[#FFD814]">
               Tea Cakes
             </Link>
             <Link to="/about" className="hover:text-[#FFD814]">
-              Our Bakery Story
+              Our Story
             </Link>
             <Link to="/contact" className="hover:text-[#FFD814]">
-              Bulk & Corporate Orders
+              Bulk & Corporate
             </Link>
           </div>
         </div>
-
-        {/* Mobile Flyout Menu */}
-        {mobileOpen && (
-          <div className="lg:hidden bg-white border-b border-gray-200 p-4 space-y-3 animate-slide-up shadow-lg">
-            {/* Mobile Delivery Location Selector */}
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                openLocationModal();
-              }}
-              className="w-full p-3 bg-amber-50/80 rounded-xl mb-3 flex items-center justify-between border border-amber-200 text-left cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <MapPin size={18} className="text-amber-700" />
-                <div>
-                  <span className="text-[10px] text-gray-500 block font-medium">Deliver to</span>
-                  <span className="text-xs font-bold text-gray-900 block">
-                    {currentLocation.area}, {currentLocation.city} – {currentLocation.pincode}
-                  </span>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
-                Change
-              </span>
-            </button>
-
-            <div className="p-3 bg-gray-50 rounded-xl mb-3 flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-800">
-                {user ? `Signed in as ${user.displayName || user.email}` : 'Welcome, Guest'}
-              </span>
-              <Link
-                to={user ? '/account' : '/login'}
-                onClick={() => setMobileOpen(false)}
-                className="text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline"
-              >
-                {user ? 'View Account' : 'Sign In'}
-              </Link>
-            </div>
-
-            <Link
-              to="/shop"
-              onClick={() => setMobileOpen(false)}
-              className="block py-2 text-sm font-bold text-gray-900 border-b border-gray-100"
-            >
-              Browse All Cakes & Desserts
-            </Link>
-            {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/shop?category=${cat.slug}`}
-                onClick={() => setMobileOpen(false)}
-                className="block py-1.5 pl-3 text-xs font-semibold text-gray-600 hover:text-[var(--color-brand-primary-dark)]"
-              >
-                {cat.name}
-              </Link>
-            ))}
-            <Link
-              to="/wishlist"
-              onClick={() => setMobileOpen(false)}
-              className="block py-2 text-sm font-semibold text-gray-700 border-t border-gray-100 mt-2"
-            >
-              Saved Wishlist
-            </Link>
-            <Link
-              to="/contact"
-              onClick={() => setMobileOpen(false)}
-              className="block py-2 text-sm font-semibold text-gray-700"
-            >
-              Customer Support & WhatsApp
-            </Link>
-            <div className="pt-2 mt-2 border-t border-gray-100">
-              <Link
-                to={isAdmin ? '/admin' : '/admin/login'}
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-1.5 py-2 text-xs font-bold text-amber-800 hover:text-amber-950"
-              >
-                <ShieldCheck size={14} className="text-amber-600" />
-                <span>{isAdmin ? 'Admin Dashboard' : 'Bakery Admin Portal'}</span>
-              </Link>
-            </div>
-          </div>
-        )}
       </header>
 
-      {/* Interactive Delivery Location Modal */}
+      {/* ===== MOBILE NAVIGATION DRAWER ===== */}
+      {/* Backdrop */}
+      {mobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
+          aria-hidden="true"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {/* Drawer Panel */}
+      <div
+        id="mobile-nav-drawer"
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation Menu"
+        className={`lg:hidden fixed top-0 left-0 h-full w-[300px] max-w-[85vw] z-[100] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-[var(--color-brand-cream)]">
+          <Link to="/" onClick={closeMobileMenu} aria-label="YOYO CAKES Home">
+            <BrandLogo size="sm" />
+          </Link>
+          <button
+            onClick={closeMobileMenu}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Close navigation menu"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Drawer Scrollable Body */}
+        <div className="flex-1 overflow-y-auto">
+          {/* User Info / Sign In */}
+          <div className="p-4 bg-amber-50 border-b border-amber-100">
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-brand-primary)] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                  {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-900 truncate">
+                    {user.displayName || 'Customer'}
+                  </p>
+                  <p className="text-[11px] text-gray-500 truncate">
+                    {user.email || user.phoneNumber}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                  <User size={20} className="text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-800">Welcome, Guest</p>
+                  <div className="flex gap-3 mt-1">
+                    <Link
+                      to="/login"
+                      onClick={closeMobileMenu}
+                      className="text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline"
+                    >
+                      Sign In
+                    </Link>
+                    <span className="text-gray-300">|</span>
+                    <Link
+                      to="/register"
+                      onClick={closeMobileMenu}
+                      className="text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline"
+                    >
+                      Register
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Delivery Location */}
+          <button
+            type="button"
+            onClick={() => {
+              closeMobileMenu();
+              openLocationModal();
+            }}
+            className="w-full p-4 flex items-center justify-between border-b border-gray-100 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <MapPin size={18} className="text-amber-600 flex-shrink-0" />
+              <div className="text-left">
+                <span className="text-[10px] text-gray-500 block font-medium">Deliver to</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {currentLocation.area}, {currentLocation.city}
+                </span>
+              </div>
+            </div>
+            <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full flex-shrink-0">
+              Change
+            </span>
+          </button>
+
+          {/* Navigation Links */}
+          <nav aria-label="Main Navigation">
+            <div className="py-2">
+              <p className="px-4 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Browse</p>
+              {navLinks.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to + label}
+                  to={to}
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[var(--color-brand-cream)] hover:text-[var(--color-brand-primary-dark)] transition-colors group"
+                >
+                  <Icon size={18} className="text-gray-400 group-hover:text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <span>{label}</span>
+                  <ChevronRight size={14} className="ml-auto text-gray-300 group-hover:text-amber-600" />
+                </Link>
+              ))}
+            </div>
+
+            <div className="py-2 border-t border-gray-100">
+              <p className="px-4 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-widest">My Account</p>
+              {accountLinks.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={label}
+                  to={to}
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[var(--color-brand-cream)] hover:text-[var(--color-brand-primary-dark)] transition-colors group"
+                >
+                  <Icon size={18} className="text-gray-400 group-hover:text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <span>{label}</span>
+                  {label === 'Wishlist' && wishlistCount > 0 && (
+                    <span className="ml-auto bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            {/* Admin Section — only shown to admins */}
+            {isAdmin && (
+              <div className="py-2 border-t border-amber-200 bg-amber-50">
+                <p className="px-4 py-1.5 text-[10px] font-black text-amber-700 uppercase tracking-widest">
+                  Admin
+                </p>
+                <Link
+                  to="/admin"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-amber-900 hover:bg-amber-100 transition-colors group"
+                >
+                  <ShieldCheck size={18} className="text-amber-600 flex-shrink-0" />
+                  <span>Admin Dashboard</span>
+                  <ChevronRight size={14} className="ml-auto text-amber-400" />
+                </Link>
+                <Link
+                  to="/admin/products"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
+                >
+                  <Package size={18} className="text-amber-500 flex-shrink-0" />
+                  <span>Products & Stock</span>
+                </Link>
+                <Link
+                  to="/admin/orders"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
+                >
+                  <ClipboardList size={18} className="text-amber-500 flex-shrink-0" />
+                  <span>Orders</span>
+                </Link>
+              </div>
+            )}
+          </nav>
+        </div>
+
+        {/* Drawer Footer */}
+        <div className="p-4 border-t border-gray-100 bg-gray-50">
+          {user ? (
+            <button
+              onClick={async () => {
+                await logout();
+                closeMobileMenu();
+                toast.success('Signed out successfully');
+              }}
+              className="w-full py-3 px-4 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              onClick={closeMobileMenu}
+              className="w-full py-3 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+            >
+              Sign In to Your Account
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Delivery Location Modal */}
       <DeliveryLocationModal />
     </>
   );

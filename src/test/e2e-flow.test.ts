@@ -1,7 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PRODUCTS, CATEGORIES } from '../data/products';
 import { saveOrder, getOrderById, updateOrderStatus, type Order } from '../lib/orders';
 import { COLLECTIONS } from '../services/firestoreService';
+
+vi.mock('../services/firestoreService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/firestoreService')>();
+  return {
+    ...actual,
+    createFirestoreOrder: vi.fn().mockResolvedValue(undefined),
+    updateFirestoreOrderStatus: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 describe('End-to-End E-Commerce Workflow & Firestore Schema Integrity', () => {
   beforeEach(() => {
