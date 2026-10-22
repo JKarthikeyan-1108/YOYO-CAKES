@@ -251,6 +251,7 @@ export default function CheckoutPage() {
   // Place Order Handler (Both Razorpay & Cash on Delivery)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (processing) return;
 
     if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
       toast.error('Please fill in your name, email, and mobile number');

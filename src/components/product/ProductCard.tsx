@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star, Clock, Eye, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import type { Product } from '@/data/products';
 import { formatPrice } from '@/data/products';
@@ -19,6 +19,21 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
   const [includeCandles, setIncludeCandles] = useState(false);
+
+  // Accessible Escape key listener & body scroll lock
+  useEffect(() => {
+    if (!quickViewOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setQuickViewOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const orig = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = orig;
+    };
+  }, [quickViewOpen]);
 
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
@@ -178,6 +193,9 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
       {quickViewOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Quick view for ${product.name}`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -192,7 +210,8 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
             <button
               type="button"
               onClick={() => setQuickViewOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors z-20"
+              className="absolute top-3 right-3 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors z-20"
+              aria-label="Close quick view dialog"
             >
               <X size={18} />
             </button>

@@ -21,6 +21,7 @@ import toast from 'react-hot-toast';
 import { getProductById, getProductsByCategory, formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import { useProductStore } from '@/stores/productStore';
 import ProductCard from '@/components/product/ProductCard';
 
 interface ReviewItem {
@@ -78,7 +79,10 @@ export default function ProductDetailPage() {
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(id || ''));
 
-  const product = id ? getProductById(id) : undefined;
+  const getStoreProduct = useProductStore((s) => s.getProductById);
+  const allProducts = useProductStore((s) => s.products);
+  const productFromStore = id ? getStoreProduct(id) : undefined;
+  const product = productFromStore || (id ? getProductById(id) : undefined);
   const categoryImage = product ? `/images/categories/${product.categorySlug}.jpg` : '';
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [hasFailedOnce, setHasFailedOnce] = useState(false);
@@ -119,8 +123,8 @@ export default function ProductDetailPage() {
     );
   }
 
-  const relatedProducts = getProductsByCategory(product.categorySlug)
-    .filter((p) => p.id !== product.id)
+  const relatedProducts = allProducts
+    .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id)
     .slice(0, 4);
 
   const displayImage = imgSrc || product.image || categoryImage;
