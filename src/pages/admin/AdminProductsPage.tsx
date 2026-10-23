@@ -14,16 +14,38 @@ import {
   ChevronUp,
   Package,
   AlertTriangle,
+  Minus,
+  CheckSquare,
+  Square,
+  Layers,
+  Sparkles,
+  ArrowUpRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { CATEGORIES, formatPrice, type Product } from '@/data/products';
 import { useProductStore } from '@/stores/productStore';
 import { uploadProductImageToStorage } from '@/services/firestoreService';
 
+type StockFilterType = 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
+
 export default function AdminProductsPage() {
-  const { products, addProduct, updateProduct, deleteProduct, toggleStock, fetchCatalog } = useProductStore();
+  const {
+    products,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    toggleStock,
+    updateStockQuantity,
+    batchUpdateStock,
+    batchAdjustStockQuantity,
+    fetchCatalog,
+  } = useProductStore();
+
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [stockFilter, setStockFilter] = useState<StockFilterType>('all');
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -55,14 +77,66 @@ export default function AdminProductsPage() {
     setUploadError(null);
   };
 
+  // Filter calculation
+  const inStockCount = products.filter((p) => p.inStock && (p.stockQuantity ?? 1) > 0).length;
+  const lowStockCount = products.filter((p) => p.inStock && (p.stockQuantity ?? 0) > 0 && (p.stockQuantity ?? 0) <= 5).length;
+  const outOfStockCount = products.filter((p) => !p.inStock || (p.stockQuantity ?? 0) === 0).length;
+  const bestsellerCount = products.filter((p) => p.bestseller).length;
+
   const filtered = products.filter((p) => {
     const matchQuery =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase());
+
     const matchCategory =
       selectedCategory === 'all' || p.categorySlug === selectedCategory;
-    return matchQuery && matchCategory;
+
+    let matchStock = true;
+    if (stockFilter === 'in_stock') {
+      matchStock = p.inStock && (p.stockQuantity ?? 1) > 0;
+    } else if (stockFilter === 'low_stock') {
+      matchStock = p.inStock && (p.stockQuantity ?? 0) > 0 && (p.stockQuantity ?? 0) <= 5;
+    } else if (stockFilter === 'out_of_stock') {
+      matchStock = !p.inStock || (p.stockQuantity ?? 0) === 0;
+    }
+
+    return matchQuery && matchCategory && matchStock;
   });
+
+  // Multi-select handlers
+  const handleSelectAll = () => {
+    if (selectedProductIds.length === filtered.length) {
+      setSelectedProductIds([]);
+    } else {
+      setSelectedProductIds(filtered.map((p) => p.id));
+    }
+  };
+
+  const handleToggleSelectOne = (id: string) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // Bulk actions
+  const handleBulkRestock = async (delta: number) => {
+    if (selectedProductIds.length === 0) return;
+    await batchAdjustStockQuantity(selectedProductIds, delta);
+    toast.success(`Restocked +${delta} units for ${selectedProductIds.length} items!`, { icon: '📦' });
+  };
+
+  const handleBulkStockStatus = async (inStock: boolean) => {
+    if (selectedProductIds.length === 0) return;
+    await batchUpdateStock(selectedProductIds, inStock);
+    toast.success(`Marked ${selectedProductIds.length} items as ${inStock ? 'In Stock' : 'Sold Out'}`);
+  };
+
+  // Inline Stock Stepper
+  const handleAdjustStock = async (product: Product, delta: number) => {
+    const nextQty = Math.max(0, (product.stockQuantity ?? 0) + delta);
+    await updateStockQuantity(product.id, nextQty);
+    toast.success(`${product.name}: ${nextQty} in stock`, { duration: 1500 });
+  };
 
   const handleEdit = (product: Product) => {
     cleanupPreview();
@@ -81,7 +155,7 @@ export default function AdminProductsPage() {
       description: '',
       image: '/images/products/dream-cake.jpg',
       inStock: true,
-      stockQuantity: 0,
+      stockQuantity: 20,
       featured: false,
       bestseller: false,
       ingredients: '',
@@ -103,7 +177,7 @@ export default function AdminProductsPage() {
     // Validate MIME type
     const validMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
     if (!validMimes.includes(file.type) && !file.type.startsWith('image/')) {
-      toast.error(`Invalid image format (${file.type || 'unknown'}). Please choose a JPEG, PNG, WebP, or GIF image.`);
+      toast.error(`Invalid image format (${file.type || 'unknown'}). Please choose JPEG, PNG, WebP, or GIF.`);
       return;
     }
 
@@ -151,7 +225,7 @@ export default function AdminProductsPage() {
     }
 
     if (uploadError) {
-      toast.error('Cannot save product while image upload has failed. Please resolve the error or paste a valid URL.');
+      toast.error('Cannot save product while image upload has failed. Please resolve the error.');
       return;
     }
 
@@ -196,87 +270,177 @@ export default function AdminProductsPage() {
     setConfirmDeleteId(null);
   };
 
-  const inStockCount = products.filter((p) => p.inStock).length;
-  const lowStockCount = products.filter((p) => (p.stockQuantity ?? 0) <= 10 && p.inStock).length;
-  const bestsellerCount = products.filter((p) => p.bestseller).length;
-
-  const stockLabel = (qty: number | undefined) => {
-    if (qty === undefined || qty === null) return 'Not configured';
-    if (qty === 0) return 'Out of Stock';
-    if (qty <= 10) return `${qty} units (Low)`;
-    return `${qty} units`;
-  };
-
   const stockBadgeClass = (qty: number | undefined, inStock: boolean) => {
-    if (!inStock) return 'bg-gray-100 text-gray-600 border-gray-200';
-    if (qty === undefined || qty === null) return 'bg-gray-100 text-gray-500 border-gray-200';
-    if (qty === 0) return 'bg-red-100 text-red-700 border-red-200';
-    if (qty <= 10) return 'bg-orange-100 text-orange-700 border-orange-200';
-    return 'bg-green-100 text-green-700 border-green-200';
+    if (!inStock || qty === 0) return 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800';
+    if (qty !== undefined && qty <= 5) return 'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800 font-bold';
+    return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800';
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 max-w-7xl">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E1008]">
-            Products & Stock
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--color-brand-chocolate)]">
+            Products & Inventory
           </h1>
-          <p className="text-xs sm:text-sm text-[#7A695E] mt-1">
-            {products.length} signature artisanal bakery items in live catalog
+          <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] mt-1">
+            {products.length} signature bakery items with live stock counts and catalog controls
           </p>
         </div>
         <button
           onClick={handleAddNew}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#D4A373] to-[#E5B88F] hover:from-[#C79361] hover:to-[#D9A779] text-[#1E1008] font-bold text-xs shadow-xs transition-all flex items-center gap-2 border border-[#C59262] self-start sm:self-auto min-h-[44px]"
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[var(--color-brand-primary)] to-[var(--color-brand-primary-light)] hover:opacity-90 text-[var(--color-brand-chocolate)] font-bold text-xs shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto min-h-[44px]"
           aria-label="Add new product"
         >
           <Plus size={16} aria-hidden="true" /> Add New Item
         </button>
       </div>
 
+      {/* Low Stock Replenishment Alert Banner */}
+      {(lowStockCount > 0 || outOfStockCount > 0) && (
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="text-amber-700 dark:text-amber-400 flex-shrink-0" size={20} />
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-amber-950 dark:text-amber-200">
+                Kitchen Replenishment Alert
+              </p>
+              <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                {lowStockCount} item{lowStockCount > 1 ? 's are' : ' is'} running low (≤5 units) and {outOfStockCount} item{outOfStockCount > 1 ? 's are' : ' is'} sold out.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setStockFilter('low_stock');
+              setSelectedCategory('all');
+            }}
+            className="px-3.5 py-1.5 rounded-xl bg-amber-900 text-amber-100 hover:bg-amber-800 text-xs font-bold self-start sm:self-auto flex items-center gap-1 shadow-xs transition-colors"
+          >
+            <span>View Low Stock</span>
+            <ArrowUpRight size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Stats Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Items', value: products.length, color: 'text-[var(--color-brand-chocolate)]', bg: 'bg-[var(--color-brand-surface)]' },
-          { label: 'In Stock', value: inStockCount, color: 'text-emerald-800 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
-          { label: 'Low Stock', value: lowStockCount, color: 'text-[#9A3412] dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/30' },
-          { label: 'Bestsellers', value: bestsellerCount, color: 'text-[#8C5E3C] dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' },
-        ].map(({ label, value, color, bg }) => (
-          <div key={label} className={`${bg} rounded-2xl p-4 border border-[var(--color-brand-border)] shadow-xs`}>
+          { label: 'Total Catalog', value: products.length, color: 'text-[var(--color-brand-chocolate)]', bg: 'bg-[var(--color-brand-surface)]', filter: 'all' as StockFilterType },
+          { label: 'In Stock', value: inStockCount, color: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-[var(--color-brand-surface)]', filter: 'in_stock' as StockFilterType },
+          { label: 'Low Stock (≤5)', value: lowStockCount, color: 'text-amber-700 dark:text-amber-400', bg: 'bg-[var(--color-brand-surface)]', filter: 'low_stock' as StockFilterType },
+          { label: 'Sold Out', value: outOfStockCount, color: 'text-rose-700 dark:text-rose-400', bg: 'bg-[var(--color-brand-surface)]', filter: 'out_of_stock' as StockFilterType },
+        ].map(({ label, value, color, bg, filter }) => (
+          <button
+            key={label}
+            onClick={() => setStockFilter(filter)}
+            className={`${bg} rounded-2xl p-4 border text-left transition-all shadow-xs ${
+              stockFilter === filter
+                ? 'border-[var(--color-brand-primary)] ring-2 ring-[var(--color-brand-primary)]/20'
+                : 'border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]/40'
+            }`}
+          >
             <p className="text-xs font-bold text-[var(--color-brand-muted)]">{label}</p>
             <p className={`text-2xl font-black ${color} mt-0.5`}>{value}</p>
-          </div>
+          </button>
         ))}
       </div>
 
-      {/* Search & Category Filters */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E8DFD5] shadow-xs space-y-3">
+      {/* Floating Bulk Actions Bar (When items selected) */}
+      {selectedProductIds.length > 0 && (
+        <div className="bg-[var(--color-brand-chocolate)] text-[var(--color-brand-cream)] p-3.5 rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-3 animate-fadeIn border border-[var(--color-brand-border)]">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-brand-primary)] animate-pulse" />
+            <span className="text-xs font-bold">
+              {selectedProductIds.length} item{selectedProductIds.length > 1 ? 's' : ''} selected
+            </span>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2">
+            <button
+              onClick={() => handleBulkRestock(10)}
+              className="px-3 py-1.5 rounded-xl bg-[var(--color-brand-primary)] hover:opacity-90 text-[var(--color-brand-chocolate)] text-xs font-bold flex items-center gap-1 shadow-xs"
+            >
+              <Package size={13} />
+              <span>+10 Restock Units</span>
+            </button>
+
+            <button
+              onClick={() => handleBulkStockStatus(true)}
+              className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1 shadow-xs"
+            >
+              <CheckCircle size={13} />
+              <span>Mark in Stock</span>
+            </button>
+
+            <button
+              onClick={() => handleBulkStockStatus(false)}
+              className="px-3 py-1.5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold flex items-center gap-1 shadow-xs"
+            >
+              <XCircle size={13} />
+              <span>Mark Sold Out</span>
+            </button>
+
+            <button
+              onClick={() => setSelectedProductIds([])}
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors"
+            >
+              Deselect All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Search & Category Filter Section */}
+      <div className="bg-[var(--color-brand-surface)] p-4 rounded-2xl border border-[var(--color-brand-border)] shadow-xs space-y-3">
         <div className="relative">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" aria-hidden="true" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search products by name or category..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+            className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40 min-h-[44px]"
             aria-label="Search products"
           />
         </div>
 
+        {/* Stock Filter Chips */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-[var(--color-brand-border)]/60 pt-1">
+          <span className="text-[11px] font-bold text-[var(--color-brand-muted)] flex-shrink-0">Stock State:</span>
+          {[
+            { key: 'all', label: 'All Inventory' },
+            { key: 'in_stock', label: `In Stock (${inStockCount})` },
+            { key: 'low_stock', label: `Low Stock ≤5 (${lowStockCount})` },
+            { key: 'out_of_stock', label: `Sold Out (${outOfStockCount})` },
+          ].map((sf) => (
+            <button
+              key={sf.key}
+              onClick={() => setStockFilter(sf.key as StockFilterType)}
+              className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex-shrink-0 min-h-[32px] ${
+                stockFilter === sf.key
+                  ? 'bg-[var(--color-brand-chocolate)] text-[var(--color-brand-cream)] shadow-xs'
+                  : 'bg-[var(--color-brand-cream)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
+              }`}
+            >
+              {sf.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Category Filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <Filter size={14} className="text-gray-400 flex-shrink-0" aria-hidden="true" />
+          <Filter size={14} className="text-[var(--color-brand-muted)] flex-shrink-0" aria-hidden="true" />
           <button
             onClick={() => setSelectedCategory('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex-shrink-0 min-h-[36px] ${
               selectedCategory === 'all'
-                ? 'bg-[#1E1008] text-[#FAF7F2] shadow-xs'
-                : 'bg-[#F5ECE1] text-[#6B5A4E] hover:bg-[#EBDCCF]'
+                ? 'bg-[var(--color-brand-chocolate)] text-[var(--color-brand-cream)] shadow-xs'
+                : 'bg-[var(--color-brand-cream)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
             }`}
-            aria-pressed={selectedCategory === 'all'}
           >
-            All ({products.length})
+            All Categories ({products.length})
           </button>
           {CATEGORIES.map((c) => {
             const count = products.filter((p) => p.categorySlug === c.slug).length;
@@ -286,10 +450,9 @@ export default function AdminProductsPage() {
                 onClick={() => setSelectedCategory(c.slug)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex-shrink-0 min-h-[36px] ${
                   selectedCategory === c.slug
-                    ? 'bg-[#1E1008] text-[#FAF7F2] shadow-xs'
-                    : 'bg-[#F5ECE1] text-[#6B5A4E] hover:bg-[#EBDCCF]'
+                    ? 'bg-[var(--color-brand-chocolate)] text-[var(--color-brand-cream)] shadow-xs'
+                    : 'bg-[var(--color-brand-cream)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                 }`}
-                aria-pressed={selectedCategory === c.slug}
               >
                 {c.name} ({count})
               </button>
@@ -298,115 +461,187 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Results count */}
-      <p className="text-xs text-[#7A695E] px-1 font-medium">
-        Showing {filtered.length} of {products.length} products
-        {selectedCategory !== 'all' && (
-          <span> in {CATEGORIES.find((c) => c.slug === selectedCategory)?.name}</span>
-        )}
-      </p>
+      {/* Results Header */}
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-[var(--color-brand-muted)] font-medium">
+          Showing {filtered.length} of {products.length} products
+        </p>
+
+        <button
+          onClick={handleSelectAll}
+          className="text-xs font-bold text-[var(--color-brand-primary)] hover:underline flex items-center gap-1.5"
+        >
+          {selectedProductIds.length === filtered.length && filtered.length > 0 ? (
+            <><CheckSquare size={14} /> Deselect All</>
+          ) : (
+            <><Square size={14} /> Select All {filtered.length} Items</>
+          )}
+        </button>
+      </div>
 
       {/* ===== DESKTOP TABLE VIEW ===== */}
-      <div className="hidden md:block bg-white rounded-2xl border border-[#E8DFD5] shadow-xs overflow-hidden">
+      <div className="hidden md:block bg-[var(--color-brand-surface)] rounded-2xl border border-[var(--color-brand-border)] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#F7F3EC] border-b border-[#E8DFD5]">
-                <th className="py-3.5 px-4 text-xs font-bold text-[#5C4D42] uppercase tracking-wide">
+              <tr className="bg-[var(--color-brand-cream)] border-b border-[var(--color-brand-border)]">
+                <th className="py-3.5 px-3 text-xs font-bold text-[var(--color-brand-muted)] w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedProductIds.length === filtered.length && filtered.length > 0}
+                    onChange={handleSelectAll}
+                    aria-label="Select all products"
+                    className="rounded border-[var(--color-brand-border)]"
+                  />
+                </th>
+                <th className="py-3.5 px-4 text-xs font-bold text-[var(--color-brand-muted)] uppercase tracking-wide">
                   Item Name
                 </th>
-                <th className="py-3.5 px-4 text-xs font-bold text-[#5C4D42] uppercase tracking-wide">
+                <th className="py-3.5 px-4 text-xs font-bold text-[var(--color-brand-muted)] uppercase tracking-wide">
                   Category
                 </th>
-                <th className="py-3.5 px-4 text-xs font-bold text-[#5C4D42] uppercase tracking-wide">
+                <th className="py-3.5 px-4 text-xs font-bold text-[var(--color-brand-muted)] uppercase tracking-wide">
                   Price
                 </th>
-                <th className="py-3.5 px-4 text-xs font-bold text-[#5C4D42] uppercase tracking-wide">
-                  Inventory
+                <th className="py-3.5 px-4 text-xs font-bold text-[var(--color-brand-muted)] uppercase tracking-wide">
+                  Stock Units (Live Stepper)
                 </th>
-                <th className="py-3.5 px-4 text-xs font-bold text-[#5C4D42] uppercase tracking-wide">
+                <th className="py-3.5 px-4 text-xs font-bold text-[var(--color-brand-muted)] uppercase tracking-wide">
                   Status
                 </th>
-                <th className="py-3.5 px-4 text-xs font-bold text-[#5C4D42] uppercase tracking-wide text-right">
+                <th className="py-3.5 px-4 text-xs font-bold text-[var(--color-brand-muted)] uppercase tracking-wide text-right">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E8DFD5]">
+            <tbody className="divide-y divide-[var(--color-brand-border)]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center">
-                    <Package size={32} className="mx-auto text-gray-300 mb-2" />
-                    <p className="text-sm font-medium text-[#7A695E]">No products found</p>
-                    <p className="text-xs text-[#8C7A6E]">Try a different search or category filter</p>
+                  <td colSpan={7} className="py-12 text-center">
+                    <Package size={32} className="mx-auto text-[var(--color-brand-muted)]/50 mb-2" />
+                    <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">No products found</p>
+                    <p className="text-xs text-[var(--color-brand-muted)]">Try a different search or inventory filter</p>
                   </td>
                 </tr>
               ) : (
-                filtered.map((product) => (
-                  <tr key={product.id} className="hover:bg-[#FAF7F2] transition-colors group">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={product.image || '/images/products/dream-cake.jpg'}
-                          alt={product.name}
-                          className="w-10 h-10 rounded-lg object-cover bg-gray-100 border border-[#E8DFD5] flex-shrink-0"
-                          loading="lazy"
-                          onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg'; }}
+                filtered.map((product) => {
+                  const isChecked = selectedProductIds.includes(product.id);
+                  return (
+                    <tr
+                      key={product.id}
+                      className={`hover:bg-[var(--color-brand-cream)]/50 transition-colors group ${
+                        isChecked ? 'bg-[var(--color-brand-primary)]/5' : ''
+                      }`}
+                    >
+                      <td className="py-3.5 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleSelectOne(product.id)}
+                          aria-label={`Select ${product.name}`}
+                          className="rounded border-[var(--color-brand-border)]"
                         />
-                        <div>
-                          <p className="font-semibold text-[#1E1008] text-sm">{product.name}</p>
-                          <p className="font-mono text-[10px] text-[#8C7A6E]">{product.id}</p>
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={product.image || '/images/products/dream-cake.jpg'}
+                            alt={product.name}
+                            className="w-10 h-10 rounded-lg object-cover bg-gray-100 border border-[var(--color-brand-border)] flex-shrink-0"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
+                            }}
+                          />
+                          <div>
+                            <p className="font-bold text-[var(--color-brand-chocolate)] text-sm">{product.name}</p>
+                            <p className="font-mono text-[10px] text-[var(--color-brand-muted)]">{product.id}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#F5ECE1] text-[#6B5A4E]">
-                        {product.category}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-[#1E1008]">
-                      {formatPrice(product.price)}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${stockBadgeClass(product.stockQuantity, product.inStock)}`}>
-                        {stockLabel(product.stockQuantity)}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <button
-                        onClick={() => handleToggleStock(product.id)}
-                        className={`flex items-center gap-1.5 text-xs font-semibold transition-colors hover:opacity-70 ${
-                          product.inStock ? 'text-green-700' : 'text-red-500'
-                        }`}
-                        aria-label={`${product.inStock ? 'Deactivate' : 'Activate'} ${product.name}`}
-                      >
-                        {product.inStock ? (
-                          <><CheckCircle size={15} aria-hidden="true" /> Active</>
-                        ) : (
-                          <><XCircle size={15} aria-hidden="true" /> Inactive</>
-                        )}
-                      </button>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)]">
+                          {product.category}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary-light)]">
+                        {formatPrice(product.price)}
+                      </td>
+
+                      {/* Live Stock Stepper */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="inline-flex items-center border border-[var(--color-brand-border)] rounded-xl bg-[var(--color-brand-cream)] overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => handleAdjustStock(product, -1)}
+                              disabled={(product.stockQuantity ?? 0) <= 0}
+                              className="p-1.5 hover:bg-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] transition-colors disabled:opacity-30"
+                              title="Decrease stock by 1"
+                            >
+                              <Minus size={13} />
+                            </button>
+                            <span className="w-10 text-center font-mono font-bold text-xs text-[var(--color-brand-chocolate)]">
+                              {product.stockQuantity ?? 0}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleAdjustStock(product, 1)}
+                              className="p-1.5 hover:bg-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] transition-colors"
+                              title="Increase stock by 1"
+                            >
+                              <Plus size={13} />
+                            </button>
+                          </div>
+
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${stockBadgeClass(product.stockQuantity, product.inStock)}`}>
+                            {product.inStock && (product.stockQuantity ?? 0) > 5 ? 'Good' : (product.stockQuantity ?? 0) > 0 ? 'Low' : 'Out'}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4">
                         <button
-                          onClick={() => handleEdit(product)}
-                          className="p-2 rounded-lg text-[#7A695E] hover:text-[#1E1008] hover:bg-[#F5ECE1] transition-colors"
-                          aria-label={`Edit ${product.name}`}
+                          onClick={() => handleToggleStock(product.id)}
+                          className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${
+                            product.inStock && (product.stockQuantity ?? 0) > 0
+                              ? 'text-emerald-700 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          }`}
+                          aria-label={`${product.inStock ? 'Deactivate' : 'Activate'} ${product.name}`}
                         >
-                          <Edit size={15} aria-hidden="true" />
+                          {product.inStock && (product.stockQuantity ?? 0) > 0 ? (
+                            <><CheckCircle size={15} aria-hidden="true" /> In Stock</>
+                          ) : (
+                            <><XCircle size={15} aria-hidden="true" /> Sold Out</>
+                          )}
                         </button>
-                        <button
-                          onClick={() => setConfirmDeleteId(product.id)}
-                          className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                          aria-label={`Delete ${product.name}`}
-                        >
-                          <Trash2 size={15} aria-hidden="true" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="p-2 rounded-lg text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream)] transition-colors"
+                            aria-label={`Edit ${product.name}`}
+                          >
+                            <Edit size={15} aria-hidden="true" />
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(product.id)}
+                            className="p-2 rounded-lg text-[var(--color-brand-muted)] hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                            aria-label={`Delete ${product.name}`}
+                          >
+                            <Trash2 size={15} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -416,122 +651,98 @@ export default function AdminProductsPage() {
       {/* ===== MOBILE CARD VIEW ===== */}
       <div className="md:hidden space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#E8DFD5] p-8 text-center">
-            <Package size={32} className="mx-auto text-gray-300 mb-2" aria-hidden="true" />
-            <p className="text-sm font-medium text-[#7A695E]">No products found</p>
-            <p className="text-xs text-[#8C7A6E] mt-1">Try a different search or filter</p>
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl border border-[var(--color-brand-border)] p-8 text-center">
+            <Package size={32} className="mx-auto text-[var(--color-brand-muted)]/50 mb-2" aria-hidden="true" />
+            <p className="text-sm font-medium text-[var(--color-brand-chocolate)]">No products found</p>
+            <p className="text-xs text-[var(--color-brand-muted)] mt-1">Try a different search or filter</p>
           </div>
         ) : (
           filtered.map((product) => {
             const isExpanded = expandedCard === product.id;
+            const isChecked = selectedProductIds.includes(product.id);
+
             return (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl border border-[#E8DFD5] shadow-xs overflow-hidden"
+                className={`bg-[var(--color-brand-surface)] rounded-2xl border border-[var(--color-brand-border)] shadow-xs overflow-hidden ${
+                  isChecked ? 'ring-2 ring-[var(--color-brand-primary)]' : ''
+                }`}
               >
                 {/* Card Main Row */}
                 <div className="p-4 flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleToggleSelectOne(product.id)}
+                    aria-label={`Select ${product.name}`}
+                    className="mt-1 rounded border-[var(--color-brand-border)]"
+                  />
+
                   <img
                     src={product.image || '/images/products/dream-cake.jpg'}
                     alt={product.name}
-                    className="w-14 h-14 rounded-xl object-cover bg-gray-100 border border-[#E8DFD5] flex-shrink-0"
+                    className="w-14 h-14 rounded-xl object-cover bg-gray-100 border border-[var(--color-brand-border)] flex-shrink-0"
                     loading="lazy"
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg'; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
+                    }}
                   />
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h3 className="font-bold text-[#1E1008] text-sm leading-tight truncate">{product.name}</h3>
-                        <span className="inline-flex mt-0.5 items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#F5ECE1] text-[#6B5A4E]">
+                        <h3 className="font-bold text-[var(--color-brand-chocolate)] text-sm leading-tight truncate">{product.name}</h3>
+                        <span className="inline-flex mt-0.5 items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)]">
                           {product.category}
                         </span>
                       </div>
-                      <span className="font-bold text-[#1E1008] text-sm flex-shrink-0">
+                      <span className="font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary-light)] text-sm flex-shrink-0">
                         {formatPrice(product.price)}
                       </span>
                     </div>
 
-                    {/* Status Row */}
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${stockBadgeClass(product.stockQuantity, product.inStock)}`}>
-                        {stockLabel(product.stockQuantity)}
-                      </span>
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${product.inStock ? 'text-green-700' : 'text-red-500'}`}>
-                        {product.inStock
-                          ? <><CheckCircle size={11} aria-hidden="true" /> Active</>
-                          : <><XCircle size={11} aria-hidden="true" /> Inactive</>
-                        }
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Actions Row */}
-                <div className="flex items-center justify-between gap-2 px-4 pb-4">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#F5ECE1] text-[#1E1008] hover:bg-[#EBDCCF] text-xs font-bold transition-colors min-h-[36px]"
-                      aria-label={`Edit ${product.name}`}
-                    >
-                      <Edit size={13} aria-hidden="true" /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleToggleStock(product.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors min-h-[36px] ${
-                        product.inStock
-                          ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                          : 'bg-green-50 text-green-700 hover:bg-green-100'
-                      }`}
-                      aria-label={`${product.inStock ? 'Deactivate' : 'Activate'} ${product.name}`}
-                    >
-                      {product.inStock ? <XCircle size={13} aria-hidden="true" /> : <CheckCircle size={13} aria-hidden="true" />}
-                      {product.inStock ? 'Deactivate' : 'Activate'}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setConfirmDeleteId(product.id)}
-                      className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
-                      aria-label={`Delete ${product.name}`}
-                    >
-                      <Trash2 size={15} aria-hidden="true" />
-                    </button>
-                    <button
-                      onClick={() => setExpandedCard(isExpanded ? null : product.id)}
-                      className="p-2 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
-                      aria-expanded={isExpanded}
-                      aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
-                    >
-                      {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expandable Details */}
-                {isExpanded && (
-                  <div className="px-4 pb-4 pt-2 border-t border-[#E8DFD5] space-y-2 bg-[#FAF7F2]">
-                    <div>
-                      <span className="text-[10px] font-bold text-[#7A695E] uppercase tracking-wide">Product ID</span>
-                      <p className="font-mono text-xs text-[#8C7A6E]">{product.id}</p>
-                    </div>
-                    {product.description && (
-                      <div>
-                        <span className="text-[10px] font-bold text-[#7A695E] uppercase tracking-wide">Description</span>
-                        <p className="text-xs text-[#1E1008] line-clamp-2">{product.description}</p>
+                    {/* Stock Stepper on Mobile */}
+                    <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-[var(--color-brand-border)]">
+                      <div className="inline-flex items-center border border-[var(--color-brand-border)] rounded-xl bg-[var(--color-brand-cream)] overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => handleAdjustStock(product, -1)}
+                          disabled={(product.stockQuantity ?? 0) <= 0}
+                          className="p-1.5 text-[var(--color-brand-chocolate)] disabled:opacity-30"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span className="w-8 text-center font-mono font-bold text-xs text-[var(--color-brand-chocolate)]">
+                          {product.stockQuantity ?? 0}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleAdjustStock(product, 1)}
+                          className="p-1.5 text-[var(--color-brand-chocolate)]"
+                        >
+                          <Plus size={12} />
+                        </button>
                       </div>
-                    )}
-                    <div className="flex gap-2">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${product.featured ? 'bg-purple-100 text-purple-700' : 'bg-[#F5ECE1] text-[#6B5A4E]'}`}>
-                        {product.featured ? 'Featured' : 'Not Featured'}
-                      </span>
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${product.bestseller ? 'bg-[#F7EFE6] text-[#8C5E3C] border border-[#E8DFD5]' : 'bg-[#F5ECE1] text-[#6B5A4E]'}`}>
-                        {product.bestseller ? 'Bestseller' : 'Regular'}
-                      </span>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleToggleStock(product.id)}
+                          className={`text-xs font-bold px-2.5 py-1 rounded-xl border ${stockBadgeClass(product.stockQuantity, product.inStock)}`}
+                        >
+                          {product.inStock && (product.stockQuantity ?? 0) > 0 ? 'Active' : 'Sold Out'}
+                        </button>
+
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="p-1.5 rounded-lg text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream)]"
+                          aria-label={`Edit ${product.name}`}
+                        >
+                          <Edit size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })
@@ -541,25 +752,25 @@ export default function AdminProductsPage() {
       {/* ===== EDIT / ADD MODAL ===== */}
       {editingProduct && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
           role="dialog"
           aria-modal="true"
           aria-labelledby="product-modal-title"
         >
           <div className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-[var(--color-brand-border)] max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-[var(--color-brand-border)] bg-[var(--color-brand-cream-dark)]">
+            <div className="flex items-center justify-between p-5 border-b border-[var(--color-brand-border)] bg-[var(--color-brand-cream)]">
               <div>
                 <h2 id="product-modal-title" className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
                   {isNew ? 'Add New Product' : `Edit: ${editingProduct.name}`}
                 </h2>
                 <p className="text-[11px] text-[var(--color-brand-muted)] mt-0.5">
-                  {isNew ? 'Create a new signature bakery item' : 'Update pricing, stock, and media'}
+                  {isNew ? 'Create a signature bakery item' : 'Update pricing, inventory stock, and media'}
                 </p>
               </div>
               <button
                 onClick={handleCloseModal}
-                className="p-2 rounded-full bg-[var(--color-brand-cream)] hover:bg-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+                className="p-2 rounded-full bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Close modal"
               >
                 <X size={18} aria-hidden="true" />
@@ -579,7 +790,7 @@ export default function AdminProductsPage() {
                   required
                   value={editingProduct.name}
                   onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40"
                   placeholder="e.g. Dream Cake"
                 />
               </div>
@@ -597,21 +808,26 @@ export default function AdminProductsPage() {
                     min={1}
                     value={editingProduct.price}
                     onChange={(e) => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40"
                   />
                 </div>
                 <div>
                   <label htmlFor="product-stock" className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
-                    Stock Quantity
+                    Stock Quantity (Units)
                   </label>
                   <input
                     id="product-stock"
                     type="number"
                     min={0}
-                    value={editingProduct.stockQuantity ?? ''}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, stockQuantity: Number(e.target.value) })}
-                    placeholder="Leave blank if N/A"
-                    className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                    value={editingProduct.stockQuantity ?? 0}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        stockQuantity: Number(e.target.value),
+                        inStock: Number(e.target.value) > 0,
+                      })
+                    }
+                    className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40"
                   />
                 </div>
               </div>
@@ -632,12 +848,54 @@ export default function AdminProductsPage() {
                       category: found ? found.name : 'Cakes',
                     });
                   }}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.id} value={c.slug}>{c.name}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Image Upload & Preview */}
+              <div>
+                <label className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1.5">
+                  Product Image
+                </label>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={previewUrl || editingProduct.image || '/images/products/dream-cake.jpg'}
+                    alt="Preview"
+                    className="w-16 h-16 rounded-xl object-cover border border-[var(--color-brand-border)] bg-gray-100 flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--color-brand-cream)] hover:bg-[var(--color-brand-border)] border border-[var(--color-brand-border)] text-xs font-bold text-[var(--color-brand-chocolate)] cursor-pointer transition-colors">
+                      <Upload size={14} />
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Image (Max 5MB)'}</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                    </label>
+                    <p className="text-[10px] text-[var(--color-brand-muted)] mt-1">
+                      JPEG, PNG, WebP up to 5MB. Uploads to Firebase Storage.
+                    </p>
+                  </div>
+                </div>
+
+                {uploadProgress !== null && uploadingImage && (
+                  <div className="w-full bg-[var(--color-brand-cream)] rounded-full h-1.5 mt-2 overflow-hidden border border-[var(--color-brand-border)]">
+                    <div
+                      className="bg-[var(--color-brand-primary)] h-1.5 transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Description */}
@@ -647,154 +905,55 @@ export default function AdminProductsPage() {
                 </label>
                 <textarea
                   id="product-description"
-                  rows={3}
+                  rows={2}
                   value={editingProduct.description}
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 resize-none"
-                  placeholder="Describe the product..."
+                  className="w-full px-3.5 py-2.5 text-xs border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40"
+                  placeholder="Artisanal recipe details, flavor notes, crust texture..."
                 />
               </div>
 
-              {/* Image Upload with Firebase Storage, Preview & Progress */}
-              <div>
-                <label className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
-                  Product Image (Firebase Storage)
-                </label>
-                <div className="flex gap-2 items-center">
+              {/* Bestseller & Featured Checkboxes */}
+              <div className="flex items-center gap-4 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[var(--color-brand-chocolate)]">
                   <input
-                    type="text"
-                    value={editingProduct.image || ''}
-                    onChange={(e) => {
-                      setEditingProduct({ ...editingProduct, image: e.target.value });
-                      setUploadError(null);
-                    }}
-                    placeholder="Paste image URL or choose file to upload →"
-                    className="flex-1 px-3.5 py-2.5 text-xs border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
-                    aria-label="Image URL"
+                    type="checkbox"
+                    checked={editingProduct.bestseller}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, bestseller: e.target.checked })}
+                    className="rounded border-[var(--color-brand-border)]"
                   />
-                  <label
-                    className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-xl cursor-pointer transition-all border ${
-                      uploadingImage
-                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                        : 'bg-[var(--color-brand-cream-dark)] text-[#8C5E3C] border-[var(--color-brand-border)] hover:bg-[#EBDCCF] active:scale-95'
-                    }`}
-                  >
-                    <Upload size={14} className={uploadingImage ? 'animate-bounce' : ''} aria-hidden="true" />
-                    <span>{uploadingImage ? 'Uploading…' : 'Choose File'}</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      disabled={uploadingImage}
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                {/* Real-time Upload Progress Bar */}
-                {uploadingImage && uploadProgress !== null && (
-                  <div className="mt-2.5 space-y-1">
-                    <div className="flex justify-between text-[11px] font-semibold text-[var(--color-brand-muted)]">
-                      <span>Uploading to Firebase Storage…</span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <div className="w-full bg-[var(--color-brand-cream-dark)] rounded-full h-2 overflow-hidden border border-[var(--color-brand-border)]">
-                      <div
-                        className="bg-gradient-to-r from-[#D4A373] to-[#E5B88F] h-full transition-all duration-300 rounded-full"
-                        style={{ width: `${uploadProgress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Actionable Upload Error Notice */}
-                {uploadError && (
-                  <div className="mt-2.5 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-600 dark:text-red-400 flex items-start gap-2.5">
-                    <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-red-500" />
-                    <div className="flex-1">
-                      <p className="font-bold">Image Upload Failed</p>
-                      <p className="text-[11px] opacity-90 mt-0.5">{uploadError}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Image Preview & Details Card */}
-                {(previewUrl || editingProduct.image) && (
-                  <div className="mt-3 p-3 rounded-xl bg-[var(--color-brand-cream-dark)] border border-[var(--color-brand-border)] flex items-center gap-3">
-                    <img
-                      src={previewUrl || editingProduct.image}
-                      alt="Product preview"
-                      className="w-14 h-14 object-cover rounded-lg border border-[var(--color-brand-border)] bg-[var(--color-brand-surface)] flex-shrink-0 shadow-xs"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-[var(--color-brand-chocolate)]">
-                          {previewUrl ? 'Local Preview' : 'Saved Image'}
-                        </span>
-                        {uploadingImage ? (
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 font-semibold border border-amber-500/30">
-                            Uploading ({uploadProgress}%)
-                          </span>
-                        ) : editingProduct.image?.includes('firebasestorage.googleapis.com') ? (
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/30 flex items-center gap-1">
-                            <CheckCircle size={10} /> Storage Saved
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-stone-500/15 text-stone-700 dark:text-stone-300 font-semibold border border-stone-500/30">
-                            Catalog URL
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-[var(--color-brand-muted)] truncate mt-1 font-mono">
-                        {previewUrl || editingProduct.image}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  <span>Mark as Bestseller</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[var(--color-brand-chocolate)]">
+                  <input
+                    type="checkbox"
+                    checked={editingProduct.featured}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, featured: e.target.checked })}
+                    className="rounded border-[var(--color-brand-border)]"
+                  />
+                  <span>Featured Collection</span>
+                </label>
               </div>
 
-              {/* Checkboxes */}
-              <div className="flex flex-wrap items-center gap-6 pt-1">
-                {[
-                  { key: 'inStock', label: 'Mark In Stock' },
-                  { key: 'featured', label: 'Featured' },
-                  { key: 'bestseller', label: 'Bestseller' },
-                ].map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2 text-sm cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={!!editingProduct[key as keyof Product]}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, [key]: e.target.checked })}
-                      className="w-4 h-4 rounded accent-[#D4A373]"
-                    />
-                    <span className="font-medium text-[var(--color-brand-chocolate)]">{label}</span>
-                  </label>
-                ))}
+              {/* Modal Footer */}
+              <div className="pt-4 border-t border-[var(--color-brand-border)] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-brand-muted)] hover:bg-[var(--color-brand-cream)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingImage}
+                  className="px-5 py-2.5 rounded-xl bg-[var(--color-brand-primary)] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[var(--color-brand-primary-dark)] transition-colors"
+                >
+                  <Save size={14} />
+                  <span>{isNew ? 'Create Item' : 'Save Changes'}</span>
+                </button>
               </div>
             </form>
-
-            {/* Modal Footer */}
-            <div className="flex justify-end gap-3 p-5 border-t border-[var(--color-brand-border)] bg-[var(--color-brand-cream-dark)] flex-shrink-0">
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                className="px-4 py-2.5 text-sm font-semibold text-[var(--color-brand-muted)] border border-[var(--color-brand-border)] rounded-xl hover:bg-[var(--color-brand-surface)] transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form=""
-                disabled={uploadingImage}
-                onClick={handleSave}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D4A373] to-[#E5B88F] hover:from-[#C79361] hover:to-[#D9A779] text-[#1E1008] font-bold text-sm shadow-xs border border-[#C59262] flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                <Save size={14} aria-hidden="true" /> {isNew ? 'Add Product' : 'Save Changes'}
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -802,41 +961,34 @@ export default function AdminProductsPage() {
       {/* ===== DELETE CONFIRMATION DIALOG ===== */}
       {confirmDeleteId && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          role="alertdialog"
+          className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
+          role="dialog"
           aria-modal="true"
-          aria-labelledby="delete-confirm-title"
         >
-          <div className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-2xl max-w-sm w-full shadow-2xl p-6 space-y-4 border border-[var(--color-brand-border)]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle size={20} className="text-red-600 dark:text-red-400" aria-hidden="true" />
-              </div>
-              <div>
-                <h3 id="delete-confirm-title" className="font-bold text-[var(--color-brand-chocolate)]">Delete Product?</h3>
-                <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
-                  "{products.find(p => p.id === confirmDeleteId)?.name}" will be permanently removed from the catalog.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-end">
+          <div className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-2xl max-w-sm w-full p-5 border border-[var(--color-brand-border)] shadow-xl">
+            <h3 className="font-bold text-base mb-1">Delete Product?</h3>
+            <p className="text-xs text-[var(--color-brand-muted)] mb-4">
+              Are you sure you want to remove this item from the catalog? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
               <button
+                type="button"
                 onClick={() => setConfirmDeleteId(null)}
-                className="px-4 py-2 text-sm font-semibold text-[var(--color-brand-muted)] border border-[var(--color-brand-border)] rounded-xl hover:bg-[var(--color-brand-cream-dark)] transition-colors min-h-[40px]"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--color-brand-muted)] hover:bg-[var(--color-brand-cream)]"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 text-sm font-bold rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors min-h-[40px]"
+                className="px-4 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
               >
-                Delete Product
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

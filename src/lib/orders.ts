@@ -1,5 +1,5 @@
 import { db, isFirebaseConfigured } from './firebase';
-import { collection, doc, getDocs, getDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, updateDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import {
   createFirestoreOrder,
   updateFirestoreOrderStatus,
@@ -77,6 +77,12 @@ export interface Order {
   deliveryAddressSnapshot?: DeliveryAddressSnapshot;
   pickupLocation?: PickupLocationInfo;
   distanceKm?: number;
+  dispatchDetails?: {
+    riderName?: string;
+    riderPhone?: string;
+    dispatchedAt?: string;
+    notes?: string;
+  };
 }
 
 const LOCAL_STORAGE_KEY = 'yoyo_cakes_orders';
@@ -193,6 +199,10 @@ export async function saveOrder(order: Order): Promise<void> {
   }
   saveLocalOrders(current);
 
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('yoyo:orders_updated', { detail: { order } }));
+  }
+
   if (isFirebaseConfigured && db) {
     try {
       // Calculate paise fields if missing
@@ -263,6 +273,10 @@ export async function updateOrderStatus(
     saveLocalOrders(current);
   }
 
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('yoyo:orders_updated', { detail: { orderId, orderStatus } }));
+  }
+
   if (isFirebaseConfigured && db) {
     try {
       await updateFirestoreOrderStatus(orderId, orderStatus, 'admin', notes);
@@ -273,4 +287,146 @@ export async function updateOrderStatus(
       console.warn('Failed to update order in Firestore:', e);
     }
   }
+}
+
+/**
+ * Assign a rider / delivery partner to an order and dispatch
+ */
+export async function assignOrderRider(
+  orderId: string,
+  riderName: string,
+  riderPhone: string,
+  notes?: string
+): Promise<void> {
+  const current = getLocalOrders();
+  const target = current.find((o) => o.id === orderId);
+  const dispatchDetails = {
+    riderName: riderName.trim(),
+    riderPhone: riderPhone.trim(),
+    dispatchedAt: new Date().toISOString(),
+    notes: notes?.trim() || undefined,
+  };
+
+  if (target) {
+    target.dispatchDetails = dispatchDetails;
+    if (target.orderStatus === 'ready' || target.orderStatus === 'confirmed') {
+      target.orderStatus = 'out_for_delivery';
+    }
+    saveLocalOrders(current);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('yoyo:orders_updated', { detail: { orderId, dispatchDetails } }));
+  }
+
+  if (isFirebaseConfigured && db) {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), {
+        dispatchDetails,
+        orderStatus: 'out_for_delivery',
+        updatedAt: new Date().toISOString(),
+      });
+      await updateFirestoreOrderStatus(
+        orderId,
+        'out_for_delivery',
+        'admin',
+        `Assigned rider ${riderName} (${riderPhone}). ${notes || ''}`
+      );
+    } catch (e) {
+      console.warn('Failed to assign rider in Firestore:', e);
+    }
+  }
+}
+
+/**
+ * Next logical status step in the bakery dispatch pipeline
+ */
+export function getNextOrderStatus(current: OrderStatus): { nextStatus: OrderStatus; label: string; actionText: string } | null {
+  switch (current) {
+    case 'placed':
+      return { nextStatus: 'confirmed', label: 'Confirmed', actionText: 'Confirm Order' };
+    case 'confirmed':
+      return { nextStatus: 'preparing', label: 'Baking', actionText: 'Start Baking' };
+    case 'preparing':
+      return { nextStatus: 'ready', label: 'Ready for Dispatch', actionText: 'Mark Packed & Ready' };
+    case 'ready':
+      return { nextStatus: 'out_for_delivery', label: 'On Route', actionText: 'Dispatch Order' };
+    case 'out_for_delivery':
+      return { nextStatus: 'delivered', label: 'Delivered', actionText: 'Mark Delivered' };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Generate a pre-filled WhatsApp customer dispatch message
+ */
+export function getWhatsAppDispatchLink(order: Order): string {
+  const phone = order.customer.phone.replace(/[^0-9]/g, '');
+  const cleanPhone = phone.startsWith('91') ? phone : `91${phone}`;
+  const statusLabel = order.orderStatus.replace(/_/g, ' ').toUpperCase();
+  const riderInfo = order.dispatchDetails?.riderName
+    ? `\n🚴 Rider: *${order.dispatchDetails.riderName}* (${order.dispatchDetails.riderPhone || 'En route'})`
+    : '';
+
+  const message = `Hello *${order.customer.name}*! 🍰\nYour YOYO CAKES order *#${order.id}* is now *${statusLabel}*!${riderInfo}\n\nItems: ${order.items.map((i) => `${i.name} (x${i.quantity})`).join(', ')}\nTotal: ₹${order.total}\n\nThank you for choosing YOYO CAKES! For assistance, contact +91 98401 23456.`;
+
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Real-time order listener for live dispatch board
+ */
+export function subscribeToOrders(callback: (orders: Order[]) => void): () => void {
+  // 1. Initial push from local storage
+  callback(getLocalOrders());
+
+  let unsubFirestore: (() => void) | null = null;
+
+  // 2. Attach Firestore live onSnapshot if available
+  if (isFirebaseConfigured && db) {
+    try {
+      const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+      unsubFirestore = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const list = snapshot.docs.map((d) => d.data() as Order);
+            callback(list);
+          }
+        },
+        (err) => {
+          console.warn('Firestore onSnapshot error, falling back to local storage events:', err);
+        }
+      );
+    } catch (e) {
+      console.warn('Could not subscribe to Firestore orders:', e);
+    }
+  }
+
+  // 3. Listen to local window events
+  const handleUpdate = () => {
+    callback(getLocalOrders());
+  };
+
+  const handleStorage = (e: StorageEvent) => {
+    if (e.key === LOCAL_STORAGE_KEY) {
+      callback(getLocalOrders());
+    }
+  };
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('yoyo:orders_updated', handleUpdate);
+    window.addEventListener('storage', handleStorage);
+  }
+
+  return () => {
+    if (unsubFirestore) {
+      unsubFirestore();
+    }
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('yoyo:orders_updated', handleUpdate);
+      window.removeEventListener('storage', handleStorage);
+    }
+  };
 }
