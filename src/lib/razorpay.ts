@@ -81,7 +81,7 @@ export async function openRazorpayCheckout({
         name: 'YOYO CAKES',
         description: `Order #${orderId} — Artisanal Bakery`,
         theme: {
-          color: '#7F5643',
+          color: '#853612',
         },
         prefill: {
           name: customerName,

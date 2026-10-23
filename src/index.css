@@ -5,86 +5,88 @@
 :root,
 html[data-theme="cream"],
 html:not(.dark) {
-  --color-brand-primary: #C9A184;
-  --color-brand-primary-dark: #7F5643;
-  --color-brand-primary-light: #E8D5C4;
-  --color-brand-cream: #FFF8F0;
-  --color-brand-cream-dark: #F5EDE4;
-  --color-brand-surface: #FFFFFF;
-  --color-brand-surface-elevated: #FFFBF7;
-  --color-brand-chocolate: #3D2417;
-  --color-brand-chocolate-light: #6B4C3B;
-  --color-brand-muted: #7F5643;
-  --color-brand-border: #E8D5C4;
+  /* Artisanal Confectionery & Pastry Palette */
+  --color-brand-primary: #D97706; /* Warm golden caramel / honey amber glaze */
+  --color-brand-primary-dark: #853612; /* Rich caramelized toffee & dark chocolate roast */
+  --color-brand-primary-light: #FDE68A; /* Warm butter vanilla cream */
+  --color-brand-cream: #FFFDF9; /* Fresh mascarpone & whipped vanilla cream base */
+  --color-brand-cream-dark: #F5EDE2; /* Warm biscuit crust & sponge tone */
+  --color-brand-surface: #FFFFFF; /* Pure porcelain cake display */
+  --color-brand-surface-elevated: #FFFBF5; /* Elevated confectionery box */
+  --color-brand-chocolate: #2B150C; /* Rich 70% dark Belgian chocolate */
+  --color-brand-chocolate-light: #5C3523; /* Creamy milk chocolate & cocoa */
+  --color-brand-muted: #784D37; /* Dusted cocoa powder */
+  --color-brand-border: #EBDCCB; /* Soft golden pastry crust border */
   --color-brand-input-bg: #FFFFFF;
-  --color-brand-input-border: #E8D5C4;
-  --color-brand-strip-bg: #3D2417;
-  --color-brand-strip-text: #FFF8F0;
-  --color-brand-strip-muted: #D1BFB1;
-  --color-brand-footer-bg: #241914;
-  --color-brand-footer-strip: #302219;
-  --color-brand-footer-text: #FFF4EA;
-  --color-brand-footer-muted: #D1BFB1;
-  --color-brand-success: #4A9D6E;
-  --color-brand-warning: #D4A035;
-  --color-brand-error: #C74A4A;
-  --color-brand-info: #5B8DB8;
+  --color-brand-input-border: #EBDCCB;
+  --color-brand-strip-bg: #241209; /* Deep dark chocolate ganache ribbon */
+  --color-brand-strip-text: #FFF9F0;
+  --color-brand-strip-muted: #D8BFAD;
+  --color-brand-footer-bg: #1A0D07; /* Decadent dark cocoa truffle box */
+  --color-brand-footer-strip: #26130A;
+  --color-brand-footer-text: #FFF8F0;
+  --color-brand-footer-muted: #C7AFA0;
+  --color-brand-success: #16A34A; /* Pistachio fresh bake */
+  --color-brand-warning: #D97706; /* Golden honey */
+  --color-brand-error: #DC2626; /* Red velvet & ripe strawberry */
+  --color-brand-info: #2563EB;
 
   color-scheme: light;
 }
 
 html[data-theme="dark"],
 html.dark {
-  --color-brand-primary: #C9A184;
-  --color-brand-primary-dark: #7F5643;
-  --color-brand-primary-light: #3A271C;
-  --color-brand-cream: #17110F;
-  --color-brand-cream-dark: #1F1613;
-  --color-brand-surface: #241914;
-  --color-brand-surface-elevated: #302219;
-  --color-brand-chocolate: #FFF4EA;
-  --color-brand-chocolate-light: #E0CFC2;
-  --color-brand-muted: #D1BFB1;
-  --color-brand-border: #594337;
-  --color-brand-input-bg: #241914;
-  --color-brand-input-border: #594337;
-  --color-brand-strip-bg: #1C130F;
-  --color-brand-strip-text: #FFF4EA;
-  --color-brand-strip-muted: #D1BFB1;
-  --color-brand-footer-bg: #120D0C;
-  --color-brand-footer-strip: #1C130F;
-  --color-brand-footer-text: #FFF4EA;
-  --color-brand-footer-muted: #D1BFB1;
-  --color-brand-success: #4A9D6E;
-  --color-brand-warning: #D4A035;
-  --color-brand-error: #C74A4A;
-  --color-brand-info: #5B8DB8;
+  /* Midnight Cacao & Roasted Mocha Lounge */
+  --color-brand-primary: #F59E0B; /* Glowing melted caramel */
+  --color-brand-primary-dark: #D97706; /* Warm golden amber */
+  --color-brand-primary-light: #3A1E11; /* Dark mocha highlight */
+  --color-brand-cream: #140C08; /* Deep roasted cacao & espresso bean */
+  --color-brand-cream-dark: #1D110B; /* Dark chocolate fudge */
+  --color-brand-surface: #24140D; /* Decadent dark chocolate cake layer */
+  --color-brand-surface-elevated: #2F1A11; /* Elevated truffle box */
+  --color-brand-chocolate: #FFF8F0; /* Whipped vanilla cream */
+  --color-brand-chocolate-light: #E8D5C4; /* Sweet almond cream */
+  --color-brand-muted: #CBB19E; /* Fine Dutch cocoa powder */
+  --color-brand-border: #4D2B1B; /* Warm dark chocolate crust border */
+  --color-brand-input-bg: #24140D;
+  --color-brand-input-border: #4D2B1B;
+  --color-brand-strip-bg: #120905;
+  --color-brand-strip-text: #FFF8F0;
+  --color-brand-strip-muted: #CBB19E;
+  --color-brand-footer-bg: #0E0603;
+  --color-brand-footer-strip: #170A05;
+  --color-brand-footer-text: #FFF8F0;
+  --color-brand-footer-muted: #CBB19E;
+  --color-brand-success: #22C55E;
+  --color-brand-warning: #F59E0B;
+  --color-brand-error: #EF4444;
+  --color-brand-info: #3B82F6;
 
   color-scheme: dark;
 }
 
 @theme {
-  --color-brand-primary: #C9A184;
-  --color-brand-primary-dark: #7F5643;
-  --color-brand-primary-light: #E8D5C4;
-  --color-brand-cream: #FFF8F0;
-  --color-brand-cream-dark: #F5EDE4;
+  --color-brand-primary: #D97706;
+  --color-brand-primary-dark: #853612;
+  --color-brand-primary-light: #FDE68A;
+  --color-brand-cream: #FFFDF9;
+  --color-brand-cream-dark: #F5EDE2;
   --color-brand-surface: #FFFFFF;
-  --color-brand-chocolate: #3D2417;
-  --color-brand-chocolate-light: #6B4C3B;
-  --color-brand-muted: #5C3E2D;
-  --color-brand-success: #4A9D6E;
-  --color-brand-warning: #D4A035;
-  --color-brand-error: #C74A4A;
-  --color-brand-info: #5B8DB8;
+  --color-brand-chocolate: #2B150C;
+  --color-brand-chocolate-light: #5C3523;
+  --color-brand-muted: #784D37;
+  --color-brand-success: #16A34A;
+  --color-brand-warning: #D97706;
+  --color-brand-error: #DC2626;
+  --color-brand-info: #2563EB;
 
   --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --shadow-card: none;
-  --shadow-card-hover: 0 8px 24px rgba(61, 36, 23, 0.08);
-  --shadow-elevated: 0 16px 36px rgba(61, 36, 23, 0.12);
-  --shadow-soft: 0 2px 8px rgba(61, 36, 23, 0.04);
+  --shadow-card-hover: 0 8px 24px rgba(43, 21, 12, 0.08);
+  --shadow-elevated: 0 16px 36px rgba(43, 21, 12, 0.12);
+  --shadow-soft: 0 2px 8px rgba(43, 21, 12, 0.04);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
@@ -179,26 +181,26 @@ html.dark {
 /* ===== SYSTEM PREFERENCE FALLBACK ===== */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="cream"]) {
-    --color-brand-primary: #C9A184;
-    --color-brand-primary-dark: #7F5643;
-    --color-brand-primary-light: #3A271C;
-    --color-brand-cream: #17110F;
-    --color-brand-cream-dark: #1F1613;
-    --color-brand-surface: #241914;
-    --color-brand-surface-elevated: #302219;
-    --color-brand-chocolate: #FFF4EA;
-    --color-brand-chocolate-light: #E0CFC2;
-    --color-brand-muted: #D1BFB1;
-    --color-brand-border: #594337;
-    --color-brand-input-bg: #241914;
-    --color-brand-input-border: #594337;
-    --color-brand-strip-bg: #1C130F;
-    --color-brand-strip-text: #FFF4EA;
-    --color-brand-strip-muted: #D1BFB1;
-    --color-brand-footer-bg: #120D0C;
-    --color-brand-footer-strip: #1C130F;
-    --color-brand-footer-text: #FFF4EA;
-    --color-brand-footer-muted: #D1BFB1;
+    --color-brand-primary: #F59E0B;
+    --color-brand-primary-dark: #D97706;
+    --color-brand-primary-light: #3A1E11;
+    --color-brand-cream: #140C08;
+    --color-brand-cream-dark: #1D110B;
+    --color-brand-surface: #24140D;
+    --color-brand-surface-elevated: #2F1A11;
+    --color-brand-chocolate: #FFF8F0;
+    --color-brand-chocolate-light: #E8D5C4;
+    --color-brand-muted: #CBB19E;
+    --color-brand-border: #4D2B1B;
+    --color-brand-input-bg: #24140D;
+    --color-brand-input-border: #4D2B1B;
+    --color-brand-strip-bg: #120905;
+    --color-brand-strip-text: #FFF8F0;
+    --color-brand-strip-muted: #CBB19E;
+    --color-brand-footer-bg: #0E0603;
+    --color-brand-footer-strip: #170A05;
+    --color-brand-footer-text: #FFF8F0;
+    --color-brand-footer-muted: #CBB19E;
 
     color-scheme: dark;
   }
@@ -213,33 +215,33 @@ html.dark body {
 
 html[data-theme="dark"] [class*="bg-[var(--color-brand-chocolate)]"],
 html.dark [class*="bg-[var(--color-brand-chocolate)]"] {
-  background-color: #241914 !important;
-  color: #FFF4EA !important;
+  background-color: #24140D !important;
+  color: #FFF8F0 !important;
 }
 
 html[data-theme="dark"] [class*="text-[var(--color-brand-chocolate)]"],
 html.dark [class*="text-[var(--color-brand-chocolate)]"] {
-  color: #FFF4EA !important;
+  color: #FFF8F0 !important;
 }
 
 html[data-theme="dark"] [class*="hover:bg-[var(--color-brand-chocolate)]"]:hover,
 html.dark [class*="hover:bg-[var(--color-brand-chocolate)]"]:hover {
-  background-color: #302219 !important;
+  background-color: #2F1A11 !important;
 }
 
 html[data-theme="dark"] .bg-white,
 html.dark .bg-white {
-  background-color: #241914 !important;
+  background-color: #24140D !important;
 }
 
 html[data-theme="dark"] .bg-gray-50,
 html.dark .bg-gray-50 {
-  background-color: #1F1613 !important;
+  background-color: #1D110B !important;
 }
 
 html[data-theme="dark"] .bg-gray-100,
 html.dark .bg-gray-100 {
-  background-color: #302219 !important;
+  background-color: #2F1A11 !important;
 }
 
 html[data-theme="dark"] [class*="bg-[#FAF7F2]"],
@@ -248,7 +250,7 @@ html[data-theme="dark"] [class*="bg-[#F7F3EC]"],
 html.dark [class*="bg-[#FAF7F2]"],
 html.dark [class*="bg-[#FAF4ED]"],
 html.dark [class*="bg-[#F7F3EC]"] {
-  background-color: #17110F !important;
+  background-color: #140C08 !important;
 }
 
 html[data-theme="dark"] [class*="bg-[#F7EFE6]"],
@@ -259,7 +261,7 @@ html.dark [class*="bg-[#F7EFE6]"],
 html.dark [class*="bg-[#F4EBE1]"],
 html.dark [class*="bg-[#F7ECE1]"],
 html.dark [class*="bg-[#F5EFE6]"] {
-  background-color: #241914 !important;
+  background-color: #24140D !important;
 }
 
 html[data-theme="dark"] [class*="bg-[#F5ECE1]"],
@@ -268,7 +270,7 @@ html[data-theme="dark"] [class*="bg-[#EBDCCF]"],
 html.dark [class*="bg-[#F5ECE1]"],
 html.dark [class*="bg-[#F3E7DB]"],
 html.dark [class*="bg-[#EBDCCF]"] {
-  background-color: #302219 !important;
+  background-color: #2F1A11 !important;
 }
 
 html[data-theme="dark"] .text-gray-900,
@@ -279,7 +281,7 @@ html.dark .text-gray-900,
 html.dark .text-gray-800,
 html.dark [class*="text-[#1E1008]"],
 html.dark [class*="text-[#0F1111]"] {
-  color: #FFF4EA !important;
+  color: #FFF8F0 !important;
 }
 
 html[data-theme="dark"] .text-gray-700,
@@ -304,7 +306,7 @@ html.dark [class*="text-[#7A451E]"],
 html.dark [class*="text-[#93582C]"],
 html.dark [class*="text-[#7A4B29]"],
 html.dark [class*="text-[#8C5E3C]"] {
-  color: #D1BFB1 !important;
+  color: #CBB19E !important;
 }
 
 html[data-theme="dark"] .border-gray-100,
@@ -325,7 +327,7 @@ html.dark [class*="border-[#E3D4C4]"],
 html.dark [class*="border-[#DEC4AC]"],
 html.dark [class*="border-[#E8D4C2]"],
 html.dark [class*="border-[#E8D9CC]"] {
-  border-color: #594337 !important;
+  border-color: #4D2B1B !important;
 }
 
 html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
@@ -343,7 +345,7 @@ html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder,
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #A89587 !important;
+  color: #A68A78 !important;
 }
 
 html[data-theme="dark"] .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
@@ -352,15 +354,15 @@ html[data-theme="dark"] [class*="divide-[#E8DFD5]"] > :not([hidden]) ~ :not([hid
 html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
 html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
 html.dark [class*="divide-[#E8DFD5]"] > :not([hidden]) ~ :not([hidden]) {
-  border-color: #594337 !important;
+  border-color: #4D2B1B !important;
 }
 
 html[data-theme="dark"] header.bg-white,
 html[data-theme="dark"] header.bg-white\/95,
 html.dark header.bg-white,
 html.dark header.bg-white\/95 {
-  background-color: rgba(36, 25, 20, 0.95) !important;
-  border-color: #594337 !important;
+  background-color: rgba(36, 20, 13, 0.95) !important;
+  border-color: #4D2B1B !important;
 }
 
 /* ===== UTILITY CLASSES ===== */

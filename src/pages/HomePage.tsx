@@ -105,23 +105,23 @@ export default function HomePage() {
   return (
     <div className="bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)]">
       {/* Mobile Compact Bakery Discovery (First screen product discovery) */}
-      <section className="sm:hidden bg-[#FFF8F0] border-b border-[#E8DFD5] pt-4 pb-3.5 px-4">
+      <section className="sm:hidden bg-[var(--color-brand-surface)] border-b border-[var(--color-brand-border)] pt-4 pb-3.5 px-4">
         <div className="flex items-center justify-between gap-3 mb-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A184]/20 text-[#7F5643] text-[10px] font-bold uppercase tracking-wider mb-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#7F5643]" />
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary-dark)] text-[10px] font-bold uppercase tracking-wider mb-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-primary)]" />
               Patisserie Kitchen
             </div>
-            <h1 className="font-heading text-lg font-black text-[#3D2417] leading-tight">
+            <h1 className="font-heading text-lg font-black text-[var(--color-brand-chocolate)] leading-tight">
               Fresh Celebration Treats
             </h1>
-            <p className="text-[11px] text-[#7F5643]/90 mt-0.5">
+            <p className="text-[11px] text-[var(--color-brand-muted)] mt-0.5">
               Handcrafted daily with pure Belgian chocolate & dairy cream
             </p>
           </div>
           <Link
             to="/shop"
-            className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-[#7F5643] text-white text-xs font-bold shadow-xs hover:bg-[#3D2417] transition-all flex items-center gap-1"
+            className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-[var(--color-brand-primary-dark)] text-white text-xs font-bold shadow-xs hover:bg-[var(--color-brand-chocolate)] transition-all flex items-center gap-1"
           >
             All 27 <ArrowRight size={12} />
           </Link>
@@ -129,9 +129,9 @@ export default function HomePage() {
 
         {/* Mobile Horizontal Scrollable Category Shortcuts */}
         <div className="pt-1.5">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#7F5643] mb-2 px-0.5">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--color-brand-muted)] mb-2 px-0.5">
             <span>Categories</span>
-            <Link to="/shop" className="text-[10px] text-[#7F5643] font-semibold underline">
+            <Link to="/shop" className="text-[10px] text-[var(--color-brand-primary-dark)] font-semibold underline">
               View all
             </Link>
           </div>
@@ -143,7 +143,7 @@ export default function HomePage() {
                 className="flex flex-col items-center flex-shrink-0 group text-center min-w-[64px]"
                 aria-label={`Browse ${cat.name}`}
               >
-                <div className="w-14 h-14 rounded-full p-0.5 border-2 border-[#C9A184]/70 bg-white group-hover:border-[#7F5643] group-active:scale-95 transition-all shadow-xs overflow-hidden mb-1">
+                <div className="w-14 h-14 rounded-full p-0.5 border-2 border-[var(--color-brand-primary)]/40 bg-[var(--color-brand-surface)] group-hover:border-[var(--color-brand-primary)] group-active:scale-95 transition-all shadow-xs overflow-hidden mb-1">
                   <img
                     src={`/images/categories/${cat.slug}.jpg`}
                     alt={cat.name}
@@ -151,7 +151,7 @@ export default function HomePage() {
                     loading="eager"
                   />
                 </div>
-                <span className="text-[11px] font-bold text-[#3D2417] group-hover:text-[#7F5643] transition-colors leading-tight line-clamp-1">
+                <span className="text-[11px] font-bold text-[var(--color-brand-chocolate)] group-hover:text-[var(--color-brand-primary)] transition-colors leading-tight line-clamp-1">
                   {cat.name}
                 </span>
               </Link>

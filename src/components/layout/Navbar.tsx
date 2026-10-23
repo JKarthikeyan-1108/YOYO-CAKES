@@ -34,6 +34,7 @@ import { useProductStore } from '@/stores/productStore';
 import { useLocationStore } from '@/stores/locationStore';
 import { useThemeStore } from '@/stores/themeStore';
 import BrandLogo from '@/components/common/BrandLogo';
+import ThemeToggle from '@/components/common/ThemeToggle';
 import DeliveryLocationModal from '@/components/common/DeliveryLocationModal';
 import { CATEGORIES, formatPrice } from '@/data/products';
 import toast from 'react-hot-toast';
@@ -524,20 +525,10 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* Theme Toggle Button (desktop/tablet) */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative min-w-[40px] min-h-[40px] justify-center cursor-pointer"
-                title={`Switch to ${resolvedTheme === 'dark' ? 'Cream' : 'Dark'} theme`}
-                aria-label={`Toggle theme (currently ${resolvedTheme})`}
-              >
-                {resolvedTheme === 'dark' ? (
-                  <Sun size={18} className="text-[#FFD814]" />
-                ) : (
-                  <Moon size={18} className="text-[var(--color-brand-primary-dark)]" />
-                )}
-              </button>
+              {/* Theme Toggle Button & Dropdown (desktop/tablet) */}
+              <div className="hidden sm:flex items-center">
+                <ThemeToggle variant="desktop" />
+              </div>
 
               {/* Cart (visible on all sizes) */}
               <Link
@@ -849,24 +840,7 @@ export default function Navbar() {
         {/* Drawer Footer */}
         <div className="p-4 border-t border-gray-100 bg-gray-50 space-y-3">
           {/* Mobile Theme Switcher */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="w-full py-2.5 px-3.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer shadow-2xs"
-            aria-label={`Switch theme, current: ${resolvedTheme}`}
-          >
-            <span className="flex items-center gap-2">
-              {resolvedTheme === 'dark' ? (
-                <Sun size={16} className="text-[#FFD814]" />
-              ) : (
-                <Moon size={16} className="text-[var(--color-brand-primary-dark)]" />
-              )}
-              <span>Theme Appearance</span>
-            </span>
-            <span className="text-[11px] font-mono uppercase bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded text-amber-900 font-extrabold">
-              {resolvedTheme === 'dark' ? 'Dark' : 'Cream'}
-            </span>
-          </button>
+          <ThemeToggle variant="mobile" />
 
           {user ? (
             <button

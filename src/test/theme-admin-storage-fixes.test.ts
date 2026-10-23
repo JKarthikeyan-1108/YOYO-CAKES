@@ -31,6 +31,46 @@ describe('Issue 1: Theme System & Tokens Persistence', () => {
     expect(useThemeStore.getState().theme).toBe('system');
     expect(localStorage.getItem('yoyo_theme')).toBe('system');
   });
+
+  it('cycles theme through cream -> dark -> system -> cream on toggleTheme', () => {
+    useThemeStore.getState().setTheme('cream');
+    expect(useThemeStore.getState().theme).toBe('cream');
+
+    const next1 = useThemeStore.getState().toggleTheme();
+    expect(next1).toBe('dark');
+    expect(useThemeStore.getState().theme).toBe('dark');
+
+    const next2 = useThemeStore.getState().toggleTheme();
+    expect(next2).toBe('system');
+    expect(useThemeStore.getState().theme).toBe('system');
+
+    const next3 = useThemeStore.getState().toggleTheme();
+    expect(next3).toBe('cream');
+    expect(useThemeStore.getState().theme).toBe('cream');
+  });
+
+  it('automatically adopts system theme when theme is system', () => {
+    // Mock matchMedia to dark
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
+      matches: query.includes('dark'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    useThemeStore.getState().setTheme('system');
+    expect(useThemeStore.getState().theme).toBe('system');
+    expect(useThemeStore.getState().resolvedTheme).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+
+    window.matchMedia = originalMatchMedia;
+  });
 });
 
 describe('Issue 2: Admin Login Security & Clean Credentials', () => {

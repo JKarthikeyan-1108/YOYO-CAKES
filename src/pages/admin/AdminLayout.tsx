@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import BrandLogo from '@/components/common/BrandLogo';
+import ThemeToggle from '@/components/common/ThemeToggle';
 import toast from 'react-hot-toast';
 
 export default function AdminLayout() {
@@ -93,6 +94,10 @@ export default function AdminLayout() {
           </p>
         </div>
 
+        <div className="pt-1">
+          <ThemeToggle variant="mobile" />
+        </div>
+
         <button
           type="button"
           onClick={handleSignOut}
@@ -132,13 +137,16 @@ export default function AdminLayout() {
           </span>
         </div>
 
-        <Link
-          to="/"
-          className="p-2 rounded-xl text-amber-100/80 hover:text-white hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label="Back to customer storefront"
-        >
-          <ArrowLeft size={18} />
-        </Link>
+        <div className="flex items-center gap-1">
+          <ThemeToggle variant="compact" />
+          <Link
+            to="/"
+            className="p-2 rounded-xl text-amber-100/80 hover:text-white hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Back to customer storefront"
+          >
+            <ArrowLeft size={18} />
+          </Link>
+        </div>
       </header>
 
       {/* === MOBILE SIDEBAR OVERLAY === */}

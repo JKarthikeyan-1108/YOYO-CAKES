@@ -6,12 +6,12 @@ interface ThemeState {
   theme: Theme;
   resolvedTheme: 'cream' | 'dark';
   setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
+  toggleTheme: () => Theme;
 }
 
 const STORAGE_KEY = 'yoyo_theme';
 
-function getSystemTheme(): 'cream' | 'dark' {
+export function getSystemTheme(): 'cream' | 'dark' {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'cream';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'cream';
 }
@@ -46,14 +46,19 @@ export const useThemeStore = create<ThemeState>((set, get) => {
   // Listen for system theme changes if set to 'system'
   if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mediaQuery && typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', () => {
+    if (mediaQuery) {
+      const handleMediaChange = () => {
         if (get().theme === 'system') {
           const newResolved = getSystemTheme();
           applyThemeToDOM(newResolved);
           set({ resolvedTheme: newResolved });
         }
-      });
+      };
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleMediaChange);
+      } else if (typeof (mediaQuery as any).addListener === 'function') {
+        (mediaQuery as any).addListener(handleMediaChange);
+      }
     }
   }
 
@@ -71,9 +76,13 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     },
 
     toggleTheme: () => {
-      const current = get().resolvedTheme;
-      const nextTheme = current === 'dark' ? 'cream' : 'dark';
+      const current = get().theme;
+      // Cycle order: cream (Light) -> dark (Dark) -> system (Auto: adapts to device) -> cream
+      const order: Theme[] = ['cream', 'dark', 'system'];
+      const currentIndex = order.indexOf(current);
+      const nextTheme = order[(currentIndex + 1) % order.length];
       get().setTheme(nextTheme);
+      return nextTheme;
     },
   };
 });

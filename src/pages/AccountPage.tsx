@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Sun,
   Moon,
+  Monitor,
 } from 'lucide-react';
 import AddressFormModal from '@/components/delivery/AddressFormModal';
 import { useAuthStore } from '@/stores/authStore';
@@ -900,7 +901,7 @@ export default function AccountPage() {
                   {[
                     { id: 'cream' as Theme, label: 'Cream (Light)', icon: Sun },
                     { id: 'dark' as Theme, label: 'Dark Mode', icon: Moon },
-                    { id: 'system' as Theme, label: 'System Match', icon: Sparkles },
+                    { id: 'system' as Theme, label: 'System (Auto)', icon: Monitor },
                   ].map(({ id, label, icon: Icon }) => (
                     <button
                       key={id}
