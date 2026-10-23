@@ -1,0 +1,38 @@
+{
+  "rules": {
+    "categories": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')"
+    },
+    "products": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')"
+    },
+    "coupons": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')"
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')"
+      }
+    },
+    "carts": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')"
+      }
+    },
+    "wishlists": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true || auth.token.email === 'admin@yoyocakes.com')"
+      }
+    },
+    "orders": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

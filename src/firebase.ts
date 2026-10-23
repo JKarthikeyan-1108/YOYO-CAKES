@@ -53,22 +53,34 @@ if (typeof window !== 'undefined') {
     });
 }
 
-// Initialize Firebase App Check with reCAPTCHA v3 in production if configured
-if (typeof window !== 'undefined' && import.meta.env.VITE_RECAPTCHA_SITE_KEY && import.meta.env.PROD) {
-  import('firebase/app-check')
-    .then(({ initializeAppCheck, ReCaptchaV3Provider }) => {
-      try {
-        initializeAppCheck(app, {
-          provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
-          isTokenAutoRefreshEnabled: true,
-        });
-      } catch (err) {
-        console.warn('Firebase App Check initialization skipped:', err);
-      }
-    })
-    .catch(() => {
-      // App Check unsupported in current browser environment
-    });
+// Initialize Firebase App Check if configured or in development (excluding tests)
+if (typeof window !== 'undefined' && import.meta.env.MODE !== 'test') {
+  const recaptchaKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  const isDev = import.meta.env.DEV;
+  const debugToken = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN;
+
+  if (isDev && (debugToken || recaptchaKey)) {
+    // Enable App Check debug token for local development
+    // @ts-expect-error Firebase App Check global debug flag
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken === 'true' || debugToken ? debugToken : true;
+  }
+
+  if (recaptchaKey) {
+    import('firebase/app-check')
+      .then(({ initializeAppCheck, ReCaptchaV3Provider }) => {
+        try {
+          initializeAppCheck(app, {
+            provider: new ReCaptchaV3Provider(recaptchaKey),
+            isTokenAutoRefreshEnabled: true,
+          });
+        } catch (err) {
+          console.warn('Firebase App Check initialization skipped:', err);
+        }
+      })
+      .catch(() => {
+        // App Check unsupported in current browser environment
+      });
+  }
 }
 
 export default app;
