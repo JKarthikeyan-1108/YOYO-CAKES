@@ -41,6 +41,11 @@ export default function LoginPage() {
     clearError();
   };
 
+  // Clear any previous errors on mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
   // If already authenticated, redirect immediately away from login
   useEffect(() => {
     if (user) {
@@ -652,9 +657,23 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/80 text-[11px] text-gray-600 leading-relaxed">
-                    <span className="font-semibold text-gray-800">Verified Credentials: </span>
-                    <span className="font-mono text-gray-800">admin@yoyocakes.com</span> • Password: <span className="font-mono text-gray-800">yoyoadmin2025</span>
+                  <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 text-[11px] text-gray-700 leading-relaxed flex items-center justify-between gap-2">
+                    <div>
+                      <span className="font-semibold text-gray-900">Admin Credentials: </span>
+                      <span className="font-mono text-gray-800">admin@yoyocakes.com</span> • Password: <span className="font-mono text-gray-800">yoyoadmin2025</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdminEmail('admin@yoyocakes.com');
+                        setAdminPassword('yoyoadmin2025');
+                        setAdminPin('yoyoadmin2025');
+                        toast.success('Admin credentials filled!');
+                      }}
+                      className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-[var(--color-brand-chocolate)] text-white rounded-lg hover:bg-[#200D06] flex-shrink-0 transition-all shadow-xs"
+                    >
+                      Auto-fill
+                    </button>
                   </div>
 
                   <button

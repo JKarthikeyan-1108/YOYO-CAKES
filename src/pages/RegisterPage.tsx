@@ -19,6 +19,11 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [registeredSuccess, setRegisteredSuccess] = useState(false);
 
+  // Clear any previous page errors on mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
   // If already authenticated, redirect immediately away from register
   useEffect(() => {
     if (user && !registeredSuccess) {
