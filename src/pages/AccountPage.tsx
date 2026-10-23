@@ -22,11 +22,14 @@ import {
   Heart,
   Edit2,
   ExternalLink,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import AddressFormModal from '@/components/delivery/AddressFormModal';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import { useThemeStore, type Theme } from '@/stores/themeStore';
 import { getAllOrders, type Order } from '@/lib/orders';
 import {
   getUserAddressesFromFirestore,
@@ -86,7 +89,7 @@ export default function AccountPage() {
 
   const [settings, setSettings] = useState<UserSettings>({
     userId: '',
-    theme: 'cream',
+    theme: useThemeStore.getState().theme,
     emailNotifications: true,
     orderUpdates: true,
     smsAlerts: true,
@@ -118,8 +121,11 @@ export default function AccountPage() {
       const userPrefs = await getUserSettingsFromFirestore(user.uid);
       if (userPrefs) {
         setSettings(userPrefs);
+        if (userPrefs.theme) {
+          useThemeStore.getState().setTheme(userPrefs.theme);
+        }
       } else {
-        setSettings((prev) => ({ ...prev, userId: user.uid }));
+        setSettings((prev) => ({ ...prev, userId: user.uid, theme: useThemeStore.getState().theme }));
       }
 
       if (user.displayName) setProfileName(user.displayName);
@@ -179,6 +185,7 @@ export default function AccountPage() {
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    useThemeStore.getState().setTheme(settings.theme);
     await saveUserSettingsToFirestore({
       ...settings,
       userId: user.uid,
@@ -237,7 +244,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="bg-[#EAEDED] min-h-screen py-8 font-sans">
+    <div className="bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] min-h-screen py-8 font-sans transition-colors">
       <div className="container-main max-w-6xl px-4">
         {/* Amazon-Style Account Welcome Header Banner */}
         <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 sm:p-8 mb-6">
@@ -881,6 +888,40 @@ export default function AccountPage() {
             </p>
 
             <form onSubmit={handleSaveSettings} className="space-y-4">
+              {/* Theme Preference */}
+              <div className="p-4 border rounded-xl border-gray-200 bg-[var(--color-brand-surface)] space-y-2.5">
+                <span className="text-xs font-bold text-gray-900 block">
+                  Website Theme & Color Appearance
+                </span>
+                <span className="text-[11px] text-gray-500 block">
+                  Choose your preferred theme across the entire bakery storefront, product catalog, cart, and dashboard.
+                </span>
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  {[
+                    { id: 'cream' as Theme, label: 'Cream (Light)', icon: Sun },
+                    { id: 'dark' as Theme, label: 'Dark Mode', icon: Moon },
+                    { id: 'system' as Theme, label: 'System Match', icon: Sparkles },
+                  ].map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => {
+                        setSettings((prev) => ({ ...prev, theme: id }));
+                        useThemeStore.getState().setTheme(id);
+                      }}
+                      className={`p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        settings.theme === id
+                          ? 'border-[var(--color-brand-primary-dark)] bg-amber-50 text-[var(--color-brand-chocolate)] shadow-xs ring-2 ring-[var(--color-brand-primary-dark)]/20'
+                          : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                      }`}
+                    >
+                      <Icon size={16} />
+                      <span className="text-[11px]">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <label className="flex items-start gap-3 p-3.5 border rounded-xl border-gray-200 cursor-pointer hover:bg-gray-50">
                 <input
                   type="checkbox"

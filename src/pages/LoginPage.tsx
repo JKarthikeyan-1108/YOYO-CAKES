@@ -72,9 +72,8 @@ export default function LoginPage() {
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Admin Form
-  const [adminEmail, setAdminEmail] = useState('admin@yoyocakes.com');
+  const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
-  const [adminPin, setAdminPin] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   // Cleanup recaptcha on unmount
@@ -125,8 +124,12 @@ export default function LoginPage() {
   // Handle Admin Portal Login
   const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!adminEmail.trim() || !adminPassword) {
+      toast.error('Please enter both administrator email and password.');
+      return;
+    }
     try {
-      await adminLogin(adminEmail, adminPassword, adminPin);
+      await adminLogin(adminEmail, adminPassword);
       toast.success('Administrator verified! Redirecting to Management Panel...', { icon: '🛡️' });
       navigate('/admin/products', { replace: true });
     } catch {}
@@ -225,13 +228,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-gradient-to-b from-[#FDFBF7] via-[#FFF9F3] to-[#F5ECE1] flex flex-col justify-center items-center px-4 py-8 sm:py-12">
+    <div className="min-h-[calc(100vh-80px)] bg-[var(--color-brand-cream)] flex flex-col justify-center items-center px-4 py-8 sm:py-12">
       {/* Invisible container for Firebase reCAPTCHA */}
       <div id="recaptcha-container"></div>
 
       <div className="w-full max-w-5xl mx-auto">
         {/* Main Grid: Split Layout on Desktop */}
-        <div className="bg-white rounded-3xl shadow-2xl border border-[var(--color-brand-primary-light)]/40 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        <div className="bg-[var(--color-brand-surface)] rounded-3xl shadow-2xl border border-[var(--color-brand-border)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
           
           {/* LEFT HERO SHOWCASE PANEL (Desktop Only) */}
           <div className="lg:col-span-5 bg-gradient-to-br from-[#2E180E] via-[#3E2114] to-[#1C0D07] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
@@ -342,13 +345,13 @@ export default function LoginPage() {
               </div>
 
               {/* Segmented Tab Switcher */}
-              <div className="grid grid-cols-3 p-1.5 bg-[var(--color-brand-cream)] rounded-2xl mb-6 border border-[var(--color-brand-primary-light)]/40 shadow-xs">
+              <div className="grid grid-cols-3 p-1.5 bg-[var(--color-brand-cream-dark)] rounded-2xl mb-6 border border-[var(--color-brand-border)] shadow-xs">
                 <button
                   type="button"
                   onClick={() => setActiveTab('phone')}
                   className={`py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                     activeTab === 'phone'
-                      ? 'bg-white text-[var(--color-brand-chocolate)] shadow-sm'
+                      ? 'bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] shadow-sm'
                       : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                   }`}
                 >
@@ -360,7 +363,7 @@ export default function LoginPage() {
                   onClick={() => setActiveTab('email')}
                   className={`py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                     activeTab === 'email'
-                      ? 'bg-white text-[var(--color-brand-chocolate)] shadow-sm'
+                      ? 'bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] shadow-sm'
                       : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                   }`}
                 >
@@ -372,11 +375,11 @@ export default function LoginPage() {
                   onClick={() => setActiveTab('admin')}
                   className={`py-2.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                     activeTab === 'admin'
-                      ? 'bg-[var(--color-brand-chocolate)] text-white shadow-sm'
-                      : 'text-[var(--color-brand-chocolate)]/70 hover:text-[var(--color-brand-chocolate)]'
+                      ? 'bg-[var(--color-brand-primary)] text-[#1E1008] shadow-sm'
+                      : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                   }`}
                 >
-                  <ShieldCheck size={15} className={activeTab === 'admin' ? 'text-[#FFD814]' : ''} />
+                  <ShieldCheck size={15} className={activeTab === 'admin' ? 'text-amber-900' : ''} />
                   <span>Admin</span>
                 </button>
               </div>
@@ -528,10 +531,12 @@ export default function LoginPage() {
                       <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" />
                       <input
                         type="email"
+                        autoComplete="username"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
                         required
-                        className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-primary-dark)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs"
+                        className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-primary-dark)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="name@example.com"
                       />
                     </div>
@@ -553,10 +558,12 @@ export default function LoginPage() {
                       <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" />
                       <input
                         type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
                         required
-                        className="w-full pl-10 pr-11 py-3.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-primary-dark)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs"
+                        className="w-full pl-10 pr-11 py-3.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-primary-dark)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="Enter your password"
                       />
                       <button
@@ -572,7 +579,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FFD814] to-[#F7CA00] hover:from-[#F7CA00] hover:to-[#E5B500] text-[#0F1111] font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 border border-[#FCD200]"
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FFD814] to-[#F7CA00] hover:from-[#F7CA00] hover:to-[#E5B500] text-[#0F1111] font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 border border-[#FCD200] disabled:opacity-60 cursor-pointer"
                   >
                     {loading ? <RefreshCw size={16} className="animate-spin" /> : 'Sign In'}
                   </button>
@@ -582,16 +589,16 @@ export default function LoginPage() {
               {/* TAB 3: DEDICATED ADMIN PORTAL */}
               {activeTab === 'admin' && (
                 <form onSubmit={handleAdminSubmit} className="space-y-4 animate-fade-in">
-                  <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex items-start gap-3 shadow-xs">
-                    <div className="p-2 rounded-xl bg-amber-100 text-amber-900 flex-shrink-0">
+                  <div className="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800/40 flex items-start gap-3 shadow-xs">
+                    <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 flex-shrink-0">
                       <ShieldCheck size={18} />
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold text-amber-950 uppercase tracking-wider">
+                      <h3 className="text-xs font-bold text-amber-950 dark:text-amber-200 uppercase tracking-wider">
                         Bakery Operations & Catalog Management
                       </h3>
-                      <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                        Authorized staff portal to add new items, modify pricing, toggle in/out of stock, and fulfill customer cake orders.
+                      <p className="text-[11px] text-amber-800 dark:text-amber-300/80 mt-0.5 leading-relaxed">
+                        Authorized staff portal to manage products, pricing, stock levels, and customer orders.
                       </p>
                     </div>
                   </div>
@@ -604,28 +611,32 @@ export default function LoginPage() {
                       <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" />
                       <input
                         type="email"
+                        autoComplete="username"
                         value={adminEmail}
                         onChange={(e) => setAdminEmail(e.target.value)}
+                        disabled={loading}
                         required
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-chocolate)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-chocolate)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium font-mono shadow-xs"
-                        placeholder="admin@yoyocakes.com"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        placeholder="Enter administrator email"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-chocolate)] mb-1.5 block">
-                      Master Password
+                      Admin Password
                     </label>
                     <div className="relative">
                       <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" />
                       <input
                         type={showAdminPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
                         value={adminPassword}
                         onChange={(e) => setAdminPassword(e.target.value)}
+                        disabled={loading}
                         required
-                        className="w-full pl-10 pr-11 py-3 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-chocolate)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-chocolate)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs"
-                        placeholder="Enter admin password"
+                        className="w-full pl-10 pr-11 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        placeholder="Enter your administrator password"
                       />
                       <button
                         type="button"
@@ -637,55 +648,16 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-chocolate)]">
-                        Security PIN (Dual Factor)
-                      </label>
-                      <span className="text-[10px] text-gray-500 font-medium">Elevated 2FA</span>
-                    </div>
-                    <div className="relative">
-                      <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" />
-                      <input
-                        type="password"
-                        maxLength={15}
-                        value={adminPin}
-                        onChange={(e) => setAdminPin(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-chocolate)] focus:bg-white outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium font-mono shadow-xs"
-                        placeholder="e.g. yoyoadmin2025"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 text-[11px] text-gray-700 leading-relaxed flex items-center justify-between gap-2">
-                    <div>
-                      <span className="font-semibold text-gray-900">Admin Credentials: </span>
-                      <span className="font-mono text-gray-800">admin@yoyocakes.com</span> • Password: <span className="font-mono text-gray-800">yoyoadmin2025</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdminEmail('admin@yoyocakes.com');
-                        setAdminPassword('yoyoadmin2025');
-                        setAdminPin('yoyoadmin2025');
-                        toast.success('Admin credentials filled!');
-                      }}
-                      className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-[var(--color-brand-chocolate)] text-white rounded-lg hover:bg-[#200D06] flex-shrink-0 transition-all shadow-xs"
-                    >
-                      Auto-fill
-                    </button>
-                  </div>
-
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 rounded-xl bg-[var(--color-brand-chocolate)] hover:bg-[#200D06] active:scale-[0.99] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 border border-black/20"
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#D4A373] to-[#E5B88F] hover:from-[#C79361] hover:to-[#D9A779] active:scale-[0.99] text-[#1E1008] font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 border border-[#C59262] disabled:opacity-60 cursor-pointer min-h-[48px]"
                   >
                     {loading ? (
-                      <RefreshCw size={16} className="animate-spin text-[#FFD814]" />
+                      <RefreshCw size={16} className="animate-spin text-[#1E1008]" />
                     ) : (
                       <>
-                        <ShieldCheck size={16} className="text-[#FFD814]" />
+                        <ShieldCheck size={16} className="text-[#1E1008]" />
                         <span>Sign In to Admin Dashboard</span>
                       </>
                     )}

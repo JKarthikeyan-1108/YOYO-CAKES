@@ -27,12 +27,33 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCatalog();
   }, [fetchCatalog]);
+
+  // Clean up object URL preview on unmount or URL change
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const cleanupPreview = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setUploadProgress(null);
+    setUploadError(null);
+  };
 
   const filtered = products.filter((p) => {
     const matchQuery =
@@ -44,11 +65,13 @@ export default function AdminProductsPage() {
   });
 
   const handleEdit = (product: Product) => {
+    cleanupPreview();
     setEditingProduct({ ...product });
     setIsNew(false);
   };
 
   const handleAddNew = () => {
+    cleanupPreview();
     const newProd: Product = {
       id: `custom-${Date.now().toString(36)}`,
       name: '',
@@ -68,16 +91,51 @@ export default function AdminProductsPage() {
     setIsNew(true);
   };
 
+  const handleCloseModal = () => {
+    cleanupPreview();
+    setEditingProduct(null);
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editingProduct) return;
+
+    // Validate MIME type
+    const validMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    if (!validMimes.includes(file.type) && !file.type.startsWith('image/')) {
+      toast.error(`Invalid image format (${file.type || 'unknown'}). Please choose a JPEG, PNG, WebP, or GIF image.`);
+      return;
+    }
+
+    // Validate 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      toast.error(`Image size (${sizeMb} MB) exceeds the 5 MB limit. Please select a smaller file.`);
+      return;
+    }
+
+    // Revoke previous blob if any
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    // Immediate local preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setUploadError(null);
     setUploadingImage(true);
+    setUploadProgress(0);
+
     try {
-      const url = await uploadProductImageToStorage(file, editingProduct.id);
-      setEditingProduct({ ...editingProduct, image: url });
-      toast.success('Image uploaded to Firebase Storage!');
+      const url = await uploadProductImageToStorage(file, editingProduct.id, (percent) => {
+        setUploadProgress(percent);
+      });
+      setEditingProduct((prev) => (prev ? { ...prev, image: url } : null));
+      toast.success('Image uploaded successfully to Firebase Storage!');
     } catch (err: any) {
-      toast.error(err?.message || 'Image upload failed');
+      const msg = err?.message || 'Image upload failed';
+      setUploadError(msg);
+      toast.error(msg);
     } finally {
       setUploadingImage(false);
     }
@@ -86,6 +144,16 @@ export default function AdminProductsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
+
+    if (uploadingImage) {
+      toast.error('Image is currently uploading. Please wait for upload to complete.');
+      return;
+    }
+
+    if (uploadError) {
+      toast.error('Cannot save product while image upload has failed. Please resolve the error or paste a valid URL.');
+      return;
+    }
 
     if (!editingProduct.name.trim()) {
       toast.error('Product name is required');
@@ -104,6 +172,7 @@ export default function AdminProductsPage() {
         await updateProduct(editingProduct);
         toast.success(`${editingProduct.name} updated successfully`);
       }
+      cleanupPreview();
       setEditingProduct(null);
     } catch (err: any) {
       toast.error(err?.message || 'Failed to save product');
@@ -170,13 +239,13 @@ export default function AdminProductsPage() {
       {/* Stats Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Items', value: products.length, color: 'text-[#1E1008]', bg: 'bg-[#F7EFE6]' },
-          { label: 'In Stock', value: inStockCount, color: 'text-emerald-800', bg: 'bg-emerald-50' },
-          { label: 'Low Stock', value: lowStockCount, color: 'text-[#9A3412]', bg: 'bg-orange-50' },
-          { label: 'Bestsellers', value: bestsellerCount, color: 'text-[#8C5E3C]', bg: 'bg-amber-50' },
+          { label: 'Total Items', value: products.length, color: 'text-[var(--color-brand-chocolate)]', bg: 'bg-[var(--color-brand-surface)]' },
+          { label: 'In Stock', value: inStockCount, color: 'text-emerald-800 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+          { label: 'Low Stock', value: lowStockCount, color: 'text-[#9A3412] dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/30' },
+          { label: 'Bestsellers', value: bestsellerCount, color: 'text-[#8C5E3C] dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' },
         ].map(({ label, value, color, bg }) => (
-          <div key={label} className={`${bg} rounded-2xl p-4 border border-[#E8DFD5] shadow-xs`}>
-            <p className="text-xs font-bold text-[#7A695E]">{label}</p>
+          <div key={label} className={`${bg} rounded-2xl p-4 border border-[var(--color-brand-border)] shadow-xs`}>
+            <p className="text-xs font-bold text-[var(--color-brand-muted)]">{label}</p>
             <p className={`text-2xl font-black ${color} mt-0.5`}>{value}</p>
           </div>
         ))}
@@ -477,15 +546,20 @@ export default function AdminProductsPage() {
           aria-modal="true"
           aria-labelledby="product-modal-title"
         >
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-[#E8DFD5] max-h-[90vh] flex flex-col">
+          <div className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-[var(--color-brand-border)] max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-[#E8DFD5] bg-[#FAF7F2]">
-              <h2 id="product-modal-title" className="font-heading text-lg font-bold text-[#1E1008]">
-                {isNew ? 'Add New Product' : `Edit: ${editingProduct.name}`}
-              </h2>
+            <div className="flex items-center justify-between p-5 border-b border-[var(--color-brand-border)] bg-[var(--color-brand-cream-dark)]">
+              <div>
+                <h2 id="product-modal-title" className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
+                  {isNew ? 'Add New Product' : `Edit: ${editingProduct.name}`}
+                </h2>
+                <p className="text-[11px] text-[var(--color-brand-muted)] mt-0.5">
+                  {isNew ? 'Create a new signature bakery item' : 'Update pricing, stock, and media'}
+                </p>
+              </div>
               <button
-                onClick={() => setEditingProduct(null)}
-                className="p-2 rounded-full bg-[#F5ECE1] hover:bg-[#EBDCCF] text-[#5C4D42] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                onClick={handleCloseModal}
+                className="p-2 rounded-full bg-[var(--color-brand-cream)] hover:bg-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Close modal"
               >
                 <X size={18} aria-hidden="true" />
@@ -496,7 +570,7 @@ export default function AdminProductsPage() {
             <form onSubmit={handleSave} className="overflow-y-auto flex-1 p-5 space-y-4">
               {/* Product Name */}
               <div>
-                <label htmlFor="product-name" className="block text-xs font-bold text-gray-700 mb-1">
+                <label htmlFor="product-name" className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
                   Product Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -505,7 +579,7 @@ export default function AdminProductsPage() {
                   required
                   value={editingProduct.name}
                   onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
                   placeholder="e.g. Dream Cake"
                 />
               </div>
@@ -513,7 +587,7 @@ export default function AdminProductsPage() {
               {/* Price & Stock */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="product-price" className="block text-xs font-bold text-[#5C4D42] mb-1">
+                  <label htmlFor="product-price" className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
                     Price (₹ INR) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -523,11 +597,11 @@ export default function AdminProductsPage() {
                     min={1}
                     value={editingProduct.price}
                     onChange={(e) => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
                   />
                 </div>
                 <div>
-                  <label htmlFor="product-stock" className="block text-xs font-bold text-[#5C4D42] mb-1">
+                  <label htmlFor="product-stock" className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
                     Stock Quantity
                   </label>
                   <input
@@ -537,14 +611,14 @@ export default function AdminProductsPage() {
                     value={editingProduct.stockQuantity ?? ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, stockQuantity: Number(e.target.value) })}
                     placeholder="Leave blank if N/A"
-                    className="w-full px-3.5 py-2.5 text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
                   />
                 </div>
               </div>
 
               {/* Category */}
               <div>
-                <label htmlFor="product-category" className="block text-xs font-bold text-[#5C4D42] mb-1">
+                <label htmlFor="product-category" className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
                   Category <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -558,7 +632,7 @@ export default function AdminProductsPage() {
                       category: found ? found.name : 'Cakes',
                     });
                   }}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 bg-white"
+                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.id} value={c.slug}>{c.name}</option>
@@ -568,7 +642,7 @@ export default function AdminProductsPage() {
 
               {/* Description */}
               <div>
-                <label htmlFor="product-description" className="block text-xs font-bold text-[#5C4D42] mb-1">
+                <label htmlFor="product-description" className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
                   Description
                 </label>
                 <textarea
@@ -576,52 +650,108 @@ export default function AdminProductsPage() {
                   rows={3}
                   value={editingProduct.description}
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 resize-none"
+                  className="w-full px-3.5 py-2.5 text-sm border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 resize-none"
                   placeholder="Describe the product..."
                 />
               </div>
 
-              {/* Image Upload */}
+              {/* Image Upload with Firebase Storage, Preview & Progress */}
               <div>
-                <label className="block text-xs font-bold text-[#5C4D42] mb-1">
+                <label className="block text-xs font-bold text-[var(--color-brand-chocolate)] mb-1">
                   Product Image (Firebase Storage)
                 </label>
                 <div className="flex gap-2 items-center">
                   <input
                     type="text"
                     value={editingProduct.image || ''}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
-                    placeholder="Paste URL or upload →"
-                    className="flex-1 px-3.5 py-2.5 text-xs border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
+                    onChange={(e) => {
+                      setEditingProduct({ ...editingProduct, image: e.target.value });
+                      setUploadError(null);
+                    }}
+                    placeholder="Paste image URL or choose file to upload →"
+                    className="flex-1 px-3.5 py-2.5 text-xs border border-[var(--color-brand-border)] bg-[var(--color-brand-input-bg)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25"
                     aria-label="Image URL"
                   />
                   <label
-                    className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 text-xs font-bold rounded-xl cursor-pointer transition-colors border ${
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-xl cursor-pointer transition-all border ${
                       uploadingImage
                         ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                        : 'bg-[#F7EFE6] text-[#8C5E3C] border-[#E8DFD5] hover:bg-[#EBDCCF]'
+                        : 'bg-[var(--color-brand-cream-dark)] text-[#8C5E3C] border-[var(--color-brand-border)] hover:bg-[#EBDCCF] active:scale-95'
                     }`}
                   >
-                    <Upload size={13} aria-hidden="true" />
-                    <span>{uploadingImage ? 'Uploading…' : 'Upload'}</span>
+                    <Upload size={14} className={uploadingImage ? 'animate-bounce' : ''} aria-hidden="true" />
+                    <span>{uploadingImage ? 'Uploading…' : 'Choose File'}</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
                       disabled={uploadingImage}
                       onChange={handleImageUpload}
                       className="hidden"
                     />
                   </label>
                 </div>
-                {editingProduct.image && (
-                  <div className="mt-2 flex items-center gap-2">
+
+                {/* Real-time Upload Progress Bar */}
+                {uploadingImage && uploadProgress !== null && (
+                  <div className="mt-2.5 space-y-1">
+                    <div className="flex justify-between text-[11px] font-semibold text-[var(--color-brand-muted)]">
+                      <span>Uploading to Firebase Storage…</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-[var(--color-brand-cream-dark)] rounded-full h-2 overflow-hidden border border-[var(--color-brand-border)]">
+                      <div
+                        className="bg-gradient-to-r from-[#D4A373] to-[#E5B88F] h-full transition-all duration-300 rounded-full"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Actionable Upload Error Notice */}
+                {uploadError && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-600 dark:text-red-400 flex items-start gap-2.5">
+                    <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-red-500" />
+                    <div className="flex-1">
+                      <p className="font-bold">Image Upload Failed</p>
+                      <p className="text-[11px] opacity-90 mt-0.5">{uploadError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Image Preview & Details Card */}
+                {(previewUrl || editingProduct.image) && (
+                  <div className="mt-3 p-3 rounded-xl bg-[var(--color-brand-cream-dark)] border border-[var(--color-brand-border)] flex items-center gap-3">
                     <img
-                      src={editingProduct.image}
+                      src={previewUrl || editingProduct.image}
                       alt="Product preview"
-                      className="w-12 h-12 object-cover rounded-lg border border-[#E8DFD5]"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg'; }}
+                      className="w-14 h-14 object-cover rounded-lg border border-[var(--color-brand-border)] bg-[var(--color-brand-surface)] flex-shrink-0 shadow-xs"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
+                      }}
                     />
-                    <span className="text-[10px] text-[#7A695E] truncate max-w-xs">{editingProduct.image}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-[var(--color-brand-chocolate)]">
+                          {previewUrl ? 'Local Preview' : 'Saved Image'}
+                        </span>
+                        {uploadingImage ? (
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 font-semibold border border-amber-500/30">
+                            Uploading ({uploadProgress}%)
+                          </span>
+                        ) : editingProduct.image?.includes('firebasestorage.googleapis.com') ? (
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/30 flex items-center gap-1">
+                            <CheckCircle size={10} /> Storage Saved
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-stone-500/15 text-stone-700 dark:text-stone-300 font-semibold border border-stone-500/30">
+                            Catalog URL
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-[var(--color-brand-muted)] truncate mt-1 font-mono">
+                        {previewUrl || editingProduct.image}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -640,26 +770,27 @@ export default function AdminProductsPage() {
                       onChange={(e) => setEditingProduct({ ...editingProduct, [key]: e.target.checked })}
                       className="w-4 h-4 rounded accent-[#D4A373]"
                     />
-                    <span className="font-medium text-[#1E1008]">{label}</span>
+                    <span className="font-medium text-[var(--color-brand-chocolate)]">{label}</span>
                   </label>
                 ))}
               </div>
             </form>
 
             {/* Modal Footer */}
-            <div className="flex justify-end gap-3 p-5 border-t border-[#E8DFD5] bg-[#FAF7F2] flex-shrink-0">
+            <div className="flex justify-end gap-3 p-5 border-t border-[var(--color-brand-border)] bg-[var(--color-brand-cream-dark)] flex-shrink-0">
               <button
                 type="button"
-                onClick={() => setEditingProduct(null)}
-                className="px-4 py-2.5 text-sm font-semibold text-[#5C4D42] border border-[#E0D3C5] rounded-xl hover:bg-[#F5ECE1] transition-colors"
+                onClick={handleCloseModal}
+                className="px-4 py-2.5 text-sm font-semibold text-[var(--color-brand-muted)] border border-[var(--color-brand-border)] rounded-xl hover:bg-[var(--color-brand-surface)] transition-colors min-h-[44px]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 form=""
+                disabled={uploadingImage}
                 onClick={handleSave}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D4A373] to-[#E5B88F] hover:from-[#C79361] hover:to-[#D9A779] text-[#1E1008] font-bold text-sm shadow-xs border border-[#C59262] flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D4A373] to-[#E5B88F] hover:from-[#C79361] hover:to-[#D9A779] text-[#1E1008] font-bold text-sm shadow-xs border border-[#C59262] flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
               >
                 <Save size={14} aria-hidden="true" /> {isNew ? 'Add Product' : 'Save Changes'}
               </button>
@@ -676,14 +807,14 @@ export default function AdminProductsPage() {
           aria-modal="true"
           aria-labelledby="delete-confirm-title"
         >
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6 space-y-4 border border-[#E8DFD5]">
+          <div className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-2xl max-w-sm w-full shadow-2xl p-6 space-y-4 border border-[var(--color-brand-border)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle size={20} className="text-red-600" aria-hidden="true" />
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={20} className="text-red-600 dark:text-red-400" aria-hidden="true" />
               </div>
               <div>
-                <h3 id="delete-confirm-title" className="font-bold text-[#1E1008]">Delete Product?</h3>
-                <p className="text-xs text-[#7A695E] mt-0.5">
+                <h3 id="delete-confirm-title" className="font-bold text-[var(--color-brand-chocolate)]">Delete Product?</h3>
+                <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
                   "{products.find(p => p.id === confirmDeleteId)?.name}" will be permanently removed from the catalog.
                 </p>
               </div>
@@ -691,13 +822,13 @@ export default function AdminProductsPage() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmDeleteId(null)}
-                className="px-4 py-2 text-sm font-semibold text-[#5C4D42] border border-[#E0D3C5] rounded-xl hover:bg-[#F5ECE1] transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-[var(--color-brand-muted)] border border-[var(--color-brand-border)] rounded-xl hover:bg-[var(--color-brand-cream-dark)] transition-colors min-h-[40px]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 text-sm font-bold rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
+                className="px-4 py-2 text-sm font-bold rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors min-h-[40px]"
               >
                 Delete Product
               </button>
@@ -705,6 +836,7 @@ export default function AdminProductsPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

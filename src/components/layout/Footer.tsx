@@ -29,11 +29,11 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#232F3E] text-white/90 font-sans">
-      {/* Amazon-Style Back to Top Strip */}
+    <footer className="bg-[var(--color-brand-footer-bg)] text-[var(--color-brand-footer-text)] font-sans border-t border-[var(--color-brand-border)]/50 transition-colors">
+      {/* Back to Top Strip */}
       <button
         onClick={scrollToTop}
-        className="w-full py-3.5 bg-[#37475A] hover:bg-[#485769] text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors"
+        className="w-full py-3.5 bg-[var(--color-brand-footer-strip)] hover:opacity-90 text-[var(--color-brand-footer-text)] text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
       >
         <ArrowUp size={14} /> Back to top
       </button>
@@ -158,15 +158,15 @@ export default function Footer() {
       </div>
 
       {/* Payment Reassurance Strip */}
-      <div className="bg-[#131A22] border-t border-white/10 py-4 px-4 text-xs text-white/60">
+      <div className="bg-[var(--color-brand-footer-bg)]/95 border-t border-[var(--color-brand-border)]/40 py-4 px-4 text-xs text-[var(--color-brand-footer-muted)]">
         <div className="container-main flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#A3E635]" />
-            <span className="text-white/80 font-medium">
+            <span className="text-[var(--color-brand-footer-text)] font-medium">
               100% Secure Checkout with Razorpay & Cash on Delivery • 256-Bit SSL Encrypted
             </span>
           </div>
-          <div className="flex items-center gap-3 text-[11px] font-bold text-white/70 uppercase tracking-wider">
+          <div className="flex items-center gap-3 text-[11px] font-bold text-[var(--color-brand-footer-muted)] uppercase tracking-wider">
             <span>UPI</span>
             <span>•</span>
             <span>Google Pay</span>
@@ -183,8 +183,8 @@ export default function Footer() {
       </div>
 
       {/* Copyright Bar */}
-      <div className="bg-[#0D141E] py-4 border-t border-white/5">
-        <div className="container-main px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-white/40">
+      <div className="bg-[var(--color-brand-footer-bg)] py-4 border-t border-[var(--color-brand-border)]/20">
+        <div className="container-main px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[var(--color-brand-footer-muted)]/70">
           <p>© {CURRENT_YEAR} YOYO CAKES Private Limited. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Handcrafted with <Heart size={12} className="text-red-500 fill-red-500" /> in Chennai, India

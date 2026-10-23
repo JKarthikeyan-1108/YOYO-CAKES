@@ -3,14 +3,18 @@ service firebase.storage {
   match /b/{bucket}/o {
     
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        request.auth.token.email == 'admin@yoyocakes.com' ||
+        request.auth.token.email.matches('.*@yoyocakes[.]com$')
+      );
     }
 
     // Product images: public read, admin upload only with size & type validation
     match /products/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin()
-                    && request.resource.size < 5 * 1024 * 1024 // 5MB limit
+                    && request.resource.size <= 5 * 1024 * 1024 // 5MB limit
                     && request.resource.contentType.matches('image/.*');
     }
 

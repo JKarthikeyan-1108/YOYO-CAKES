@@ -93,7 +93,7 @@ export default function BottomNav() {
 
       {/* Primary Mobile Bottom Navigation */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-brand-surface)] border-t border-[var(--color-brand-border)] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] transition-colors"
         aria-label="Mobile navigation"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -112,8 +112,8 @@ export default function BottomNav() {
                 to={href}
                 className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative min-h-[44px] ${
                   active
-                    ? 'text-[var(--color-brand-primary-dark)]'
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? 'text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]'
+                    : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                 }`}
                 aria-label={label}
                 aria-current={active ? 'page' : undefined}
@@ -122,7 +122,7 @@ export default function BottomNav() {
                   <Icon
                     size={20}
                     strokeWidth={active ? 2.5 : 2}
-                    className={active ? 'text-[var(--color-brand-primary-dark)]' : ''}
+                    className={active ? 'text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]' : ''}
                   />
                 </div>
                 <span
@@ -134,7 +134,7 @@ export default function BottomNav() {
                 </span>
                 {/* Active indicator bar */}
                 {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[var(--color-brand-primary-dark)] rounded-full" />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[var(--color-brand-primary-dark)] dark:bg-[var(--color-brand-primary)] rounded-full" />
                 )}
               </Link>
             );

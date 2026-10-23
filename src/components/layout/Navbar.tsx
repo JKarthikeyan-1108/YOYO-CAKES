@@ -23,6 +23,8 @@ import {
   ClipboardList,
   MessageSquare,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCartStore } from '@/stores/cartStore';
@@ -30,6 +32,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productStore';
 import { useLocationStore } from '@/stores/locationStore';
+import { useThemeStore } from '@/stores/themeStore';
 import BrandLogo from '@/components/common/BrandLogo';
 import DeliveryLocationModal from '@/components/common/DeliveryLocationModal';
 import { CATEGORIES, formatPrice } from '@/data/products';
@@ -54,6 +57,7 @@ export default function Navbar() {
   const { user, logout, isAdmin } = useAuthStore();
   const products = useProductStore((s) => s.products);
   const { currentLocation, openModal: openLocationModal } = useLocationStore();
+  const { resolvedTheme, toggleTheme } = useThemeStore();
 
   // Lock body scroll when drawer open
   useEffect(() => {
@@ -164,18 +168,18 @@ export default function Navbar() {
   return (
     <>
       {/* Compact Announcement Bar */}
-      <div className="bg-[var(--color-brand-chocolate)] text-white text-[11px] font-medium py-1.5 px-4 tracking-wide">
+      <div className="bg-[var(--color-brand-strip-bg)] text-[var(--color-brand-strip-text)] text-[11px] font-medium py-1.5 px-4 tracking-wide border-b border-[var(--color-brand-border)]/50">
         <div className="container-main flex items-center justify-between">
           <div className="flex items-center gap-2 truncate">
             <Sparkles size={12} className="text-[var(--color-brand-primary)] flex-shrink-0" />
             <span className="truncate">Handcrafted Artisanal Bakes • Fresh Baked Daily • Every bite, a little happiness</span>
           </div>
-          <div className="hidden md:flex items-center gap-4 text-[11px] text-white/80 flex-shrink-0">
-            <a href="tel:+918428855444" className="hover:text-white flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-4 text-[11px] text-[var(--color-brand-strip-muted)] flex-shrink-0">
+            <a href="tel:+918428855444" className="hover:text-[var(--color-brand-primary)] flex items-center gap-1">
               Helpline: +91 84288 55444
             </a>
             <span>|</span>
-            <Link to="/contact" className="hover:text-white">Store Locator</Link>
+            <Link to="/contact" className="hover:text-[var(--color-brand-primary)]">Store Locator</Link>
           </div>
         </div>
       </div>
@@ -520,6 +524,21 @@ export default function Navbar() {
                 )}
               </Link>
 
+              {/* Theme Toggle Button (desktop/tablet) */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative min-w-[40px] min-h-[40px] justify-center cursor-pointer"
+                title={`Switch to ${resolvedTheme === 'dark' ? 'Cream' : 'Dark'} theme`}
+                aria-label={`Toggle theme (currently ${resolvedTheme})`}
+              >
+                {resolvedTheme === 'dark' ? (
+                  <Sun size={18} className="text-[#FFD814]" />
+                ) : (
+                  <Moon size={18} className="text-[var(--color-brand-primary-dark)]" />
+                )}
+              </button>
+
               {/* Cart (visible on all sizes) */}
               <Link
                 to="/cart"
@@ -615,8 +634,8 @@ export default function Navbar() {
         )}
 
         {/* Desktop Sub-Navigation Bar with horizontal scroll categories */}
-        <div className="hidden sm:block bg-[var(--color-brand-chocolate)] text-white text-xs font-medium overflow-x-auto scrollbar-none">
-          <div className="container-main flex items-center gap-4 sm:gap-5 py-1.5 whitespace-nowrap">
+        <div className="hidden sm:block bg-[var(--color-brand-strip-bg)] text-[var(--color-brand-strip-text)] text-xs font-medium overflow-x-auto scrollbar-none border-b border-[var(--color-brand-border)]/40">
+          <div className="container-main flex items-center gap-4 sm:gap-5 py-2 whitespace-nowrap">
             <Link to="/shop" className="flex items-center gap-1.5 hover:text-[var(--color-brand-primary)] font-bold">
               <Menu size={14} /> All Products
             </Link>
@@ -828,7 +847,27 @@ export default function Navbar() {
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
+        <div className="p-4 border-t border-gray-100 bg-gray-50 space-y-3">
+          {/* Mobile Theme Switcher */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="w-full py-2.5 px-3.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer shadow-2xs"
+            aria-label={`Switch theme, current: ${resolvedTheme}`}
+          >
+            <span className="flex items-center gap-2">
+              {resolvedTheme === 'dark' ? (
+                <Sun size={16} className="text-[#FFD814]" />
+              ) : (
+                <Moon size={16} className="text-[var(--color-brand-primary-dark)]" />
+              )}
+              <span>Theme Appearance</span>
+            </span>
+            <span className="text-[11px] font-mono uppercase bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded text-amber-900 font-extrabold">
+              {resolvedTheme === 'dark' ? 'Dark' : 'Cream'}
+            </span>
+          </button>
+
           {user ? (
             <button
               onClick={async () => {

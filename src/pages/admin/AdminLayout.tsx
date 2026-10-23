@@ -112,7 +112,7 @@ export default function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1E1008] flex flex-col lg:flex-row antialiased">
+    <div className="min-h-screen bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] flex flex-col lg:flex-row antialiased transition-colors">
       {/* === MOBILE HEADER === */}
       <header className="lg:hidden sticky top-0 z-40 bg-gradient-to-r from-[#1C0E07] to-[#2B160B] text-white flex items-center justify-between px-4 py-3 shadow-md border-b border-[#3A2011]">
         <button
@@ -179,7 +179,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* === MAIN CONTENT === */}
-      <main className="flex-1 overflow-y-auto min-h-0 bg-[#FAF7F2]">
+      <main className="flex-1 overflow-y-auto min-h-0 bg-[var(--color-brand-cream)] transition-colors">
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           <Outlet />
         </div>

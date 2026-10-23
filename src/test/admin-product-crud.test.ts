@@ -20,19 +20,18 @@ describe('Admin Authentication & Product Catalog CRUD', () => {
 
   it('allows valid administrator login and persists admin session', async () => {
     const auth = useAuthStore.getState();
-    const success = await auth.adminLogin('admin@yoyocakes.com', 'yoyoadmin2025', 'yoyoadmin2025');
+    const success = await auth.adminLogin('admin@yoyocakes.com', 'yoyoadmin2025');
 
     expect(success).toBe(true);
     expect(useAuthStore.getState().isAdmin).toBe(true);
     expect(useAuthStore.getState().user?.email).toBe('admin@yoyocakes.com');
-    expect(localStorage.getItem('yoyo_auth_admin')).toBe('true');
   });
 
   it('rejects unauthorized users attempting admin login', async () => {
     const auth = useAuthStore.getState();
 
     await expect(
-      auth.adminLogin('hacker@random.com', 'wrongpassword', 'badpin')
+      auth.adminLogin('hacker@random.com', 'wrongpassword')
     ).rejects.toThrow();
 
     expect(useAuthStore.getState().isAdmin).toBe(false);
@@ -46,7 +45,6 @@ describe('Admin Authentication & Product Catalog CRUD', () => {
     await auth.logout();
     expect(useAuthStore.getState().isAdmin).toBe(false);
     expect(useAuthStore.getState().user).toBeNull();
-    expect(localStorage.getItem('yoyo_auth_admin')).toBeNull();
   });
 
   it('allows adding a new product to the catalog', async () => {

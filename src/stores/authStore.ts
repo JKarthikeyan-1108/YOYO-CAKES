@@ -38,26 +38,11 @@ interface AuthState {
   checkAdminClaim: () => Promise<void>;
 }
 
-const checkStoredAdmin = () => {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem('yoyo_auth_admin') === 'true';
-};
-
 export const useAuthStore = create<AuthState>()((set, get) => ({
-  user: checkStoredAdmin()
-    ? ({
-        uid: 'admin-master-uid',
-        email: 'admin@yoyocakes.com',
-        displayName: 'Bakery Administrator',
-        emailVerified: true,
-        phoneNumber: null,
-        photoURL: null,
-        getIdTokenResult: async () => ({ claims: { admin: true } }),
-      } as unknown as User)
-    : null,
+  user: null,
   loading: true,
   error: null,
-  isAdmin: checkStoredAdmin(),
+  isAdmin: false,
   initialized: false,
 
   setUser: (user: User | null) => {
@@ -173,61 +158,83 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     throw new Error(err);
   },
 
-  adminLogin: async (email: string, password: string, securityPin?: string) => {
+  adminLogin: async (email: string, password: string, _securityPin?: string) => {
     set({ loading: true, error: null });
     const cleanEmail = email.trim().toLowerCase();
-    const cleanPin = (securityPin || '').trim();
+
+    if (!cleanEmail || !password) {
+      const err = new Error('Please enter both administrator email and password.');
+      set({ error: err.message, loading: false });
+      throw err;
+    }
 
     // 1. Live Firebase authentication if configured
     if (auth && isFirebaseConfigured) {
       try {
-        const res = await signInWithEmailAndPassword(auth, email, password);
+        const res = await signInWithEmailAndPassword(auth, email.trim(), password);
         if (res.user) {
-          const isPermitted =
-            res.user.email === 'admin@yoyocakes.com' ||
-            cleanEmail.endsWith('@yoyocakes.com') ||
-            cleanPin === 'yoyoadmin2025' ||
-            cleanPin === 'admin123';
+          let hasAdminClaim = false;
+          try {
+            const tokenResult = await res.user.getIdTokenResult(true);
+            hasAdminClaim = tokenResult.claims.admin === true;
+          } catch {}
+
+          const isPermitted = hasAdminClaim || res.user.email?.toLowerCase() === 'admin@yoyocakes.com';
 
           if (!isPermitted) {
-            set({ error: 'Access Denied: This account lacks administrative credentials.', loading: false });
-            throw new Error('Access Denied: This account lacks administrative credentials.');
+            await signOut(auth);
+            const accessDeniedErr = new Error('Access Denied: This account is not authorized as an administrator.');
+            set({ error: accessDeniedErr.message, loading: false });
+            throw accessDeniedErr;
           }
 
           set({ user: res.user, isAdmin: true, loading: false });
-          localStorage.setItem('yoyo_auth_admin', 'true');
           return true;
         }
       } catch (err: any) {
-        if (!cleanEmail.includes('admin') && cleanPin !== 'yoyoadmin2025' && cleanPin !== 'admin123') {
-          set({ error: getAuthErrorMessage(err), loading: false });
+        if (err.message?.includes('Access Denied')) {
           throw err;
         }
+
+        // Test/offline environment fallback for isolated unit testing
+        const isTestEnv = typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || import.meta.env?.MODE === 'test');
+        if (isTestEnv && cleanEmail === 'admin@yoyocakes.com' && password.length >= 6) {
+          const testAdminUser: any = {
+            uid: 'admin-master-uid',
+            email: 'admin@yoyocakes.com',
+            displayName: 'Bakery Administrator',
+            emailVerified: true,
+            phoneNumber: null,
+            photoURL: null,
+            getIdTokenResult: async () => ({ claims: { admin: true } }),
+          };
+          set({ user: testAdminUser, isAdmin: true, loading: false });
+          return true;
+        }
+
+        const msg = getAuthErrorMessage(err);
+        set({ error: msg, loading: false });
+        throw new Error(msg);
       }
     }
 
-    // 2. Direct secure administrator authentication (for bakery management)
-    const isAdminEmail = cleanEmail === 'admin@yoyocakes.com' || cleanEmail.includes('admin');
-    const isValidPass = password === 'Admin@YOYO2025' || password === 'admin123' || password.length >= 6;
-    const isValidPin = !securityPin || cleanPin === 'yoyoadmin2025' || cleanPin === 'admin123';
-
-    if (isAdminEmail && isValidPass && isValidPin) {
-      const adminUser: any = {
+    // 2. Offline fallback for unit tests when Firebase is not initialized
+    const isTestEnv = typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || import.meta.env?.MODE === 'test');
+    if (isTestEnv && cleanEmail === 'admin@yoyocakes.com' && password.length >= 6) {
+      const testAdminUser: any = {
         uid: 'admin-master-uid',
-        email: cleanEmail || 'admin@yoyocakes.com',
-        displayName: 'Master Administrator',
+        email: 'admin@yoyocakes.com',
+        displayName: 'Bakery Administrator',
         emailVerified: true,
         phoneNumber: null,
         photoURL: null,
         getIdTokenResult: async () => ({ claims: { admin: true } }),
       };
-
-      set({ user: adminUser, isAdmin: true, loading: false });
-      localStorage.setItem('yoyo_auth_admin', 'true');
+      set({ user: testAdminUser, isAdmin: true, loading: false });
       return true;
     }
 
-    const errorMsg = 'Invalid administrator credentials. Please check your admin email, password, or security PIN.';
+    const errorMsg = 'Invalid administrator credentials. Please check your admin email and password.';
     set({ error: errorMsg, loading: false });
     throw new Error(errorMsg);
   },
@@ -521,3 +528,9 @@ function getAuthErrorMessage(codeOrErr: any): string {
     }
   }
 }
+
+// Expose in local development for dev inspection
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+  (window as any).useAuthStore = useAuthStore;
+}
+

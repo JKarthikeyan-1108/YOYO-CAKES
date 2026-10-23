@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { ref as rtdbRef, get as rtdbGet, set as rtdbSet, remove as rtdbRemove } from 'firebase/database';
 import { db, rtdb, storage, isFirebaseConfigured } from '@/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import type { Product } from '@/data/products';
 import { PRODUCTS, CATEGORIES } from '@/data/products';
 
@@ -731,18 +731,112 @@ export async function saveCategoryToFirestore(category: FirestoreCategory): Prom
 }
 
 // --- FIREBASE STORAGE UPLOADS ---
-export async function uploadProductImageToStorage(file: File, productId: string): Promise<string> {
-  if (!storage) throw new Error('Firebase Storage is not initialized.');
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const imageRef = ref(storage, `products/${productId}_${Date.now()}.${fileExt}`);
-  const snap = await uploadBytes(imageRef, file);
-  return await getDownloadURL(snap.ref);
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+export async function uploadProductImageToStorage(
+  file: File,
+  productId: string,
+  onProgress?: (percent: number) => void
+): Promise<string> {
+  if (!storage) {
+    throw new Error('Firebase Storage is not initialized. Please verify your Firebase configuration.');
+  }
+
+  // 1. Validate MIME format
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
+    throw new Error(
+      `Unsupported file format (${file.type || 'unknown'}). Please upload a JPEG, PNG, WebP, or GIF image.`
+    );
+  }
+
+  // 2. Validate file size (5MB limit)
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    throw new Error(
+      `Image size (${sizeMb} MB) exceeds the 5 MB limit. Please select a smaller image.`
+    );
+  }
+
+  // 3. Construct unique storage path with clean file extension
+  const rawExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const cleanExt = rawExt.replace(/[^a-z0-9]/g, '') || 'jpg';
+  const safeProductId = productId.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const filename = `${safeProductId}_${Date.now()}.${cleanExt}`;
+  const imageRef = ref(storage, `products/${filename}`);
+
+  const metadata = {
+    contentType: file.type || 'image/jpeg',
+    customMetadata: {
+      productId,
+      uploadedAt: new Date().toISOString(),
+    },
+  };
+
+  return new Promise<string>((resolve, reject) => {
+    const uploadTask = uploadBytesResumable(imageRef, file, metadata);
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        if (snapshot.totalBytes > 0) {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          if (onProgress) {
+            onProgress(progress);
+          }
+        }
+      },
+      (error: any) => {
+        console.error('Firebase Storage upload error:', error);
+        let userMessage = error.message || 'Image upload failed.';
+        switch (error.code) {
+          case 'storage/unauthorized':
+            userMessage = 'Permission denied: Admin authentication is required to upload product images.';
+            break;
+          case 'storage/canceled':
+            userMessage = 'Image upload was cancelled.';
+            break;
+          case 'storage/quota-exceeded':
+            userMessage = 'Firebase Storage quota exceeded. Please contact your administrator.';
+            break;
+          case 'storage/retry-limit-exceeded':
+            userMessage = 'Upload timed out. Please check your network connection and try again.';
+            break;
+          case 'storage/invalid-checksum':
+            userMessage = 'File corrupted during transfer. Please retry.';
+            break;
+          case 'storage/bucket-not-found':
+            userMessage = 'Firebase Storage bucket was not found. Please verify VITE_FIREBASE_STORAGE_BUCKET in your environment.';
+            break;
+          case 'storage/project-not-found':
+            userMessage = 'Firebase project not found for storage.';
+            break;
+        }
+        reject(new Error(userMessage));
+      },
+      async () => {
+        try {
+          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadUrl);
+        } catch (err: any) {
+          reject(new Error(err?.message || 'Failed to retrieve image download URL after upload.'));
+        }
+      }
+    );
+  });
 }
 
 export async function uploadProfileImageToStorage(file: File, userId: string): Promise<string> {
   if (!storage) throw new Error('Firebase Storage is not initialized.');
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const imageRef = ref(storage, `profiles/${userId}/${userId}_${Date.now()}.${fileExt}`);
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
+    throw new Error('Unsupported file format. Please upload a JPEG, PNG, WebP, or GIF image.');
+  }
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    throw new Error('Profile image exceeds the 5 MB limit.');
+  }
+  const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const cleanExt = fileExt.replace(/[^a-z0-9]/g, '') || 'jpg';
+  const imageRef = ref(storage, `profiles/${userId}/${userId}_${Date.now()}.${cleanExt}`);
   const snap = await uploadBytes(imageRef, file);
   return await getDownloadURL(snap.ref);
 }

@@ -88,7 +88,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
     <>
       <Link
         to={`/product/${product.id}`}
-        className="group flex flex-col justify-between rounded-2xl bg-white border border-gray-200/80 hover:border-[var(--color-brand-primary)]/50 hover:shadow-lg transition-all overflow-hidden relative"
+        className="group flex flex-col justify-between rounded-2xl bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]/50 hover:shadow-lg transition-all overflow-hidden relative"
       >
         <div>
           {/* Image & Badges */}
@@ -120,7 +120,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
                     e.stopPropagation();
                     setQuickViewOpen(true);
                   }}
-                  className="w-full py-2 bg-white/95 hover:bg-white text-gray-900 font-bold text-xs rounded-xl shadow-md backdrop-blur-xs flex items-center justify-center gap-1.5 transition-transform hover:scale-[1.02] border border-gray-200"
+                  className="w-full py-2 bg-[var(--color-brand-surface)]/95 hover:bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] font-bold text-xs rounded-xl shadow-md backdrop-blur-xs flex items-center justify-center gap-1.5 transition-transform hover:scale-[1.02] border border-[var(--color-brand-border)]"
                 >
                   <Eye size={14} className="text-[var(--color-brand-primary-dark)]" /> Quick View
                 </button>
@@ -138,7 +138,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-xs ${
                   isInWishlist
                     ? 'bg-red-500 text-white'
-                    : 'bg-white/90 text-gray-600 hover:bg-white hover:text-red-500'
+                    : 'bg-[var(--color-brand-surface)]/90 text-[var(--color-brand-muted)] hover:bg-[var(--color-brand-surface)] hover:text-red-500'
                 }`}
                 aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
               >
@@ -149,7 +149,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
 
           {/* Product Details (Swiggy-inspired Clean Food Card) */}
           <div className="p-3.5 sm:p-4">
-            <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+            <div className="flex items-center justify-between text-[11px] text-[var(--color-brand-muted)] mb-1">
               <span className="uppercase tracking-wider font-semibold text-[var(--color-brand-muted)]">
                 {product.category}
               </span>
@@ -158,13 +158,13 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
               </span>
             </div>
 
-            <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2 leading-snug mb-1">
+            <h3 className="font-heading text-sm sm:text-base font-bold text-[var(--color-brand-chocolate)] group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2 leading-snug mb-1">
               {product.name}
             </h3>
 
             {/* Price Tag */}
             <div className="flex items-baseline gap-1.5 mt-2">
-              <span className="text-base sm:text-lg font-extrabold text-gray-900">
+              <span className="text-base sm:text-lg font-extrabold text-[var(--color-brand-chocolate)]">
                 {formatPrice(product.price)}
               </span>
             </div>
@@ -222,14 +222,14 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
           }}
         >
           <div
-            className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-gray-200 relative overflow-hidden text-left"
+            className="bg-[var(--color-brand-surface)] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[var(--color-brand-border)] relative overflow-hidden text-left"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setQuickViewOpen(false)}
-              className="absolute top-3 right-3 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors z-20"
+              className="absolute top-3 right-3 min-w-[40px] min-h-[40px] rounded-full bg-[var(--color-brand-surface-elevated)] hover:opacity-80 text-[var(--color-brand-chocolate)] flex items-center justify-center transition-colors z-20 border border-[var(--color-brand-border)]"
               aria-label="Close quick view dialog"
             >
               <X size={18} />
@@ -237,7 +237,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
               {/* Product Visual */}
-              <div className="relative rounded-2xl overflow-hidden aspect-square bg-[var(--color-brand-cream-dark)] border border-gray-100">
+              <div className="relative rounded-2xl overflow-hidden aspect-square bg-[var(--color-brand-cream-dark)] border border-[var(--color-brand-border)]">
                 <img
                   src={imgSrc}
                   alt={product.name}
@@ -251,34 +251,34 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
               {/* Product Info & Actions */}
               <div className="space-y-4">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-brand-primary-dark)]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]">
                     {product.category}
                   </span>
-                  <h3 className="font-heading text-xl font-extrabold text-gray-900 mt-0.5 leading-snug">
+                  <h3 className="font-heading text-xl font-extrabold text-[var(--color-brand-chocolate)] mt-0.5 leading-snug">
                     {product.name}
                   </h3>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-2xl font-black text-gray-900">
+                    <span className="text-2xl font-black text-[var(--color-brand-chocolate)]">
                       {formatPrice(product.price)}
                     </span>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">
+                <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed line-clamp-3">
                   {product.description}
                 </p>
 
                 {/* Cake Customization (Message & Candles) */}
-                <div className="space-y-2 pt-2 border-t border-gray-100">
+                <div className="space-y-2 pt-2 border-t border-[var(--color-brand-border)]">
                   <input
                     type="text"
                     maxLength={35}
                     value={customMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
                     placeholder="Message on cake (optional)..."
-                    className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs outline-none focus:border-[var(--color-brand-primary-dark)]"
+                    className="w-full px-3 py-1.5 rounded-lg border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] text-xs outline-none focus:border-[var(--color-brand-primary-dark)]"
                   />
-                  <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs text-[var(--color-brand-muted)] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={includeCandles}
