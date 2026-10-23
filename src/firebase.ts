@@ -7,7 +7,7 @@ import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 
 // Existing Firebase Project: yoyo-c46c3
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyBCR9C0H6xwheuez0CLNY5Ihei9Vh1PLZo',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDgRMJkxuxWw10EHaINvVXyR8ltRLM5wCs',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'yoyo-c46c3.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'yoyo-c46c3',
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || 'https://yoyo-c46c3-default-rtdb.firebaseio.com',
