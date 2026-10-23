@@ -1,4 +1,18 @@
 {
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "YOYO CAKES",
+        "supportEmail": "admin@yoyocakes.com",
+        "authorizedRedirectUris": [
+          "https://yoyo-c46c3.firebaseapp.com/__/auth/handler",
+          "https://yoyocakes-seven.vercel.app",
+          "http://localhost"
+        ]
+      }
+    }
+  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
