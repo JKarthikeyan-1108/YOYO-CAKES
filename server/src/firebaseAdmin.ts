@@ -67,6 +67,8 @@ if (!admin.apps.length) {
   }
 }
 
-export const db = admin.firestore();
+import { getFirestore } from 'firebase-admin/firestore';
+export const db = process.env.FIREBASE_DATABASE_ID ? getFirestore(process.env.FIREBASE_DATABASE_ID) : getFirestore();
 export const auth = admin.auth();
 export default admin;
+

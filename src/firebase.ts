@@ -30,7 +30,8 @@ export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Export the Firestore database instance as db
-export const db: Firestore = getFirestore(app);
+const firestoreDatabaseId = import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID;
+export const db: Firestore = firestoreDatabaseId ? getFirestore(app, firestoreDatabaseId) : getFirestore(app);
 
 // Export the Realtime Database instance as rtdb
 export const rtdb: Database = getDatabase(app);
