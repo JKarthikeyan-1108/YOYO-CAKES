@@ -532,16 +532,16 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => setFulfillmentMode('delivery')}
-                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col ${
+                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col cursor-pointer ${
                       fulfillmentMode === 'delivery'
-                        ? 'border-[var(--color-brand-primary-dark)] bg-amber-50/70 font-bold text-[var(--color-brand-primary-dark)] shadow-2xs'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        ? 'border-[var(--color-brand-primary)] bg-amber-500/10 dark:bg-amber-500/20 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
+                        : 'border-gray-200 dark:border-[#4D2B1B] bg-white dark:bg-[#24140D] text-gray-700 dark:text-amber-100/70 hover:border-gray-300 dark:hover:border-amber-700/50'
                     }`}
                   >
                     <span className="flex items-center gap-1.5 font-bold">
-                      <Truck size={14} /> Doorstep Delivery
+                      <Truck size={14} className="text-[var(--color-brand-primary)]" /> Doorstep Delivery
                     </span>
-                    <span className="text-[10px] text-gray-500 font-normal mt-1 leading-tight">
+                    <span className="text-[10px] text-gray-500 dark:text-amber-200/60 font-normal mt-1 leading-tight">
                       Calculated at checkout by address
                     </span>
                   </button>
@@ -549,16 +549,16 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => setFulfillmentMode('pickup')}
-                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col ${
+                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col cursor-pointer ${
                       fulfillmentMode === 'pickup'
-                        ? 'border-[var(--color-brand-primary-dark)] bg-amber-50/70 font-bold text-[var(--color-brand-primary-dark)] shadow-2xs'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        ? 'border-[var(--color-brand-primary)] bg-amber-500/10 dark:bg-amber-500/20 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
+                        : 'border-gray-200 dark:border-[#4D2B1B] bg-white dark:bg-[#24140D] text-gray-700 dark:text-amber-100/70 hover:border-gray-300 dark:hover:border-amber-700/50'
                     }`}
                   >
                     <span className="flex items-center gap-1.5 font-bold">
-                      <Store size={14} /> Kitchen Pickup
+                      <Store size={14} className="text-emerald-600 dark:text-emerald-400" /> Kitchen Pickup
                     </span>
-                    <span className="text-[10px] text-emerald-700 font-bold mt-1 leading-tight">
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold mt-1 leading-tight">
                       ₹0 (Complimentary)
                     </span>
                   </button>
