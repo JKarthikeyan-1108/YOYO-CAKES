@@ -132,24 +132,10 @@ export default function WishlistPage() {
                         </h3>
                       </Link>
 
-                      {/* Ratings */}
-                      <div className="flex items-center gap-1 mb-2">
-                        <div className="flex text-[#FFA41C]">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={12} fill="currentColor" strokeWidth={0} />
-                          ))}
-                        </div>
-                        <span className="text-xs font-bold text-gray-800">4.9</span>
-                        <span className="text-[11px] text-gray-500">(184)</span>
-                      </div>
-
                       {/* Price Tag */}
                       <div className="flex items-baseline gap-2 mb-2">
                         <span className="text-lg font-extrabold text-[#0F1111]">
                           {formatPrice(product.price)}
-                        </span>
-                        <span className="text-xs text-gray-400 line-through">
-                          {formatPrice(mrp)}
                         </span>
                       </div>
 
@@ -159,16 +145,16 @@ export default function WishlistPage() {
                         In Stock – Freshly Baked Daily
                       </div>
                       <div className="text-[11px] text-gray-500 flex items-center gap-1">
-                        <Clock size={11} className="text-amber-600" /> FREE Delivery on orders over ₹500
+                        <Clock size={11} className="text-gray-400" /> Delivery confirmed at checkout
                       </div>
                     </div>
                   </div>
 
-                  {/* Amazon Gold Add to Cart Button */}
+                  {/* Add to Cart Button */}
                   <div className="p-4 sm:p-5 pt-0">
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className="w-full py-2.5 bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-xs rounded-full shadow-2xs transition-all flex items-center justify-center gap-2"
+                      className="w-full py-2.5 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold text-xs rounded-full shadow-xs transition-all flex items-center justify-center gap-2"
                     >
                       <ShoppingCart size={14} /> Add to Cart
                     </button>

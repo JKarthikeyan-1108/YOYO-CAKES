@@ -31,10 +31,10 @@ describe('GPS Delivery Address & Serviceability Engine', () => {
 
     expect(res.serviceable).toBe(true);
     expect(res.distanceKm).toBeLessThan(FALLBACK_DELIVERY_SETTINGS.maxRadiusKm);
-    expect(res.deliveryFee).toBe(0); // Subtotal >= 500 triggers free delivery
+    expect(res.deliveryFee).toBe(0); // Subtotal >= 500 triggers delivery fee waiver
   });
 
-  it('charges base delivery fee when subtotal is below free delivery threshold', () => {
+  it('charges base delivery fee when subtotal is below delivery fee waiver threshold', () => {
     const res = calculateLocalServiceability(
       13.088,
       80.215,

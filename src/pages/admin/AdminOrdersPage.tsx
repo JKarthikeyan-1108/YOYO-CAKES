@@ -131,61 +131,61 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[var(--color-brand-chocolate)]">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E1008]">
             Orders & Kitchen Fulfillment
           </h1>
-          <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] mt-1">
+          <p className="text-xs sm:text-sm text-[#7A695E] mt-1">
             Real-time bakery orders, kitchen baking workflows, and dispatch
           </p>
         </div>
         <button
           onClick={loadOrders}
           disabled={loading}
-          className="btn-secondary text-xs px-3.5 py-2.5 min-h-[44px] flex items-center gap-2 self-start sm:self-auto rounded-xl"
+          className="px-4 py-2.5 rounded-xl bg-[#F5ECE1] hover:bg-[#EBDCCF] text-[#1E1008] border border-[#E0D3C5] font-bold text-xs shadow-xs min-h-[44px] flex items-center gap-2 self-start sm:self-auto transition-all"
           aria-label="Refresh orders list"
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          <RefreshCw size={14} className={loading ? 'animate-spin text-[#8C5E3C]' : 'text-[#8C5E3C]'} />
           <span>{loading ? 'Refreshing...' : 'Refresh Orders'}</span>
         </button>
       </div>
 
       {/* Metrics Stats Banner */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-            <Package size={14} className="text-[var(--color-brand-chocolate)]" /> Total Orders
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8DFD5] shadow-xs">
+          <div className="text-xs font-bold text-[#7A695E] flex items-center gap-1.5">
+            <Package size={14} className="text-[#1E1008]" /> Total Orders
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-[var(--color-brand-chocolate)] mt-1">{orders.length}</div>
-          <div className="text-[11px] text-gray-400 mt-0.5">All customer orders</div>
+          <div className="text-xl sm:text-2xl font-black text-[#1E1008] mt-1">{orders.length}</div>
+          <div className="text-[11px] text-[#8C7A6E] mt-0.5">All customer orders</div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-            <CheckCircle2 size={14} className="text-emerald-600" /> Revenue
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8DFD5] shadow-xs">
+          <div className="text-xs font-bold text-[#7A695E] flex items-center gap-1.5">
+            <CheckCircle2 size={14} className="text-emerald-700" /> Revenue
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-emerald-700 mt-1">{formatPrice(totalRevenue)}</div>
-          <div className="text-[11px] text-emerald-600 font-medium mt-0.5">Paid online / COD</div>
+          <div className="text-xl sm:text-2xl font-black text-emerald-800 mt-1">{formatPrice(totalRevenue)}</div>
+          <div className="text-[11px] text-emerald-700 font-medium mt-0.5">Paid online / COD</div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-            <ChefHat size={14} className="text-amber-600" /> In Kitchen
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8DFD5] shadow-xs">
+          <div className="text-xs font-bold text-[#7A695E] flex items-center gap-1.5">
+            <ChefHat size={14} className="text-[#8C5E3C]" /> In Kitchen
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-amber-600 mt-1">{bakingCount}</div>
-          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Active baking tickets</div>
+          <div className="text-xl sm:text-2xl font-black text-[#8C5E3C] mt-1">{bakingCount}</div>
+          <div className="text-[11px] text-[#8C5E3C] font-medium mt-0.5">Active baking tickets</div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/80 shadow-xs">
-          <div className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-            <Truck size={14} className="text-blue-600" /> Out for Delivery
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8DFD5] shadow-xs">
+          <div className="text-xs font-bold text-[#7A695E] flex items-center gap-1.5">
+            <Truck size={14} className="text-blue-700" /> Out for Delivery
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-blue-600 mt-1">{onRouteCount}</div>
-          <div className="text-[11px] text-blue-700 font-medium mt-0.5">{completedCount} delivered</div>
+          <div className="text-xl sm:text-2xl font-black text-blue-700 mt-1">{onRouteCount}</div>
+          <div className="text-[11px] text-blue-800 font-medium mt-0.5">{completedCount} delivered</div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/70 shadow-xs flex flex-col gap-3">
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E8DFD5] shadow-xs flex flex-col gap-3">
         <div className="relative w-full">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -193,7 +193,7 @@ export default function AdminOrdersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by Order ID, customer name, or phone..."
-            className="input-field pl-10 py-2.5 text-xs sm:text-sm min-h-[44px]"
+            className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm border border-[#E0D3C5] rounded-xl focus:outline-none focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 min-h-[44px]"
             aria-label="Search orders"
           />
         </div>
@@ -212,10 +212,10 @@ export default function AdminOrdersPage() {
             <button
               key={s.key}
               onClick={() => setStatusFilter(s.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors min-h-[36px] flex items-center ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors min-h-[36px] flex items-center ${
                 statusFilter === s.key
-                  ? 'bg-[var(--color-brand-chocolate)] text-white shadow-2xs'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#1E1008] text-[#FAF7F2] shadow-xs'
+                  : 'bg-[#F5ECE1] text-[#6B5A4E] hover:bg-[#EBDCCF]'
               }`}
             >
               {s.label}
@@ -226,10 +226,10 @@ export default function AdminOrdersPage() {
 
       {/* Empty State */}
       {filtered.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200/80 p-8 sm:p-12 text-center shadow-xs">
+        <div className="bg-white rounded-2xl border border-[#E8DFD5] p-8 sm:p-12 text-center shadow-xs">
           <Package size={40} className="mx-auto text-gray-300 mb-3" />
-          <h3 className="text-base font-bold text-gray-700">No orders found</h3>
-          <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
+          <h3 className="text-base font-bold text-[#1E1008]">No orders found</h3>
+          <p className="text-xs text-[#7A695E] mt-1 max-w-sm mx-auto">
             {search ? 'No orders match your search criteria. Try a different query.' : 'No orders in this status category.'}
           </p>
         </div>
@@ -242,15 +242,15 @@ export default function AdminOrdersPage() {
           return (
             <div
               key={order.id}
-              className="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-3 transition-shadow hover:shadow-sm"
+              className="bg-white rounded-2xl border border-[#E8DFD5] p-4 shadow-xs space-y-3 transition-shadow hover:shadow-sm"
             >
               {/* Card Header: ID, Date & Fulfillment */}
-              <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-gray-100">
+              <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-[#E8DFD5]">
                 <div>
-                  <span className="font-mono font-bold text-xs text-[var(--color-brand-chocolate)] block">
+                  <span className="font-mono font-bold text-xs text-[#1E1008] block">
                     #{order.id}
                   </span>
-                  <span className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] text-[#7A695E] flex items-center gap-1 mt-0.5">
                     <Calendar size={11} />
                     {new Date(order.createdAt).toLocaleDateString('en-IN', {
                       month: 'short',
@@ -266,7 +266,7 @@ export default function AdminOrdersPage() {
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex items-center gap-1 border ${
                       order.fulfillment === 'delivery'
                         ? 'bg-blue-50 text-blue-700 border-blue-200'
-                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                        : 'bg-[#F7EFE6] text-[#8C5E3C] border-[#E8DFD5]'
                     }`}
                   >
                     {order.fulfillment === 'delivery' ? <Truck size={10} /> : <ChefHat size={10} />}
@@ -288,10 +288,10 @@ export default function AdminOrdersPage() {
               {/* Customer & Phone */}
               <div className="flex items-center justify-between text-xs">
                 <div>
-                  <span className="font-bold text-gray-800 block text-sm">{order.customer.name}</span>
+                  <span className="font-bold text-[#1E1008] block text-sm">{order.customer.name}</span>
                   <a
                     href={`tel:${order.customer.phone}`}
-                    className="text-blue-600 hover:underline flex items-center gap-1 text-[11px] mt-0.5 font-medium"
+                    className="text-[#8C5E3C] hover:underline flex items-center gap-1 text-[11px] mt-0.5 font-medium"
                     aria-label={`Call ${order.customer.name} at ${order.customer.phone}`}
                   >
                     <Phone size={11} /> {order.customer.phone}
@@ -299,27 +299,27 @@ export default function AdminOrdersPage() {
                 </div>
 
                 <div className="text-right">
-                  <div className="font-black text-base text-[var(--color-brand-primary-dark)]">
+                  <div className="font-black text-base text-[#1E1008]">
                     {formatPrice(order.total)}
                   </div>
-                  <span className="text-[11px] text-gray-400">{itemCount} items</span>
+                  <span className="text-[11px] text-[#7A695E]">{itemCount} items</span>
                 </div>
               </div>
 
               {/* Items summary preview */}
-              <div className="bg-gray-50 rounded-xl p-2.5 text-[11px] text-gray-600 space-y-1">
+              <div className="bg-[#FAF7F2] rounded-xl p-2.5 text-[11px] text-[#5C4D42] border border-[#E8DFD5] space-y-1">
                 {order.items.slice(0, 2).map((item) => (
                   <div key={item.id} className="flex justify-between truncate">
                     <span className="truncate pr-2">
                       {item.quantity}× {item.name}
                     </span>
-                    <span className="font-semibold text-gray-800 flex-shrink-0">
+                    <span className="font-semibold text-[#1E1008] flex-shrink-0">
                       {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
                 {order.items.length > 2 && (
-                  <div className="text-[10px] text-gray-400 italic pt-0.5">
+                  <div className="text-[10px] text-[#7A695E] italic pt-0.5">
                     +{order.items.length - 2} more item{order.items.length - 2 > 1 ? 's' : ''}...
                   </div>
                 )}
@@ -352,7 +352,7 @@ export default function AdminOrdersPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedOrder(order)}
-                  className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center gap-1.5 min-h-[44px] flex-shrink-0"
+                  className="px-3.5 py-2 rounded-xl bg-[#F5ECE1] hover:bg-[#EBDCCF] text-[#1E1008] border border-[#E0D3C5] text-xs font-bold flex items-center gap-1.5 min-h-[44px] flex-shrink-0 transition-colors"
                   aria-label={`View full details for order ${order.id}`}
                 >
                   <Eye size={15} /> Details

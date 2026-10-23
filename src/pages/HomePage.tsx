@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -57,12 +57,12 @@ const TESTIMONIALS = [
   {
     id: 't-4',
     name: 'Vikram Chandran',
-    location: 'Adyar, Chennai',
+    location: 'RS Puram, Coimbatore',
     verified: true,
     rating: 5,
     date: '3 weeks ago',
     headline: 'Classic Tiramisu done right with mascarpone cream.',
-    comment: 'Finally found real Italian-style tiramisu in Chennai. Proper espresso soaked biscuits, light mascarpone layer, and fine dark cocoa powder. Delivered in cold insulated packaging so it arrived in picture-perfect shape.',
+    comment: 'Finally found real Italian-style tiramisu! Proper espresso soaked biscuits, light mascarpone layer, and fine dark cocoa powder. Delivered in cold insulated packaging so it arrived in picture-perfect shape.',
     productName: 'Classic Italian Tiramisu',
     productImage: '/images/products/tiramisu.jpg',
   },
@@ -71,27 +71,21 @@ const TESTIMONIALS = [
 export default function HomePage() {
   const [pincode, setPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 28, seconds: 15 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 6, minutes: 0, seconds: 0 };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const handleCheckPincode = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pincode.trim() || pincode.replace(/\D/g, '').length !== 6) {
-      setPincodeStatus('Please enter a valid 6-digit Chennai pincode');
+    const cleanPin = pincode.replace(/\D/g, '');
+    if (cleanPin.length !== 6) {
+      setPincodeStatus('Please enter a valid 6-digit delivery pincode');
       return;
     }
-    setPincodeStatus('✓ Fast 2-Hour Delivery & Midnight Slots Available in your area!');
+    if (cleanPin.startsWith('600') || cleanPin.startsWith('601') || cleanPin.startsWith('602') || cleanPin.startsWith('603')) {
+      setPincodeStatus('✓ Delivery & Kitchen Pickup available in Chennai!');
+    } else if (cleanPin.startsWith('641')) {
+      setPincodeStatus('✓ Delivery & Kitchen Pickup available in Coimbatore!');
+    } else {
+      setPincodeStatus('Available in Chennai (600xxx) and Coimbatore (641xxx) delivery zones.');
+    }
   };
 
   const products = useProductStore((s) => s.products);
@@ -100,7 +94,7 @@ export default function HomePage() {
   const miniJars = products.filter((p) => p.categorySlug === 'mini-jar-cakes');
   const brownies = products.filter((p) => p.categorySlug === 'brownies').slice(0, 4);
 
-  // Lightning Deals selection
+  // Daily Specials selection
   const dealProducts = [
     products.find((p) => p.id === 'cake-001'),
     products.find((p) => p.id === 'cake-002'),
@@ -110,28 +104,84 @@ export default function HomePage() {
 
   return (
     <div className="bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)]">
-      {/* Hero Section */}
-      <section className="relative bg-[var(--color-brand-cream)] py-16 sm:py-24">
+      {/* Mobile Compact Bakery Discovery (First screen product discovery) */}
+      <section className="sm:hidden bg-[#FFF8F0] border-b border-[#E8DFD5] pt-4 pb-3.5 px-4">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A184]/20 text-[#7F5643] text-[10px] font-bold uppercase tracking-wider mb-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7F5643]" />
+              Patisserie Kitchen
+            </div>
+            <h1 className="font-heading text-lg font-black text-[#3D2417] leading-tight">
+              Fresh Celebration Treats
+            </h1>
+            <p className="text-[11px] text-[#7F5643]/90 mt-0.5">
+              Handcrafted daily with pure Belgian chocolate & dairy cream
+            </p>
+          </div>
+          <Link
+            to="/shop"
+            className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-[#7F5643] text-white text-xs font-bold shadow-xs hover:bg-[#3D2417] transition-all flex items-center gap-1"
+          >
+            All 27 <ArrowRight size={12} />
+          </Link>
+        </div>
+
+        {/* Mobile Horizontal Scrollable Category Shortcuts */}
+        <div className="pt-1.5">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#7F5643] mb-2 px-0.5">
+            <span>Categories</span>
+            <Link to="/shop" className="text-[10px] text-[#7F5643] font-semibold underline">
+              View all
+            </Link>
+          </div>
+          <div className="flex items-center gap-3 overflow-x-auto pb-1.5 scrollbar-none -mx-4 px-4">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/shop?category=${cat.slug}`}
+                className="flex flex-col items-center flex-shrink-0 group text-center min-w-[64px]"
+                aria-label={`Browse ${cat.name}`}
+              >
+                <div className="w-14 h-14 rounded-full p-0.5 border-2 border-[#C9A184]/70 bg-white group-hover:border-[#7F5643] group-active:scale-95 transition-all shadow-xs overflow-hidden mb-1">
+                  <img
+                    src={`/images/categories/${cat.slug}.jpg`}
+                    alt={cat.name}
+                    className="w-full h-full object-cover rounded-full"
+                    loading="eager"
+                  />
+                </div>
+                <span className="text-[11px] font-bold text-[#3D2417] group-hover:text-[#7F5643] transition-colors leading-tight line-clamp-1">
+                  {cat.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Desktop Hero Section */}
+      <section className="hidden sm:block relative bg-[var(--color-brand-cream)] py-8 sm:py-14 lg:py-20">
         <div className="container-main">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 mb-6">
+              <div className="inline-flex items-center gap-2 mb-4 sm:mb-6">
                 <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-brand-primary-dark)]" />
-                <span className="text-sm font-semibold tracking-wide text-[var(--color-brand-primary-dark)]">
-                  Handcrafted in Chennai
+                <span className="text-xs sm:text-sm font-semibold tracking-wide text-[var(--color-brand-primary-dark)]">
+                  Handcrafted Artisanal Bakes
                 </span>
               </div>
 
-              <h1 className="font-heading text-4xl sm:text-6xl lg:text-7xl font-bold text-[var(--color-brand-chocolate)] leading-[1.08] mb-6">
+              <h1 className="font-heading text-3xl sm:text-5xl lg:text-7xl font-bold text-[var(--color-brand-chocolate)] leading-[1.1] mb-4 sm:mb-6">
                 Every Bite, a Little Happiness
               </h1>
 
-              <p className="text-lg sm:text-xl text-[var(--color-brand-muted)] mb-8 leading-relaxed max-w-2xl font-normal">
+              <p className="text-base sm:text-xl text-[var(--color-brand-muted)] mb-6 sm:mb-8 leading-relaxed max-w-2xl font-normal">
                 Handcrafted cakes, fudgy brownies, classic tiramisu, and adorable mini jar cakes prepared in small batches with pure Belgian chocolate and real dairy cream.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 mb-12">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8 sm:mb-12">
                 <Link to="/shop" className="btn-primary">
                   Shop All 27 Treats <ArrowRight size={18} />
                 </Link>
@@ -141,28 +191,28 @@ export default function HomePage() {
               </div>
 
               {/* Verified Metrics */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-[var(--color-brand-primary)]/20">
+              <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-6 sm:pt-8 border-t border-[var(--color-brand-primary)]/20">
                 <div>
-                  <p className="font-heading text-3xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)]">
+                  <p className="font-heading text-2xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)]">
                     27
                   </p>
-                  <p className="text-sm text-[var(--color-brand-muted)] font-medium mt-1">
+                  <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] font-medium mt-0.5 sm:mt-1">
                     Signature Varieties
                   </p>
                 </div>
                 <div>
-                  <p className="font-heading text-3xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)]">
+                  <p className="font-heading text-2xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)]">
                     100%
                   </p>
-                  <p className="text-sm text-[var(--color-brand-muted)] font-medium mt-1">
+                  <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] font-medium mt-0.5 sm:mt-1">
                     Fresh Baked Daily
                   </p>
                 </div>
                 <div>
-                  <p className="font-heading text-3xl sm:text-4xl font-bold text-[var(--color-brand-primary-dark)]">
+                  <p className="font-heading text-2xl sm:text-4xl font-bold text-[var(--color-brand-primary-dark)]">
                     ₹50
                   </p>
-                  <p className="text-sm text-[var(--color-brand-muted)] font-medium mt-1">
+                  <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] font-medium mt-0.5 sm:mt-1">
                     Starting Price
                   </p>
                 </div>
@@ -171,21 +221,21 @@ export default function HomePage() {
 
             {/* Right Hero Visual */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-3xl overflow-hidden bg-[var(--color-brand-cream-dark)]">
+              <div className="relative rounded-3xl overflow-hidden bg-[var(--color-brand-cream-dark)] shadow-md">
                 <img
                   src="/images/products/dream-cake.jpg"
                   alt="YOYO CAKES Signature 5-in-1 Chocolate Dream Cake"
-                  className="w-full h-[420px] sm:h-[480px] object-cover hover:scale-105 transition-transform duration-700"
+                  className="w-full h-[280px] sm:h-[420px] lg:h-[480px] object-cover hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-chocolate)]/80 via-transparent to-transparent flex items-end p-6 sm:p-8">
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-chocolate)]/85 via-transparent to-transparent flex items-end p-5 sm:p-8">
                   <div className="text-white">
                     <span className="text-xs uppercase tracking-wider font-semibold text-[var(--color-brand-primary)] block mb-1">
                       Featured Masterpiece
                     </span>
-                    <p className="font-heading text-xl sm:text-2xl font-bold">
+                    <p className="font-heading text-lg sm:text-2xl font-bold">
                       5-in-1 Chocolate Dream Cake
                     </p>
-                    <p className="text-sm text-white/80 mt-1">
+                    <p className="text-xs sm:text-sm text-white/80 mt-0.5 sm:mt-1">
                       Crisp cracked chocolate shell with cocoa dust — ₹150
                     </p>
                   </div>
@@ -196,15 +246,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Amazon / E-Commerce Category Circle Quick-Access Ribbon */}
-      <section className="bg-white border-y border-gray-200 py-6">
+      {/* Swiggy-Style Category Quick-Access Ribbon (Desktop) */}
+      <section className="hidden sm:block bg-white border-y border-gray-200 py-5">
         <div className="container-main">
-          <div className="flex items-center justify-between gap-5 sm:gap-8 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex items-center justify-between gap-4 sm:gap-8 overflow-x-auto pb-2 scrollbar-none">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.id}
                 to={`/shop?category=${cat.slug}`}
-                className="flex flex-col items-center flex-shrink-0 group text-center"
+                className="flex flex-col items-center flex-shrink-0 group text-center min-w-[72px]"
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 border-2 border-[var(--color-brand-primary-light)]/40 group-hover:border-[var(--color-brand-primary-dark)] group-hover:scale-105 transition-all shadow-xs overflow-hidden mb-2 bg-[var(--color-brand-cream)]">
                   <img
@@ -224,7 +274,7 @@ export default function HomePage() {
       </section>
 
       {/* Pincode Delivery Availability Checker Strip */}
-      <section className="bg-[var(--color-brand-cream-dark)] py-4 border-b border-gray-200/80">
+      <section className="bg-[var(--color-brand-cream-dark)] py-3.5 border-b border-gray-200/80">
         <div className="container-main">
           <form onSubmit={handleCheckPincode} className="flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 text-gray-800">
@@ -238,11 +288,11 @@ export default function HomePage() {
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                 placeholder="Enter 6-digit Pincode"
-                className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-mono outline-none focus:border-[var(--color-brand-primary-dark)] bg-white w-44"
+                className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-mono outline-none focus:border-[var(--color-brand-primary-dark)] bg-white w-40"
               />
               <button
                 type="submit"
-                className="px-4 py-1.5 rounded-lg bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FCD200]"
+                className="px-4 py-1.5 rounded-lg bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold text-xs shadow-xs transition-colors"
               >
                 Check
               </button>
@@ -257,41 +307,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Lightning Deals / Today's Offers (Amazon Style) */}
-      <section className="py-12 bg-white border-b border-gray-200">
+      {/* Fresh Daily Specials */}
+      <section className="py-10 sm:py-14 bg-white border-b border-gray-200">
         <div className="container-main">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-[var(--color-brand-primary-dark)] text-white flex items-center justify-center shadow-xs">
                 <Flame size={20} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-gray-900">
-                    Today's Fresh Lightning Deals
+                  <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-gray-900">
+                    Today's Fresh Daily Specials
                   </h2>
-                  <span className="bg-red-100 text-red-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-sm">
-                    LIMITED BATCH
+                  <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-sm">
+                    FRESH BATCH
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Baked early morning with Belgian chocolate. Order before the deal timer ends!
+                  Baked early morning with pure Belgian chocolate and real dairy cream.
                 </p>
               </div>
             </div>
 
-            {/* Live Countdown Timer */}
-            <div className="flex items-center gap-2 bg-red-50 text-red-800 px-4 py-2 rounded-xl border border-red-200 text-xs font-bold self-start sm:self-auto">
-              <Clock size={15} className="text-red-600 animate-pulse" />
-              <span>Ends in:</span>
-              <span className="font-mono text-sm tracking-wider bg-white px-2 py-0.5 rounded border border-red-200 text-red-700">
-                {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
-              </span>
-            </div>
+            <Link
+              to="/shop"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline self-start sm:self-auto"
+            >
+              See all items <ArrowRight size={14} />
+            </Link>
           </div>
 
-          {/* Deal Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Specials Grid - 2 cols on mobile */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
             {dealProducts.map((p) => p && (
               <ProductCard key={p.id} product={p} />
             ))}
@@ -299,8 +347,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Shop by Category */}
-      <section className="py-20 bg-white">
+      {/* Shop by Category - desktop grid (mobile uses top horizontal shortcut scroll) */}
+      <section className="hidden md:block py-20 bg-white">
         <div className="container-main">
           <div className="max-w-2xl mb-12">
             <h2 className="font-heading text-3xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)] mb-3">
@@ -361,7 +409,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-8">
             {cakes.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -378,7 +426,7 @@ export default function HomePage() {
                 Customer Favorites
               </h2>
               <p className="text-base text-[var(--color-brand-muted)]">
-                Our most requested treats across Chennai.
+                Our most requested treats across our kitchens.
               </p>
             </div>
             <Link
@@ -528,14 +576,13 @@ export default function HomePage() {
                     <Star key={i} size={18} fill="currentColor" />
                   ))}
                 </div>
-                <span className="text-sm font-bold text-gray-900">4.9 out of 5 stars</span>
-                <span className="text-xs text-gray-500 font-medium">(1,420+ Chennai reviews)</span>
+                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Customer Favorites</span>
               </div>
               <h2 className="font-heading text-3xl sm:text-4xl font-bold text-[var(--color-brand-chocolate)]">
-                Loved Across Chennai
+                Loved by Celebration Hosts
               </h2>
               <p className="text-base text-[var(--color-brand-muted)] mt-1">
-                Real feedback from real cake lovers across Anna Nagar, T. Nagar, Velachery, and beyond.
+                Real customer feedback on our freshly baked cakes, brownies, and jar treats across Chennai & Coimbatore.
               </p>
             </div>
 

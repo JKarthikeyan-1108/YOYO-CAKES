@@ -306,7 +306,7 @@ export default function AdminSettingsPage() {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">
-                Free Delivery Threshold (₹) *
+                Complimentary Delivery Threshold (₹) *
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">₹</span>
@@ -320,7 +320,7 @@ export default function AdminSettingsPage() {
                   required
                 />
               </div>
-              <p className="text-[10px] text-gray-400 mt-0.5">Carts at or above this value get FREE delivery.</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">Carts at or above this value qualify for complimentary delivery waiver.</p>
             </div>
 
             <div>

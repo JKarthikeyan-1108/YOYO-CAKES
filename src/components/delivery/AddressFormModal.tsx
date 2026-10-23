@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, MapPin, Save, User, Home, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
+import { useLocationStore } from '@/stores/locationStore';
 import { 
   saveAddressToFirestore, 
   type SavedAddress 
@@ -22,18 +23,19 @@ export default function AddressFormModal({
   editingAddress,
 }: AddressFormModalProps) {
   const { user } = useAuthStore();
+  const { currentLocation } = useLocationStore();
 
   const [recipientName, setRecipientName] = useState('');
   const [phone, setPhone] = useState('');
   const [addressLine1, setAddressLine1] = useState('');
   const [addressLine2, setAddressLine2] = useState('');
   const [locality, setLocality] = useState('');
-  const [city, setCity] = useState('Chennai');
+  const [city, setCity] = useState(currentLocation?.city || 'Chennai');
   const [state, setState] = useState('Tamil Nadu');
-  const [postalCode, setPostalCode] = useState('600001');
+  const [postalCode, setPostalCode] = useState(currentLocation?.pincode || '600001');
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
-  const [latitude, setLatitude] = useState<number>(13.085);
-  const [longitude, setLongitude] = useState<number>(80.2101);
+  const [latitude, setLatitude] = useState<number>(currentLocation?.latitude ?? 13.085);
+  const [longitude, setLongitude] = useState<number>(currentLocation?.longitude ?? 80.2101);
   const [isDefault, setIsDefault] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -57,16 +59,16 @@ export default function AddressFormModal({
       setPhone('');
       setAddressLine1('');
       setAddressLine2('');
-      setLocality('');
-      setCity('Chennai');
+      setLocality(currentLocation?.area || '');
+      setCity(currentLocation?.city || 'Chennai');
       setState('Tamil Nadu');
-      setPostalCode('600001');
+      setPostalCode(currentLocation?.pincode || '600001');
       setDeliveryInstructions('');
-      setLatitude(13.085);
-      setLongitude(80.2101);
+      setLatitude(currentLocation?.latitude ?? 13.085);
+      setLongitude(currentLocation?.longitude ?? 80.2101);
       setIsDefault(false);
     }
-  }, [editingAddress, user, isOpen]);
+  }, [editingAddress, user, isOpen, currentLocation]);
 
   if (!isOpen) return null;
 
@@ -303,14 +305,16 @@ export default function AddressFormModal({
                     required
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-xl border border-gray-300 bg-gray-50 text-xs sm:text-sm outline-none"
+                    placeholder="City"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] bg-white text-xs sm:text-sm outline-none"
                   />
                   <input
                     type="text"
                     required
                     value={state}
                     onChange={(e) => setState(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-xl border border-gray-300 bg-gray-50 text-xs sm:text-sm outline-none"
+                    placeholder="State"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] bg-white text-xs sm:text-sm outline-none"
                   />
                 </div>
               </div>

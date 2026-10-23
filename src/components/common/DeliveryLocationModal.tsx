@@ -17,6 +17,7 @@ export default function DeliveryLocationModal() {
   const [pincodeInput, setPincodeInput] = useState(currentLocation.pincode);
   const [errorMsg, setErrorMsg] = useState('');
   const [gpsError, setGpsError] = useState('');
+  const [cityTab, setCityTab] = useState<'All' | 'Chennai' | 'Coimbatore'>('All');
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -24,12 +25,13 @@ export default function DeliveryLocationModal() {
   useEffect(() => {
     if (isModalOpen) {
       setPincodeInput(currentLocation.pincode);
+      setCityTab(currentLocation.city === 'Coimbatore' ? 'Coimbatore' : 'All');
       setErrorMsg('');
       setGpsError('');
       // Small delay to allow DOM render
       setTimeout(() => closeButtonRef.current?.focus(), 50);
     }
-  }, [isModalOpen, currentLocation.pincode]);
+  }, [isModalOpen, currentLocation.pincode, currentLocation.city]);
 
   // Escape key to close
   useEffect(() => {
@@ -215,7 +217,7 @@ export default function DeliveryLocationModal() {
               />
               <button
                 type="submit"
-                className="px-4 py-3 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-extrabold text-sm rounded-xl shadow-xs transition-colors min-h-[44px] flex-shrink-0"
+                className="px-4 py-3 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-extrabold text-sm rounded-xl shadow-xs transition-colors min-h-[44px] flex-shrink-0"
               >
                 Check &amp; Apply
               </button>
@@ -228,51 +230,68 @@ export default function DeliveryLocationModal() {
           </form>
 
           {/* Popular Hubs */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-gray-800 uppercase tracking-wide">
                 Popular Delivery Areas
               </span>
-              <span className="text-[10px] text-gray-500">Chennai &amp; Coimbatore</span>
+              <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-[11px] font-bold">
+                {(['All', 'Chennai', 'Coimbatore'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setCityTab(tab)}
+                    className={`px-2.5 py-1 rounded-md transition-all ${
+                      cityTab === tab
+                        ? 'bg-white text-[var(--color-brand-chocolate)] shadow-xs'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {POPULAR_DELIVERY_HUBS.map((hub) => {
-                const isSelected = hub.pincode === currentLocation.pincode;
-                return (
-                  <button
-                    key={hub.pincode}
-                    type="button"
-                    onClick={() => {
-                      setLocation(hub);
-                      toast.success(`📍 Delivering to ${hub.area}, ${hub.city}`);
-                      closeModal();
-                    }}
-                    className={`p-3 rounded-2xl border text-left transition-all ${
-                      isSelected
-                        ? 'border-amber-500 bg-amber-50/80 shadow-xs'
-                        : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50/30'
-                    }`}
-                    aria-pressed={isSelected}
-                    aria-label={`${hub.area}, ${hub.city} – ${hub.estimatedTime}`}
-                  >
-                    <div className="flex items-start justify-between gap-1 mb-1">
-                      <div className="min-w-0">
-                        <span className="font-bold text-xs text-gray-900 block leading-tight truncate">
-                          {hub.area}
-                        </span>
-                        <span className="text-[10px] text-gray-500 block">
-                          {hub.city} • {hub.pincode}
-                        </span>
+              {POPULAR_DELIVERY_HUBS
+                .filter((hub) => cityTab === 'All' || hub.city === cityTab)
+                .map((hub) => {
+                  const isSelected = hub.pincode === currentLocation.pincode;
+                  return (
+                    <button
+                      key={hub.pincode}
+                      type="button"
+                      onClick={() => {
+                        setLocation(hub);
+                        toast.success(`📍 Delivering to ${hub.area}, ${hub.city}`);
+                        closeModal();
+                      }}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        isSelected
+                          ? 'border-[var(--color-brand-primary-dark)] bg-amber-50/80 shadow-xs'
+                          : 'border-gray-200 bg-white hover:border-[var(--color-brand-primary-dark)] hover:bg-amber-50/30'
+                      }`}
+                      aria-pressed={isSelected}
+                      aria-label={`${hub.area}, ${hub.city} – ${hub.estimatedTime}`}
+                    >
+                      <div className="flex items-start justify-between gap-1 mb-1">
+                        <div className="min-w-0">
+                          <span className="font-bold text-xs text-gray-900 block leading-tight truncate">
+                            {hub.area}
+                          </span>
+                          <span className="text-[10px] text-gray-500 block">
+                            {hub.city} • {hub.pincode}
+                          </span>
+                        </div>
+                        {isSelected && <Check size={14} className="text-[var(--color-brand-chocolate)] flex-shrink-0" aria-hidden="true" />}
                       </div>
-                      {isSelected && <Check size={14} className="text-amber-700 flex-shrink-0" aria-hidden="true" />}
-                    </div>
-                    <span className="text-[10px] font-semibold text-emerald-700 block">
-                      ⚡ {hub.estimatedTime}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span className="text-[10px] font-semibold text-emerald-700 block">
+                        ⚡ {hub.estimatedTime}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         </div>
@@ -280,8 +299,8 @@ export default function DeliveryLocationModal() {
         {/* Footer */}
         <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <span className="flex items-center gap-1.5">
-            <Sparkles size={13} className="text-amber-500" aria-hidden="true" />
-            Free delivery on orders above ₹500
+            <Sparkles size={13} className="text-[var(--color-brand-primary-dark)]" aria-hidden="true" />
+            Freshly baked to order daily
           </span>
           <button
             onClick={closeModal}

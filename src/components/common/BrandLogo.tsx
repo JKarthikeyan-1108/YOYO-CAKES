@@ -115,14 +115,14 @@ export default function BrandLogo({
         <div className="flex items-baseline gap-1.5 leading-none">
           <span
             className={`font-heading ${sizeMap.text} font-black tracking-tight leading-none ${
-              isWhite ? 'text-white' : 'text-[#2C1810]'
+              isWhite ? 'text-white' : 'text-[#3D2417]'
             }`}
           >
             YOYO
           </span>
           <span
-            className={`font-heading ${sizeMap.text} font-light tracking-widest leading-none ${
-              isWhite ? 'text-[#F59E0B]' : 'text-[#C05621]'
+            className={`font-heading ${sizeMap.text} font-bold tracking-widest leading-none ${
+              isWhite ? 'text-[#C9A184]' : 'text-[#7F5643]'
             }`}
           >
             CAKES
@@ -132,8 +132,8 @@ export default function BrandLogo({
         {showTagline && (
           <div className="flex items-center gap-1.5 mt-0.5">
             <span
-              className={`font-sans ${sizeMap.sub} font-semibold uppercase tracking-[0.2em] leading-tight ${
-                isWhite ? 'text-amber-200/90' : 'text-[#8C5D43]'
+              className={`font-sans ${sizeMap.sub} font-bold uppercase tracking-[0.2em] leading-tight ${
+                isWhite ? 'text-[#C9A184]' : 'text-[#5C3827]'
               }`}
             >
               Every bite, a little happiness

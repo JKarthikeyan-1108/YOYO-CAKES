@@ -9,7 +9,6 @@ import {
   MapPin,
   ChevronDown,
   Sparkles,
-  PhoneCall,
   Flame,
   ArrowRight,
   ShieldCheck,
@@ -42,8 +41,10 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSearchVisible, setIsMobileSearchVisible] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
@@ -73,6 +74,7 @@ export default function Navbar() {
           hamburgerRef.current?.focus();
         }
         if (isSearchOpen) setIsSearchOpen(false);
+        if (isMobileSearchVisible) setIsMobileSearchVisible(false);
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -82,7 +84,7 @@ export default function Navbar() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mobileOpen, isSearchOpen]);
+  }, [mobileOpen, isSearchOpen, isMobileSearchVisible]);
 
   // Close search on outside click
   useEffect(() => {
@@ -94,6 +96,13 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Focus mobile search input when it becomes visible
+  useEffect(() => {
+    if (isMobileSearchVisible && mobileSearchInputRef.current) {
+      mobileSearchInputRef.current.focus();
+    }
+  }, [isMobileSearchVisible]);
 
   const closeMobileMenu = useCallback(() => {
     setMobileOpen(false);
@@ -113,6 +122,7 @@ export default function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setIsSearchOpen(false);
+      setIsMobileSearchVisible(false);
       const catParam = selectedCategory !== 'all' ? `&category=${selectedCategory}` : '';
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}${catParam}`);
     }
@@ -120,12 +130,14 @@ export default function Navbar() {
 
   const handleSelectProduct = (productId: string) => {
     setIsSearchOpen(false);
+    setIsMobileSearchVisible(false);
     navigate(`/product/${productId}`);
   };
 
   const handleSelectTrending = (query: string) => {
     setSearchQuery(query);
     setIsSearchOpen(false);
+    setIsMobileSearchVisible(false);
     navigate(`/shop?search=${encodeURIComponent(query)}`);
   };
 
@@ -141,27 +153,26 @@ export default function Navbar() {
   ];
 
   const accountLinks = [
-    { to: '/account', label: 'My Orders', icon: ClipboardList },
-    { to: '/account', label: 'My Profile', icon: User },
-    { to: '/account', label: 'Account Settings', icon: Settings },
+    { to: '/cart', label: 'Shopping Cart', icon: ShoppingCart },
+    { to: '/orders', label: 'My Orders', icon: ClipboardList },
+    { to: '/account?tab=profile', label: 'My Profile', icon: User },
+    { to: '/account?tab=settings', label: 'Account Settings', icon: Settings },
     { to: '/wishlist', label: 'Wishlist', icon: Heart },
     { to: '/contact', label: 'Contact', icon: MessageSquare },
   ];
 
   return (
     <>
-      {/* Top Announcement Bar */}
-      <div className="bg-[var(--color-brand-chocolate)] text-white text-xs font-semibold py-1.5 px-4 tracking-wide">
+      {/* Compact Announcement Bar */}
+      <div className="bg-[var(--color-brand-chocolate)] text-white text-[11px] font-medium py-1.5 px-4 tracking-wide">
         <div className="container-main flex items-center justify-between">
           <div className="flex items-center gap-2 truncate">
-            <span className="bg-[#FFD814] text-[#0F1111] text-[10px] font-black uppercase px-2 py-0.5 rounded-sm tracking-wider flex-shrink-0">
-              FREE DELIVERY
-            </span>
-            <span className="truncate text-[11px]">On all handcrafted orders above ₹500 across Chennai</span>
+            <Sparkles size={12} className="text-[var(--color-brand-primary)] flex-shrink-0" />
+            <span className="truncate">Handcrafted Artisanal Bakes • Fresh Baked Daily • Every bite, a little happiness</span>
           </div>
           <div className="hidden md:flex items-center gap-4 text-[11px] text-white/80 flex-shrink-0">
             <a href="tel:+918428855444" className="hover:text-white flex items-center gap-1">
-              <PhoneCall size={12} /> Helpline: +91 84288 55444
+              Helpline: +91 84288 55444
             </a>
             <span>|</span>
             <Link to="/contact" className="hover:text-white">Store Locator</Link>
@@ -171,59 +182,52 @@ export default function Navbar() {
 
       {/* Main Navigation Bar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs">
-        <div className="container-main py-2.5 sm:py-3">
-          <div className="flex items-center gap-2 sm:gap-4 justify-between">
-            {/* Hamburger + Logo */}
-            <div className="flex items-center gap-2">
+        <div className="container-main py-2 sm:py-2.5">
+          <div className="flex items-center gap-2 sm:gap-3 justify-between">
+            {/* Left: Hamburger + Logo + Location */}
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <button
                 ref={hamburgerRef}
                 onClick={() => setMobileOpen(true)}
-                className="lg:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="lg:hidden p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Open navigation menu"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-nav-drawer"
               >
-                <Menu size={22} />
+                <Menu size={20} />
               </button>
 
-              <Link to="/" className="group inline-flex items-center" aria-label="YOYO CAKES Home">
-                <BrandLogo size="md" />
+              <Link to="/" className="group inline-flex items-center flex-shrink-0" aria-label="YOYO CAKES Home">
+                <BrandLogo size="sm" showTagline={false} />
               </Link>
-            </div>
 
-            {/* Delivery Location (desktop only) */}
-            <button
-              type="button"
-              onClick={openLocationModal}
-              className="hidden lg:flex items-center gap-2 p-2 rounded-xl hover:bg-amber-50/70 border border-transparent hover:border-amber-200 text-left transition-all text-xs text-gray-700 cursor-pointer group"
-              aria-label="Change delivery location"
-            >
-              <div className="w-8 h-8 rounded-lg bg-amber-100/70 text-amber-800 flex items-center justify-center flex-shrink-0">
-                <MapPin size={16} className="text-amber-700" />
-              </div>
-              <div className="min-w-0 max-w-[140px]">
-                <span className="text-[10px] text-gray-500 block leading-tight font-medium">Deliver to</span>
-                <span className="font-extrabold text-gray-900 leading-tight block truncate text-xs">
+              {/* Delivery Location Selector (accessible on mobile & desktop) */}
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="flex items-center gap-1 py-1 px-2 sm:px-2.5 rounded-full hover:bg-amber-100/80 bg-amber-50/70 border border-amber-200 text-left transition-all text-[11px] sm:text-xs text-gray-700 cursor-pointer flex-shrink min-w-0"
+                aria-label="Change delivery location"
+              >
+                <MapPin size={12} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                <span className="font-bold text-gray-900 truncate max-w-[60px] xs:max-w-[85px] sm:max-w-[120px]">
                   {currentLocation.area}
                 </span>
-                <span className="text-[10px] text-emerald-700 font-semibold block leading-tight">
-                  ⚡ {currentLocation.estimatedTime}
-                </span>
-              </div>
-            </button>
+                <ChevronDown size={11} className="text-gray-400 flex-shrink-0" />
+              </button>
+            </div>
 
-            {/* Central Search Bar */}
-            <div ref={searchContainerRef} className="flex-1 max-w-2xl mx-1 sm:mx-2 relative">
+            {/* Center: Search Bar (desktop) */}
+            <div ref={searchContainerRef} className="hidden sm:block flex-1 max-w-xl mx-2 relative">
               <form onSubmit={handleSearch}>
-                <div className="flex rounded-xl overflow-hidden border border-gray-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-[#FFD814]/40 shadow-xs transition-all bg-white">
+                <div className="flex rounded-full overflow-hidden border border-gray-200 focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 shadow-xs transition-all bg-gray-50 hover:bg-white">
                   {/* Category Dropdown */}
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="hidden md:block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-2.5 border-r border-gray-300 outline-none hover:bg-gray-200 cursor-pointer"
+                    className="hidden md:block bg-transparent text-gray-600 text-xs font-semibold px-3 py-2 border-r border-gray-200 outline-none hover:bg-gray-100 cursor-pointer"
                     aria-label="Filter by category"
                   >
-                    <option value="all">All Cakes</option>
+                    <option value="all">All</option>
                     {CATEGORIES.map((cat) => (
                       <option key={cat.id} value={cat.slug}>
                         {cat.name}
@@ -233,6 +237,7 @@ export default function Navbar() {
 
                   {/* Search Input */}
                   <div className="relative flex-1 flex items-center">
+                    <Search size={16} className="ml-3 text-gray-400 flex-shrink-0" />
                     <input
                       ref={searchInputRef}
                       type="text"
@@ -242,14 +247,14 @@ export default function Navbar() {
                         setSearchQuery(e.target.value);
                         setIsSearchOpen(true);
                       }}
-                      placeholder="Search cakes, tiramisu, brownies..."
-                      className="w-full px-3.5 py-2.5 text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400"
+                      placeholder="Search cakes, brownies, tiramisu..."
+                      className="w-full px-2.5 py-2 text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400 bg-transparent"
                       aria-label="Search products"
                       aria-autocomplete="list"
                       aria-controls={isSearchOpen ? 'search-results' : undefined}
                     />
                     {!searchQuery && (
-                      <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md font-mono mr-2 pointer-events-none select-none">
+                      <span className="hidden lg:inline-flex items-center gap-0.5 text-[10px] text-gray-400 bg-gray-200/60 px-1.5 py-0.5 rounded font-mono mr-2 pointer-events-none select-none">
                         ⌘K
                       </span>
                     )}
@@ -257,10 +262,10 @@ export default function Navbar() {
                       <button
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="px-2 text-gray-400 hover:text-gray-600 mr-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        className="px-2 text-gray-400 hover:text-gray-600 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         aria-label="Clear search"
                       >
-                        <X size={15} />
+                        <X size={14} />
                       </button>
                     )}
                   </div>
@@ -269,9 +274,9 @@ export default function Navbar() {
                   <button
                     type="submit"
                     aria-label="Search"
-                    className="bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] px-4 sm:px-5 flex items-center justify-center text-gray-900 transition-colors border-l border-gray-200 min-w-[44px] min-h-[44px]"
+                    className="bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] px-4 flex items-center justify-center text-white transition-colors min-w-[40px] min-h-[40px]"
                   >
-                    <Search size={18} />
+                    <Search size={16} />
                   </button>
                 </div>
               </form>
@@ -307,21 +312,18 @@ export default function Navbar() {
                                   <img
                                     src={item.image || `/images/categories/${item.categorySlug}.jpg`}
                                     alt={item.name}
-                                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200"
+                                    className="w-11 h-11 rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200"
                                     loading="lazy"
                                   />
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-xs sm:text-sm font-bold text-gray-900 truncate group-hover:text-amber-800">
+                                    <h4 className="text-xs sm:text-sm font-bold text-gray-900 truncate group-hover:text-[var(--color-brand-primary-dark)]">
                                       {item.name}
                                     </h4>
                                     <p className="text-[11px] text-gray-500 truncate">{item.category}</p>
-                                    <span className="font-heading text-xs font-black text-gray-900 sm:hidden">
-                                      {formatPrice(item.price)}
-                                    </span>
                                   </div>
                                 </button>
-                                <div className="flex items-center gap-2.5 flex-shrink-0">
-                                  <span className="font-heading text-xs sm:text-sm font-extrabold text-gray-900 hidden sm:block">
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <span className="font-heading text-sm font-extrabold text-gray-900">
                                     {formatPrice(item.price)}
                                   </span>
                                   <button
@@ -331,7 +333,7 @@ export default function Navbar() {
                                       addItemToCart(item);
                                       toast.success(`${item.name} added to cart!`);
                                     }}
-                                    className="p-2 sm:px-3 sm:py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] active:scale-95 text-[#0F1111] font-bold text-xs rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer min-w-[44px] min-h-[44px] justify-center"
+                                    className="p-1.5 sm:px-2.5 sm:py-1.5 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] active:scale-95 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1 transition-all cursor-pointer min-w-[36px] min-h-[36px] justify-center"
                                     title="Add to cart"
                                     aria-label={`Add ${item.name} to cart`}
                                   >
@@ -362,7 +364,7 @@ export default function Navbar() {
                                 key={tag}
                                 type="button"
                                 onClick={() => handleSelectTrending(tag)}
-                                className="px-2.5 py-1 rounded-full bg-gray-100 hover:bg-[#FFD814] hover:text-gray-900 text-[11px] font-semibold text-gray-700 transition-colors"
+                                className="px-2.5 py-1 rounded-full bg-gray-100 hover:bg-[var(--color-brand-primary)] hover:text-white text-[11px] font-semibold text-gray-700 transition-colors"
                               >
                                 {tag}
                               </button>
@@ -408,8 +410,18 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Mobile Search Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsMobileSearchVisible(!isMobileSearchVisible)}
+              className="sm:hidden p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 min-w-[40px] min-h-[40px] flex items-center justify-center"
+              aria-label="Search products"
+            >
+              <Search size={20} />
+            </button>
+
             {/* Right Action Icons */}
-            <div className="flex items-center gap-0.5 sm:gap-2">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               {/* Returns & Orders (desktop) */}
               <Link
                 to={user ? '/account' : '/login'}
@@ -423,10 +435,10 @@ export default function Navbar() {
               <div className="relative group hidden sm:block">
                 <Link
                   to={user ? '/account' : '/login'}
-                  className="flex items-center gap-1 p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors min-w-[44px] min-h-[44px]"
+                  className="flex items-center gap-1 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors min-w-[40px] min-h-[40px]"
                   aria-label={user ? 'My Account' : 'Sign in'}
                 >
-                  <User size={20} className="text-gray-700" />
+                  <User size={18} className="text-gray-700" />
                   <div className="hidden sm:block text-left">
                     <span className="text-[10px] text-gray-500 font-medium block leading-tight">
                       {user ? `Hello, ${user.displayName?.split(' ')[0] || 'You'}` : 'Hello, Sign in'}
@@ -479,7 +491,7 @@ export default function Navbar() {
                     <div className="text-center">
                       <Link
                         to="/login"
-                        className="w-full block py-2 rounded-lg bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs font-bold shadow-xs mb-2 border border-[#FCD200]"
+                        className="w-full block py-2 rounded-lg bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white text-xs font-bold shadow-xs mb-2"
                       >
                         Sign in
                       </Link>
@@ -497,10 +509,10 @@ export default function Navbar() {
               {/* Wishlist (desktop/tablet) */}
               <Link
                 to="/wishlist"
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative min-w-[44px] min-h-[44px] justify-center"
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors hidden sm:flex items-center relative min-w-[40px] min-h-[40px] justify-center"
                 aria-label={`Wishlist${wishlistCount > 0 ? `, ${wishlistCount} items` : ''}`}
               >
-                <Heart size={20} className={wishlistCount > 0 ? 'text-red-500 fill-red-500' : ''} />
+                <Heart size={18} className={wishlistCount > 0 ? 'text-red-500 fill-red-500' : ''} />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center shadow-xs">
                     {wishlistCount}
@@ -508,17 +520,19 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* Cart */}
+              {/* Cart (visible on all sizes) */}
               <Link
                 to="/cart"
-                className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-gray-100 text-gray-900 transition-colors relative min-w-[44px] min-h-[44px] justify-center"
+                className="flex items-center gap-1 p-1.5 rounded-lg hover:bg-gray-100 text-gray-900 transition-colors relative min-w-[40px] min-h-[40px] justify-center"
                 aria-label={`Shopping cart, ${cartCount} items`}
               >
                 <div className="relative">
-                  <ShoppingCart size={24} className="text-gray-900" />
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#FFD814] text-[#0F1111] text-[10px] font-black rounded-full h-5 min-w-5 px-1 flex items-center justify-center border border-white shadow-xs">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
+                  <ShoppingCart size={20} className="text-gray-800" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-[var(--color-brand-primary-dark)] text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center border border-white shadow-xs">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
                 </div>
                 <span className="hidden md:inline text-xs font-bold">Cart</span>
               </Link>
@@ -526,34 +540,108 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Sub-Navigation Bar (desktop) */}
-        <div className="bg-[#232F3E] text-white text-xs font-medium overflow-x-auto scrollbar-none">
-          <div className="container-main flex items-center gap-4 sm:gap-6 py-2 whitespace-nowrap">
-            <Link to="/shop" className="flex items-center gap-1.5 hover:text-[#FFD814] font-bold">
-              <Menu size={16} /> All Products
+        {/* Mobile Search Bar (slides down when toggled) */}
+        {isMobileSearchVisible && (
+          <div className="sm:hidden px-3 pb-2.5 animate-fade-in">
+            <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-gray-200 focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 bg-gray-50">
+              <div className="relative flex-1 flex items-center">
+                <Search size={16} className="ml-3 text-gray-400 flex-shrink-0" />
+                <input
+                  ref={mobileSearchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearchOpen(true);
+                  }}
+                  placeholder="Search cakes, brownies..."
+                  className="w-full px-2.5 py-2 text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400 bg-transparent"
+                  aria-label="Search products"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="px-2 text-gray-400 hover:text-gray-600 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                    aria-label="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                aria-label="Search"
+                className="bg-[var(--color-brand-primary-dark)] px-3.5 flex items-center justify-center text-white min-h-[38px]"
+              >
+                <Search size={16} />
+              </button>
+            </form>
+
+            {/* Mobile search results */}
+            {isSearchOpen && searchQuery.trim().length > 0 && (
+              <div className="mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-h-64 overflow-y-auto">
+                {searchResults.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {searchResults.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSelectProduct(item.id)}
+                        className="w-full p-3 flex items-center gap-3 hover:bg-gray-50 text-left"
+                      >
+                        <img
+                          src={item.image || `/images/categories/${item.categorySlug}.jpg`}
+                          alt={item.name}
+                          className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                          loading="lazy"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
+                          <p className="text-xs text-gray-500">{formatPrice(item.price)}</p>
+                        </div>
+                        <ArrowRight size={14} className="text-gray-400 flex-shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-xs text-gray-500">
+                    No results for "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Desktop Sub-Navigation Bar with horizontal scroll categories */}
+        <div className="hidden sm:block bg-[var(--color-brand-chocolate)] text-white text-xs font-medium overflow-x-auto scrollbar-none">
+          <div className="container-main flex items-center gap-4 sm:gap-5 py-1.5 whitespace-nowrap">
+            <Link to="/shop" className="flex items-center gap-1.5 hover:text-[var(--color-brand-primary)] font-bold">
+              <Menu size={14} /> All Products
             </Link>
-            <Link to="/shop?sort=bestseller" className="hover:text-[#FFD814] flex items-center gap-1">
-              <Sparkles size={13} className="text-[#FFD814]" /> Best Sellers
+            <Link to="/shop?sort=bestseller" className="hover:text-[var(--color-brand-primary)] flex items-center gap-1">
+              <Sparkles size={12} className="text-[var(--color-brand-primary)]" /> Best Sellers
             </Link>
-            <Link to="/shop?category=cakes" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=cakes" className="hover:text-[var(--color-brand-primary)]">
               Signature Cakes
             </Link>
-            <Link to="/shop?category=brownies" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=brownies" className="hover:text-[var(--color-brand-primary)]">
               Fudgy Brownies
             </Link>
-            <Link to="/shop?category=tiramisu-desserts" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=tiramisu-desserts" className="hover:text-[var(--color-brand-primary)]">
               Italian Tiramisu
             </Link>
-            <Link to="/shop?category=mini-jar-cakes" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=mini-jar-cakes" className="hover:text-[var(--color-brand-primary)]">
               Jar Cakes
             </Link>
-            <Link to="/shop?category=tea-cakes-pies" className="hover:text-[#FFD814]">
+            <Link to="/shop?category=tea-cakes-pies" className="hover:text-[var(--color-brand-primary)]">
               Tea Cakes
             </Link>
-            <Link to="/about" className="hover:text-[#FFD814]">
+            <Link to="/about" className="hover:text-[var(--color-brand-primary)]">
               Our Story
             </Link>
-            <Link to="/contact" className="hover:text-[#FFD814]">
+            <Link to="/contact" className="hover:text-[var(--color-brand-primary)]">
               Bulk & Corporate
             </Link>
           </div>
@@ -660,7 +748,7 @@ export default function Navbar() {
                 </span>
               </div>
             </div>
-            <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full flex-shrink-0">
+            <span className="text-xs font-semibold text-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)] px-2.5 py-1 rounded-full flex-shrink-0">
               Change
             </span>
           </button>
@@ -756,7 +844,7 @@ export default function Navbar() {
             <Link
               to="/login"
               onClick={closeMobileMenu}
-              className="w-full py-3 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-3 px-4 rounded-xl bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
             >
               Sign In to Your Account
             </Link>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   User,
   Package,
@@ -30,7 +30,6 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { getAllOrders, type Order } from '@/lib/orders';
 import {
   getUserAddressesFromFirestore,
-  saveAddressToFirestore,
   deleteAddressFromFirestore,
   getUserSettingsFromFirestore,
   saveUserSettingsToFirestore,
@@ -44,11 +43,36 @@ type AccountTab = 'orders' | 'profile' | 'addresses' | 'support' | 'settings';
 
 export default function AccountPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, logout, isAdmin } = useAuthStore();
   const buyAgainItems = useCartStore((s) => s.buyAgainItems);
   const wishlistCount = useWishlistStore((s) => s.items.length);
 
-  const [activeTab, setActiveTab] = useState<AccountTab>('orders');
+  const tabFromQuery = searchParams.get('tab') as AccountTab | null;
+  const [activeTab, setActiveTabState] = useState<AccountTab>(() => {
+    if (location.pathname === '/orders') return 'orders';
+    if (tabFromQuery && ['orders', 'profile', 'addresses', 'support', 'settings'].includes(tabFromQuery)) {
+      return tabFromQuery;
+    }
+    return 'orders';
+  });
+
+  const setActiveTab = (tab: AccountTab) => {
+    setActiveTabState(tab);
+    if (location.pathname !== '/orders') {
+      searchParams.set('tab', tab);
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
+
+  useEffect(() => {
+    if (location.pathname === '/orders') {
+      setActiveTabState('orders');
+    } else if (tabFromQuery && ['orders', 'profile', 'addresses', 'support', 'settings'].includes(tabFromQuery)) {
+      setActiveTabState(tabFromQuery);
+    }
+  }, [location.pathname, tabFromQuery]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderFilter, setOrderFilter] = useState<'all' | 'in_progress' | 'delivered'>('all');
@@ -219,7 +243,7 @@ export default function AccountPage() {
         <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 sm:p-8 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#232F3E] text-[#FFD814] flex items-center justify-center font-heading text-2xl font-bold shadow-xs">
+              <div className="w-16 h-16 rounded-full bg-[var(--color-brand-primary-dark)] text-white flex items-center justify-center font-heading text-2xl font-bold shadow-xs">
                 {profileName
                   ? profileName.charAt(0).toUpperCase()
                   : user?.email
@@ -231,11 +255,11 @@ export default function AccountPage() {
                   <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F1111]">
                     Hello, {profileName || 'Customer'}
                   </h1>
-                  <span className="px-2.5 py-0.5 bg-[#FFD814] text-[#0F1111] text-[11px] font-extrabold rounded-full flex items-center gap-1 shadow-2xs">
-                    <Sparkles size={11} /> YOYO VIP
+                  <span className="px-2.5 py-0.5 bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] text-[11px] font-extrabold rounded-full flex items-center gap-1 shadow-2xs">
+                    <Sparkles size={11} /> YOYO Member
                   </span>
                   {isAdmin && (
-                    <span className="bg-[#232F3E] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+                    <span className="bg-[var(--color-brand-chocolate)] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
                       Admin
                     </span>
                   )}
@@ -251,7 +275,7 @@ export default function AccountPage() {
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="px-4 py-2 bg-[#232F3E] hover:bg-[#131921] text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
+                  className="px-4 py-2 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
                 >
                   <ShieldCheck size={14} /> Admin Portal
                 </Link>

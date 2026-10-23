@@ -55,7 +55,7 @@ describe('End-to-End E-Commerce Workflow & Firestore Schema Integrity', () => {
   });
 
   describe('2. Customer Cart, Coupon & Delivery Fee Calculations', () => {
-    it('applies delivery fee under ₹500 and free delivery at/above ₹500', () => {
+    it('applies delivery fee under ₹500 and complimentary delivery waiver at/above ₹500', () => {
       // Order 1: ₹350 (subtotal < 500)
       const subtotalLow = 350;
       const feeLow = subtotalLow >= 500 ? 0 : 40;

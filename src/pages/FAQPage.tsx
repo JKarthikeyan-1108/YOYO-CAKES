@@ -12,7 +12,7 @@ const FAQS: FAQItem[] = [
   {
     category: 'Orders & Fulfillment',
     q: 'How does delivery work and what are the delivery charges?',
-    a: 'We offer local city delivery. Orders above ₹500 enjoy complimentary FREE delivery! For orders under ₹500, a nominal delivery fee of ₹40 applies.',
+    a: 'We offer temperature-controlled local city delivery across Chennai. Delivery charges are calculated based on your delivery address and distance from our kitchen, and are confirmed at checkout. Store pickup from our kitchen counter is always available with zero delivery charges.',
   },
   {
     category: 'Orders & Fulfillment',

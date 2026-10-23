@@ -96,12 +96,12 @@ export default function CheckoutPage() {
     phone: '',
     address: '',
     landmark: '',
-    locality: '',
+    locality: currentLocation?.area || '',
     city: currentLocation?.city || 'Chennai',
     state: 'Tamil Nadu',
     pincode: currentLocation?.pincode || '600001',
-    latitude: 13.085,
-    longitude: 80.2101,
+    latitude: currentLocation?.latitude ?? 13.085,
+    longitude: currentLocation?.longitude ?? 80.2101,
     instructions: '',
     agreeTerms: true,
   });
@@ -147,7 +147,7 @@ export default function CheckoutPage() {
     };
   }, [form.latitude, form.longitude, fulfillment, items]);
 
-  // Keep delivery city and pincode updated from location store
+  // Keep delivery city, pincode, locality and coordinates updated from location store
   useEffect(() => {
     if (currentLocation?.pincode) {
       const timer = setTimeout(() => {
@@ -155,6 +155,9 @@ export default function CheckoutPage() {
           ...prev,
           city: currentLocation.city || prev.city,
           pincode: currentLocation.pincode || prev.pincode,
+          locality: currentLocation.area || prev.locality,
+          latitude: currentLocation.latitude ?? prev.latitude,
+          longitude: currentLocation.longitude ?? prev.longitude,
         }));
       }, 0);
       return () => clearTimeout(timer);
@@ -194,6 +197,19 @@ export default function CheckoutPage() {
       ? serviceability?.deliveryFee ?? (subtotal >= deliverySettings.freeDeliveryThreshold ? 0 : deliverySettings.baseDeliveryFee)
       : 0;
   const total = subtotal + deliveryFee;
+
+  const isCoimbatore =
+    currentLocation?.city === 'Coimbatore' ||
+    form.city === 'Coimbatore' ||
+    (form.latitude >= 10.8 && form.latitude <= 11.3 && form.longitude >= 76.7 && form.longitude <= 77.3);
+
+  const activePickupName = isCoimbatore
+    ? 'YOYO CAKES Coimbatore Kitchen Counter'
+    : deliverySettings.storeName;
+
+  const activePickupAddress = isCoimbatore
+    ? '72, DB Road, RS Puram, Coimbatore, Tamil Nadu 641002'
+    : deliverySettings.pickupAddress;
 
   const handleAddressSelect = (addr: SavedAddress) => {
     setSelectedAddressId(addr.id);
@@ -352,8 +368,8 @@ export default function CheckoutPage() {
         pickupLocation:
           fulfillment === 'pickup'
             ? {
-                name: deliverySettings.storeName,
-                address: deliverySettings.pickupAddress,
+                name: activePickupName,
+                address: activePickupAddress,
                 phone: '8428855444',
                 instructions: deliverySettings.pickupInstructions,
               }
@@ -976,11 +992,11 @@ export default function CheckoutPage() {
                     <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-3">
                       <div className="flex items-center gap-2 text-[var(--color-brand-chocolate)] font-bold text-sm">
                         <Store size={18} className="text-[var(--color-brand-primary-dark)]" />
-                        <span>{deliverySettings.storeName}</span>
+                        <span>{activePickupName}</span>
                       </div>
 
                       <p className="text-xs text-gray-700 leading-relaxed font-medium">
-                        📍 {deliverySettings.pickupAddress}
+                        📍 {activePickupAddress}
                       </p>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-amber-200/60 text-xs text-gray-600">
@@ -1279,17 +1295,11 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-gray-600">
                       <span>Delivery & Handling:</span>
                       {deliveryFee === 0 ? (
-                        <span className="font-bold text-green-700">FREE</span>
+                        <span className="font-semibold text-emerald-700">₹0 (Complimentary / Pickup)</span>
                       ) : (
                         <span className="font-semibold text-gray-900">{formatPrice(deliveryFee)}</span>
                       )}
                     </div>
-
-                    {deliveryFee > 0 && (
-                      <div className="bg-amber-50 text-amber-800 p-2 rounded-lg text-[11px]">
-                        Add {formatPrice(500 - subtotal)} more to qualify for <strong>FREE Delivery</strong>!
-                      </div>
-                    )}
 
                     <div className="pt-3 border-t border-gray-100 flex justify-between text-base font-bold text-gray-900">
                       <span>Order Total:</span>

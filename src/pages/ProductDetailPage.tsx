@@ -18,7 +18,7 @@ import {
   Clock 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getProductById, getProductsByCategory, formatPrice } from '@/data/products';
+import { getProductById, formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useProductStore } from '@/stores/productStore';
@@ -303,12 +303,6 @@ export default function ProductDetailPage() {
               <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-base text-gray-400 line-through">
-                {formatPrice(Math.round((product.price * 1.18) / 10) * 10)}
-              </span>
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                17% OFF
-              </span>
               <span className="text-xs text-[var(--color-brand-success)] font-bold bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
                 <CheckCircle size={13} /> In Stock
               </span>
@@ -321,11 +315,11 @@ export default function ProductDetailPage() {
               {product.description}
             </p>
 
-            {/* Amazon Delivery Promise Box */}
+            {/* Bakery Delivery Promise Box */}
             <div className="bg-[var(--color-brand-cream-dark)]/70 rounded-xl p-4 mb-6 border border-[var(--color-brand-primary-light)]/40 space-y-2 text-xs">
               <div className="flex items-center gap-2 text-gray-800 font-semibold">
                 <Truck size={16} className="text-[var(--color-brand-primary-dark)]" />
-                <span>FREE Delivery on orders over ₹500 across Chennai</span>
+                <span>Direct Bakery Delivery across Chennai</span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Clock size={16} className="text-green-600" />

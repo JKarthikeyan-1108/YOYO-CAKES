@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Star, Clock, Eye, X } from 'lucide-react';
+import { Heart, Plus, Minus, Eye, X, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import type { Product } from '@/data/products';
@@ -35,21 +35,37 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
     };
   }, [quickViewOpen]);
 
+  const cartItem = useCartStore((s) => s.items.find((i) => i.product.id === product.id));
   const addItem = useCartStore((s) => s.addItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
 
-  // Simulated ratings & MRP for Amazon e-commerce feel
-  const rating = product.bestseller ? 4.9 : 4.8;
-  const reviewCount = product.bestseller ? 218 : 84;
-  const mrp = Math.round((product.price * 1.18) / 10) * 10;
-  const discountPercent = Math.round(((mrp - product.price) / mrp) * 100);
+  const quantity = cartItem?.quantity || 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product);
     toast.success(`${product.name} added to cart`);
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(product.id, quantity + 1);
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (quantity <= 1) {
+      removeItem(product.id);
+      toast.success(`${product.name} removed from cart`);
+    } else {
+      updateQuantity(product.id, quantity - 1);
+    }
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -72,7 +88,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
     <>
       <Link
         to={`/product/${product.id}`}
-        className="group flex flex-col justify-between rounded-2xl bg-white border border-gray-200/80 hover:border-gray-300 hover:shadow-elevated transition-all overflow-hidden relative"
+        className="group flex flex-col justify-between rounded-2xl bg-white border border-gray-200/80 hover:border-[var(--color-brand-primary)]/50 hover:shadow-lg transition-all overflow-hidden relative"
       >
         <div>
           {/* Image & Badges */}
@@ -82,25 +98,21 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               onError={handleImageError}
+              loading="lazy"
             />
 
             {/* Badges */}
             <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
               {product.bestseller && (
-                <span className="badge badge-neutral text-white text-[10px] font-bold uppercase tracking-wider rounded-sm shadow-xs flex items-center gap-1 border-none py-1">
-                  <span className="text-[#FF9900]">#1</span> Best Seller
-                </span>
-              )}
-              {discountPercent > 0 && (
-                <span className="badge badge-error text-white text-[10px] font-bold rounded-sm shadow-xs border-none py-1">
-                  {discountPercent}% OFF
+                <span className="badge bg-[var(--color-brand-primary-dark)] text-white text-[10px] font-bold tracking-wider rounded-md shadow-xs border-none py-1 px-2 uppercase">
+                  Bestseller
                 </span>
               )}
             </div>
 
             {/* Quick View Button on Hover */}
             {showQuickView && (
-              <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+              <div className="hidden sm:block absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -115,12 +127,13 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
               </div>
             )}
 
-            {/* Wishlist Button with DaisyUI Tooltip */}
+            {/* Wishlist Button */}
             <div
               className="tooltip tooltip-left absolute top-2.5 right-2.5 z-10"
               data-tip={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <button
+                type="button"
                 onClick={handleToggleWishlist}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-xs ${
                   isInWishlist
@@ -134,58 +147,64 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
             </div>
           </div>
 
-          {/* Product Details (Amazon E-commerce Typography & Layout) */}
-          <div className="p-4 sm:p-5">
+          {/* Product Details (Swiggy-inspired Clean Food Card) */}
+          <div className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
               <span className="uppercase tracking-wider font-semibold text-[var(--color-brand-muted)]">
                 {product.category}
               </span>
-              <span className="badge badge-soft badge-success text-[10px] font-semibold py-0.5">
-                Fresh Bake
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                <Check size={10} /> Fresh Bake
               </span>
             </div>
 
-            <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2 leading-snug mb-1.5">
+            <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 group-hover:text-[var(--color-brand-primary-dark)] transition-colors line-clamp-2 leading-snug mb-1">
               {product.name}
             </h3>
 
-            {/* Star Ratings */}
-            <div className="flex items-center gap-1 mb-2.5">
-              <div className="flex text-[#FFA41C]">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={13} fill="currentColor" strokeWidth={0} />
-                ))}
-              </div>
-              <span className="text-xs font-bold text-gray-800">{rating}</span>
-              <span className="text-[11px] text-gray-500 font-medium">({reviewCount})</span>
-            </div>
-
-            {/* Amazon-Style Price Tag */}
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900">
+            {/* Price Tag */}
+            <div className="flex items-baseline gap-1.5 mt-2">
+              <span className="text-base sm:text-lg font-extrabold text-gray-900">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(mrp)}
-              </span>
-            </div>
-
-            {/* Delivery Promise */}
-            <div className="text-[11px] text-gray-600 flex items-center gap-1 mb-4">
-              <Clock size={12} className="text-green-600" />
-              <span>FREE Delivery on orders over ₹500</span>
             </div>
           </div>
         </div>
 
-        {/* Amazon-Style Gold Add to Cart Button */}
-        <div className="p-4 sm:p-5 pt-0">
-          <button
-            onClick={handleAddToCart}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2 border border-[#FCD200]"
-          >
-            <ShoppingCart size={14} /> Add to Cart
-          </button>
+        {/* Swiggy-Style Add / Stepper Button */}
+        <div className="p-3 sm:p-4 pt-0">
+          {quantity > 0 ? (
+            <div className="flex items-center justify-between bg-[var(--color-brand-primary-dark)] text-white rounded-xl py-1 px-1.5 sm:px-3 shadow-xs">
+              <button
+                type="button"
+                onClick={handleDecrement}
+                className="w-8 h-8 min-w-[32px] flex items-center justify-center rounded-lg hover:bg-black/15 active:scale-90 transition-all text-white font-bold"
+                aria-label={`Decrease quantity of ${product.name}`}
+              >
+                <Minus size={14} />
+              </button>
+              <span className="text-xs sm:text-sm font-black tracking-wider text-center px-1">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={handleIncrement}
+                className="w-8 h-8 min-w-[32px] flex items-center justify-center rounded-lg hover:bg-black/15 active:scale-90 transition-all text-white font-bold"
+                aria-label={`Increase quantity of ${product.name}`}
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="w-full py-2 px-3 rounded-xl bg-white hover:bg-[var(--color-brand-cream-light)] text-[var(--color-brand-primary-dark)] hover:text-[var(--color-brand-chocolate)] border-2 border-[var(--color-brand-primary-dark)]/40 hover:border-[var(--color-brand-primary-dark)] text-xs font-black shadow-xs transition-all flex items-center justify-center gap-1 active:scale-[0.98] min-h-[38px]"
+              aria-label={`Add ${product.name} to cart`}
+            >
+              <Plus size={14} /> ADD
+            </button>
+          )}
         </div>
       </Link>
 
@@ -210,7 +229,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
             <button
               type="button"
               onClick={() => setQuickViewOpen(false)}
-              className="absolute top-3 right-3 min-w-[44px] min-h-[44px] rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors z-20"
+              className="absolute top-3 right-3 min-w-[40px] min-h-[40px] rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors z-20"
               aria-label="Close quick view dialog"
             >
               <X size={18} />
@@ -224,12 +243,12 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
-                <span className="badge badge-soft badge-success text-[10px] font-semibold absolute top-3 left-3 shadow-xs">
+                <span className="badge bg-emerald-700 text-white text-[10px] font-semibold absolute top-3 left-3 shadow-xs border-none">
                   Fresh Daily Bake
                 </span>
               </div>
 
-              {/* Product Info & Fast Actions */}
+              {/* Product Info & Actions */}
               <div className="space-y-4">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-brand-primary-dark)]">
@@ -241,12 +260,6 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-2xl font-black text-gray-900">
                       {formatPrice(product.price)}
-                    </span>
-                    <span className="text-xs text-gray-400 line-through">
-                      {formatPrice(mrp)}
-                    </span>
-                    <span className="badge badge-error text-white text-[10px] font-bold">
-                      {discountPercent}% OFF
                     </span>
                   </div>
                 </div>
@@ -289,9 +302,9 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
                       toast.success(`${product.name} added to cart`);
                       setQuickViewOpen(false);
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs font-bold shadow-xs flex items-center justify-center gap-2 border border-[#FCD200]"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white text-xs font-bold shadow-xs flex items-center justify-center gap-2 transition-colors"
                   >
-                    <ShoppingCart size={15} /> Add to Cart — {formatPrice(product.price)}
+                    <Plus size={15} /> Add to Cart — {formatPrice(product.price)}
                   </button>
 
                   <Link
@@ -310,4 +323,3 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
     </>
   );
 }
-

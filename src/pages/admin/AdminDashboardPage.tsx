@@ -9,6 +9,8 @@ import {
   TrendingUp,
   ArrowRight,
   Eye,
+  ChefHat,
+  Sparkles,
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { getAllOrders, type Order } from '@/lib/orders';
@@ -62,7 +64,7 @@ export default function AdminDashboardPage() {
     revenue,
   }));
 
-  // If no orders yet, provide fallback empty state representation
+  // If no orders yet, provide fallback baseline
   if (chartData.length === 0) {
     chartData.push(
       { date: 'Mon', revenue: 0 },
@@ -74,99 +76,128 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-7xl">
       {/* Header */}
-      <div>
-        <h1 className="font-heading text-3xl font-bold text-[var(--color-brand-chocolate)]">
-          Bakery Operations Dashboard
-        </h1>
-        <p className="text-sm text-[var(--color-brand-muted)] mt-1">
-          Real-time sales, live inventory, and order fulfillment tracking
-        </p>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/70 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-[var(--color-brand-muted)] uppercase tracking-wider block">
-              Verified Revenue
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#93582C] bg-[#F5ECE1] px-2.5 py-0.5 rounded-full border border-[#DEC4AC]">
+              Executive Overview
             </span>
-            <span className="text-2xl font-bold text-[var(--color-brand-chocolate)] mt-1 block">
-              {formatPrice(verifiedSalesRevenue)}
-            </span>
-            <span className="text-[11px] text-[var(--color-brand-success)] font-medium mt-1 flex items-center gap-1">
-              <TrendingUp size={12} /> Live Razorpay records
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" /> Live Telemetry
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-[var(--color-brand-primary-dark)] flex items-center justify-center">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E1008] tracking-tight">
+            Bakery Operations Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6B5A4E] mt-1">
+            Real-time sales, live inventory, and order fulfillment tracking for YOYO CAKES
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Link
+            to="/admin/products"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#D4A373] to-[#E5B88F] hover:from-[#C79361] hover:to-[#D9A779] text-[#1E1008] font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 border border-[#C59262] min-h-[44px]"
+          >
+            <Package size={15} /> Manage Catalog
+          </Link>
+          <Link
+            to="/admin/orders"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#FAF4ED] text-[#1E1008] font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 border border-[#E3D4C4] min-h-[44px]"
+          >
+            <Clock size={15} /> View Kitchen
+          </Link>
+        </div>
+      </div>
+
+      {/* KPI Cards (Luxury Warm Espresso & Gold) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Verified Revenue */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DFD5] shadow-xs hover:shadow-md transition-all flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-[#8C5E3C] uppercase tracking-wider block">
+              Verified Revenue
+            </span>
+            <span className="text-2xl sm:text-3xl font-black text-[#1E1008] mt-1.5 block tracking-tight">
+              {formatPrice(verifiedSalesRevenue)}
+            </span>
+            <span className="text-[11px] text-emerald-700 font-semibold mt-1 flex items-center gap-1">
+              <TrendingUp size={13} /> Live Razorpay records
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FFF5EB] to-[#FCE7D2] text-[#8C5E3C] border border-[#E8D5C4] flex items-center justify-center shadow-2xs flex-shrink-0">
             <DollarSign size={24} />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/70 shadow-sm flex items-center justify-between">
+        {/* Total Orders */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DFD5] shadow-xs hover:shadow-md transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-[var(--color-brand-muted)] uppercase tracking-wider block">
+            <span className="text-[11px] font-bold text-[#5C4D42] uppercase tracking-wider block">
               Total Orders
             </span>
-            <span className="text-2xl font-bold text-[var(--color-brand-chocolate)] mt-1 block">
+            <span className="text-2xl sm:text-3xl font-black text-[#1E1008] mt-1.5 block tracking-tight">
               {totalOrders}
             </span>
-            <span className="text-[11px] text-[var(--color-brand-muted)] font-medium mt-1 block">
-              All channels (Delivery & Pickup)
+            <span className="text-[11px] text-[#7A695E] font-medium mt-1 block">
+              Delivery & Bakery Store Pickup
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-[var(--color-brand-info)] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#F4EBE1] text-[#7A4B29] border border-[#E3D4C4] flex items-center justify-center shadow-2xs flex-shrink-0">
             <Package size={24} />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/70 shadow-sm flex items-center justify-between">
+        {/* In Kitchen / Baking */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DFD5] shadow-xs hover:shadow-md transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-[var(--color-brand-muted)] uppercase tracking-wider block">
-              In Progress
+            <span className="text-[11px] font-bold text-[#9A3412] uppercase tracking-wider block">
+              In Kitchen / Baking
             </span>
-            <span className="text-2xl font-bold text-[var(--color-brand-chocolate)] mt-1 block">
+            <span className="text-2xl sm:text-3xl font-black text-[#9A3412] mt-1.5 block tracking-tight">
               {pendingOrders}
             </span>
-            <span className="text-[11px] text-[var(--color-brand-warning)] font-medium mt-1 block">
-              Kitchen preparing / baking
+            <span className="text-[11px] text-orange-700 font-semibold mt-1 block">
+              Active preparation tickets
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-yellow-50 text-[var(--color-brand-warning)] flex items-center justify-center">
-            <Clock size={24} />
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#C2410C] border border-orange-200/70 flex items-center justify-center shadow-2xs flex-shrink-0">
+            <ChefHat size={24} />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/70 shadow-sm flex items-center justify-between">
+        {/* Completed Orders */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DFD5] shadow-xs hover:shadow-md transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-[var(--color-brand-muted)] uppercase tracking-wider block">
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
               Completed Orders
             </span>
-            <span className="text-2xl font-bold text-[var(--color-brand-chocolate)] mt-1 block">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-800 mt-1.5 block tracking-tight">
               {completedOrders}
             </span>
-            <span className="text-[11px] text-[var(--color-brand-success)] font-medium mt-1 block">
+            <span className="text-[11px] text-emerald-700 font-medium mt-1 block">
               Delivered or collected
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-green-50 text-[var(--color-brand-success)] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/70 flex items-center justify-center shadow-2xs flex-shrink-0">
             <CheckCircle size={24} />
           </div>
         </div>
       </div>
 
-      {/* Sales Trend Chart */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/70 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      {/* Sales Trend Chart (Espresso & Honey-Gold Area) */}
+      <div className="bg-white p-5 sm:p-7 rounded-2xl border border-[#E8DFD5] shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h2 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
+            <h2 className="font-heading text-lg sm:text-xl font-bold text-[#1E1008]">
               Sales Revenue Trends (INR)
             </h2>
-            <p className="text-xs text-[var(--color-brand-muted)]">
-              Daily verified revenue generated from completed transactions
+            <p className="text-xs text-[#7A695E] mt-0.5">
+              Daily verified revenue generated from completed bakery transactions
             </p>
           </div>
-          <span className="text-xs font-semibold text-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)] px-3 py-1 rounded-full">
-            Recharts Analytics
+          <span className="text-xs font-bold text-[#7A451E] bg-[#F7ECE1] px-3 py-1.5 rounded-full border border-[#E8D4C2] self-start sm:self-auto">
+            ✨ Gold Analytics
           </span>
         </div>
 
@@ -174,31 +205,38 @@ export default function AdminDashboardPage() {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C9A184" stopOpacity={0.6} />
-                  <stop offset="95%" stopColor="#C9A184" stopOpacity={0.0} />
+                <linearGradient id="salesGradGold" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#D4A373" stopOpacity={0.65} />
+                  <stop offset="95%" stopColor="#D4A373" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-              <XAxis dataKey="date" stroke="#9B8578" fontSize={12} tickLine={false} />
-              <YAxis stroke="#9B8578" fontSize={12} tickLine={false} tickFormatter={(v) => `₹${v}`} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EFE7DE" />
+              <XAxis dataKey="date" stroke="#8C7A6E" fontSize={11} tickLine={false} />
+              <YAxis
+                stroke="#8C7A6E"
+                fontSize={11}
+                tickLine={false}
+                tickFormatter={(v) => `₹${v}`}
+              />
               <Tooltip
                 formatter={(val: any) => [`₹${val}`, 'Revenue']}
                 contentStyle={{
-                  backgroundColor: '#3D2417',
-                  color: '#fff',
-                  borderRadius: '10px',
-                  border: 'none',
+                  backgroundColor: '#1E1008',
+                  color: '#FFF9F2',
+                  borderRadius: '12px',
+                  border: '1px solid #D4A373',
+                  boxShadow: '0 10px 25px -5px rgba(30, 16, 8, 0.45)',
                   fontSize: '12px',
+                  fontWeight: '700',
                 }}
               />
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="#7F5643"
+                stroke="#9E6738"
                 strokeWidth={3}
                 fillOpacity={1}
-                fill="url(#salesGrad)"
+                fill="url(#salesGradGold)"
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -206,23 +244,26 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Two Column Layout: Recent Orders & Low Stock Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Recent Orders (2 Cols) */}
-        <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/70 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)]">
-              Recent Orders
-            </h2>
+        <div className="lg:col-span-2 bg-white p-5 sm:p-7 rounded-2xl border border-[#E8DFD5] shadow-xs">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="font-heading text-lg font-bold text-[#1E1008]">
+                Recent Customer Orders
+              </h2>
+              <span className="text-xs text-[#7A695E]">Latest orders placed across Chennai</span>
+            </div>
             <Link
               to="/admin/orders"
-              className="text-xs font-semibold text-[var(--color-brand-primary-dark)] hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-[#93582C] hover:text-[#1E1008] transition-colors flex items-center gap-1 bg-[#FAF4ED] px-3 py-1.5 rounded-lg border border-[#E8D9CC]"
             >
-              View All Orders <ArrowRight size={14} />
+              All Orders <ArrowRight size={13} />
             </Link>
           </div>
 
           {recentOrders.length === 0 ? (
-            <p className="text-xs text-[var(--color-brand-muted)] text-center py-8">
+            <p className="text-xs text-[#8C7A6E] text-center py-8">
               No orders registered yet. New customer orders will show up here immediately.
             </p>
           ) : (
@@ -232,30 +273,30 @@ export default function AdminDashboardPage() {
                 {recentOrders.map((o) => (
                   <div
                     key={o.id}
-                    className="p-3 rounded-xl border border-gray-100 bg-gray-50/50 flex items-center justify-between text-xs"
+                    className="p-3.5 rounded-xl border border-[#E8DFD5] bg-[#FAF7F2] flex items-center justify-between text-xs"
                   >
                     <div>
-                      <span className="font-mono font-bold text-[var(--color-brand-chocolate)] block">
+                      <span className="font-mono font-bold text-[#1E1008] block">
                         #{o.id}
                       </span>
-                      <span className="font-semibold text-gray-800 block text-[11px] mt-0.5">
+                      <span className="font-bold text-gray-800 block text-xs mt-0.5">
                         {o.customer.name}
                       </span>
-                      <span className="text-[10px] text-gray-400 capitalize">{o.fulfillment}</span>
+                      <span className="text-[10px] text-[#7A695E] capitalize">{o.fulfillment}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <div className="text-right">
-                        <span className="font-bold text-[var(--color-brand-primary-dark)] block">
+                        <span className="font-black text-[#1E1008] block text-xs">
                           {formatPrice(o.total)}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)]">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#F5ECE1] text-[#7A451E] border border-[#E8D4C2]">
                           {o.orderStatus.replace('_', ' ')}
                         </span>
                       </div>
                       <Link
                         to={`/order/${o.id}`}
-                        className="p-2 rounded-lg text-gray-500 hover:text-[var(--color-brand-primary-dark)] min-w-[36px] min-h-[36px] flex items-center justify-center bg-white shadow-2xs"
+                        className="p-2 rounded-lg text-[#1E1008] hover:bg-[#F3E7DB] min-w-[36px] min-h-[36px] flex items-center justify-center bg-white border border-[#E0D3C5] shadow-2xs"
                         aria-label={`View order ${o.id}`}
                       >
                         <Eye size={15} />
@@ -266,39 +307,39 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Desktop Table (sm+) */}
-              <div className="hidden sm:block overflow-x-auto">
+              <div className="hidden sm:block overflow-x-auto rounded-xl border border-[#E8DFD5]">
                 <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-gray-100 text-[var(--color-brand-muted)] uppercase tracking-wider">
-                      <th className="pb-3 font-semibold">Order ID</th>
-                      <th className="pb-3 font-semibold">Customer</th>
-                      <th className="pb-3 font-semibold">Total</th>
-                      <th className="pb-3 font-semibold">Status</th>
-                      <th className="pb-3 font-semibold text-right">Action</th>
+                  <thead className="bg-[#F7F3EC] border-b border-[#E8DFD5] text-[#5C4D42] uppercase tracking-wider text-[11px] font-bold">
+                    <tr>
+                      <th className="py-3 px-3.5">Order ID</th>
+                      <th className="py-3 px-3.5">Customer</th>
+                      <th className="py-3 px-3.5">Total</th>
+                      <th className="py-3 px-3.5">Status</th>
+                      <th className="py-3 px-3.5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[#EFE7DE]">
                     {recentOrders.map((o) => (
-                      <tr key={o.id} className="hover:bg-gray-50/70 transition-colors">
-                        <td className="py-3 font-mono font-bold text-[var(--color-brand-chocolate)]">
+                      <tr key={o.id} className="hover:bg-[#FAF7F2] transition-colors">
+                        <td className="py-3 px-3.5 font-mono font-bold text-[#1E1008]">
                           #{o.id}
                         </td>
-                        <td className="py-3">
-                          <span className="font-semibold block text-gray-800">{o.customer.name}</span>
-                          <span className="text-[10px] text-[var(--color-brand-muted)] capitalize">{o.fulfillment}</span>
+                        <td className="py-3 px-3.5">
+                          <span className="font-bold text-gray-800 block">{o.customer.name}</span>
+                          <span className="text-[10px] text-[#8C7A6E] capitalize">{o.fulfillment}</span>
                         </td>
-                        <td className="py-3 font-bold text-[var(--color-brand-primary-dark)]">
+                        <td className="py-3 px-3.5 font-black text-[#1E1008]">
                           {formatPrice(o.total)}
                         </td>
-                        <td className="py-3">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)]">
+                        <td className="py-3 px-3.5">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#F5ECE1] text-[#7A451E] border border-[#E8D4C2]">
                             {o.orderStatus.replace('_', ' ')}
                           </span>
                         </td>
-                        <td className="py-3 text-right">
+                        <td className="py-3 px-3.5 text-right">
                           <Link
                             to={`/order/${o.id}`}
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-[var(--color-brand-primary-dark)] inline-flex"
+                            className="p-1.5 rounded-lg text-[#7A451E] hover:text-[#1E1008] hover:bg-[#F3E7DB] inline-flex transition-colors"
                             aria-label={`View order ${o.id}`}
                           >
                             <Eye size={16} />
@@ -314,43 +355,49 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Low Stock Alerts (1 Col) */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/70 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] flex items-center gap-2">
-              <AlertTriangle size={18} className="text-[var(--color-brand-warning)]" />
+        <div className="bg-white p-5 sm:p-7 rounded-2xl border border-[#E8DFD5] shadow-xs">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-heading text-lg font-bold text-[#1E1008] flex items-center gap-2">
+              <AlertTriangle size={18} className="text-[#C2410C]" />
               Low Stock Alerts
             </h2>
             <Link
               to="/admin/products"
-              className="text-xs font-semibold text-[var(--color-brand-primary-dark)] hover:underline"
+              className="text-xs font-bold text-[#93582C] hover:text-[#1E1008] bg-[#FAF4ED] px-2.5 py-1 rounded-lg border border-[#E8D9CC]"
             >
               Manage
             </Link>
           </div>
 
-          <div className="space-y-3">
-            {lowStockProducts.slice(0, 6).map((product) => (
-              <div
-                key={product.id}
-                className="p-3 rounded-xl border border-gray-100 bg-gray-50/50 flex items-center justify-between text-xs"
-              >
-                <div>
-                  <h4 className="font-semibold text-[var(--color-brand-chocolate)]">{product.name}</h4>
-                  <span className="text-[10px] text-[var(--color-brand-muted)]">{product.category}</span>
+          <div className="space-y-2.5">
+            {lowStockProducts.length === 0 ? (
+              <p className="text-xs text-[#8C7A6E] text-center py-6">
+                All products have healthy inventory levels.
+              </p>
+            ) : (
+              lowStockProducts.slice(0, 6).map((product) => (
+                <div
+                  key={product.id}
+                  className="p-3 rounded-xl border border-[#E8DFD5] bg-[#FAF7F2] hover:bg-[#F5EFE6] transition-colors flex items-center justify-between text-xs"
+                >
+                  <div className="truncate pr-2">
+                    <h4 className="font-bold text-[#1E1008] truncate">{product.name}</h4>
+                    <span className="text-[10px] text-[#7A695E]">{product.category}</span>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <span
+                      className={`font-black px-2 py-0.5 rounded-full text-[10px] border ${
+                        product.stockQuantity <= 10
+                          ? 'bg-rose-100 text-rose-900 border-rose-200'
+                          : 'bg-amber-100 text-amber-900 border-amber-200'
+                      }`}
+                    >
+                      {product.stockQuantity} left
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span
-                    className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
-                      product.stockQuantity <= 10
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {product.stockQuantity} left
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -45,7 +45,7 @@ describe('Cart Store & Calculation Engine', () => {
     expect(useCartStore.getState().items).toHaveLength(0);
   });
 
-  it('correctly assesses free delivery threshold (>= ₹500)', () => {
+  it('correctly assesses delivery waiver threshold (>= ₹500)', () => {
     const cookiePie = getProductById('teacake-003')!; // ₹150
 
     // 3 pies = ₹450 -> under ₹500 -> delivery fee is ₹40
@@ -55,7 +55,7 @@ describe('Cart Store & Calculation Engine', () => {
     const deliveryFeeBelow = subtotalBelow >= 500 ? 0 : 40;
     expect(deliveryFeeBelow).toBe(40);
 
-    // Add 1 more pie -> ₹600 -> qualifies for FREE delivery
+    // Add 1 more pie -> ₹600 -> qualifies for delivery fee waiver
     useCartStore.getState().addItem(cookiePie, 1);
     const subtotalAbove = useCartStore.getState().getSubtotal();
     expect(subtotalAbove).toBe(600);

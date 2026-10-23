@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import BottomNav from './BottomNav';
 import ScrollToTop from '@/components/common/ScrollToTop';
 import RouteProgressBar from '@/components/common/RouteProgressBar';
 import { Toaster } from 'react-hot-toast';
@@ -13,10 +14,11 @@ export default function Layout() {
       <ScrollToTop />
       <RouteProgressBar />
       <Navbar />
-      <main key={location.pathname} className="flex-1 page-transition-wrapper">
+      <main key={location.pathname} className="flex-1 page-transition-wrapper pb-16 lg:pb-0">
         <Outlet />
       </main>
       <Footer />
+      <BottomNav />
       <Toaster
         position="bottom-right"
         toastOptions={{

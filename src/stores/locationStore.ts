@@ -9,6 +9,8 @@ export interface DeliveryLocation {
   estimatedTime: string;
   isExpressAvailable: boolean;
   deliveryFee: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
@@ -17,6 +19,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'Anna Nagar',
     pincode: '600040',
+    latitude: 13.085,
+    longitude: 80.2101,
     estimatedTime: '40–50 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -25,6 +29,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'T. Nagar',
     pincode: '600017',
+    latitude: 13.0418,
+    longitude: 80.2341,
     estimatedTime: '45–60 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -33,6 +39,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'Velachery',
     pincode: '600042',
+    latitude: 12.9756,
+    longitude: 80.2207,
     estimatedTime: '50–65 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -41,6 +49,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'Adyar / Besant Nagar',
     pincode: '600020',
+    latitude: 13.0012,
+    longitude: 80.2565,
     estimatedTime: '45–55 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -49,6 +59,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'OMR / Thoraipakkam',
     pincode: '600096',
+    latitude: 12.9363,
+    longitude: 80.2319,
     estimatedTime: '60–75 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -57,6 +69,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'Nungambakkam',
     pincode: '600034',
+    latitude: 13.0569,
+    longitude: 80.2425,
     estimatedTime: '35–45 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -65,6 +79,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Chennai',
     area: 'Porur / Ramapuram',
     pincode: '600116',
+    latitude: 13.0336,
+    longitude: 80.1585,
     estimatedTime: '50–60 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -75,6 +91,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Coimbatore',
     area: 'RS Puram',
     pincode: '641002',
+    latitude: 11.0088,
+    longitude: 76.9458,
     estimatedTime: '35–45 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -83,6 +101,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Coimbatore',
     area: 'Peelamedu',
     pincode: '641004',
+    latitude: 11.0287,
+    longitude: 77.0182,
     estimatedTime: '40–50 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -91,6 +111,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Coimbatore',
     area: 'Gandhipuram',
     pincode: '641012',
+    latitude: 11.0168,
+    longitude: 76.9675,
     estimatedTime: '30–40 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -99,6 +121,8 @@ export const POPULAR_DELIVERY_HUBS: DeliveryLocation[] = [
     city: 'Coimbatore',
     area: 'Saibaba Colony',
     pincode: '641011',
+    latitude: 11.0256,
+    longitude: 76.9427,
     estimatedTime: '35–45 mins',
     isExpressAvailable: true,
     deliveryFee: 0,
@@ -147,6 +171,8 @@ export const useLocationStore = create<LocationStore>()((set, get) => ({
       city: loc.city || get().currentLocation.city,
       area: loc.area || get().currentLocation.area,
       pincode: loc.pincode,
+      latitude: loc.latitude !== undefined ? loc.latitude : get().currentLocation.latitude,
+      longitude: loc.longitude !== undefined ? loc.longitude : get().currentLocation.longitude,
       estimatedTime: loc.estimatedTime || '45–60 mins',
       isExpressAvailable: true,
       deliveryFee: 0,
@@ -173,18 +199,23 @@ export const useLocationStore = create<LocationStore>()((set, get) => ({
     }
 
     // Default valid Indian pincode fallback
+    const isCoimbatore = cleanPin.startsWith('641');
     const customArea = cleanPin.startsWith('600')
       ? 'Chennai Zone'
-      : cleanPin.startsWith('641')
+      : isCoimbatore
       ? 'Coimbatore Zone'
       : 'Tamil Nadu Express';
 
-    const customCity = cleanPin.startsWith('641') ? 'Coimbatore' : 'Chennai';
+    const customCity = isCoimbatore ? 'Coimbatore' : 'Chennai';
+    const customLat = isCoimbatore ? 11.0168 : 13.085;
+    const customLng = isCoimbatore ? 76.9675 : 80.2101;
 
     const updated: DeliveryLocation = {
       city: customCity,
       area: customArea,
       pincode: cleanPin,
+      latitude: customLat,
+      longitude: customLng,
       estimatedTime: '45–70 mins',
       isExpressAvailable: true,
       deliveryFee: 0,
@@ -215,6 +246,8 @@ export const useLocationStore = create<LocationStore>()((set, get) => ({
 
             const detectedLoc: DeliveryLocation = {
               ...chosenHub,
+              latitude,
+              longitude,
               address: `GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
             };
 

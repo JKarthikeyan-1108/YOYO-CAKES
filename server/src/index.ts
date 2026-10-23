@@ -14,6 +14,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
+  'https://yoyocakes-seven.vercel.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
@@ -24,6 +25,7 @@ app.use(
       if (!origin) return callback(null, true);
       if (
         allowedOrigins.includes(origin) ||
+        origin === 'https://yoyocakes-seven.vercel.app' ||
         origin.endsWith('.vercel.app') ||
         origin.includes('yoyocakes')
       ) {
@@ -32,7 +34,7 @@ app.use(
       return callback(null, true); // Permissive in dev/staging
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );

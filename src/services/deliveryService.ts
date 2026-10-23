@@ -1,6 +1,10 @@
 import { auth } from '@/firebase';
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'https://yoyo-cakes.onrender.com'
+).replace(/\/$/, '');
 
 export interface DeliverySettings {
   storeName: string;
@@ -101,6 +105,9 @@ export function calculateLocalServiceability(
   settings: DeliverySettings = FALLBACK_DELIVERY_SETTINGS
 ): ServiceabilityResponse {
   if (fulfillment === 'pickup') {
+    const isCoimbatore = lat >= 10.8 && lat <= 11.3 && lng >= 76.7 && lng <= 77.3;
+    const pickupName = isCoimbatore ? 'YOYO CAKES Coimbatore Kitchen Counter' : settings.storeName;
+    const pickupAddr = isCoimbatore ? '72, DB Road, RS Puram, Coimbatore, Tamil Nadu 641002' : settings.pickupAddress;
     return {
       serviceable: settings.pickupEnabled,
       reason: settings.pickupEnabled ? undefined : 'Store pickup is temporarily unavailable.',
@@ -112,10 +119,10 @@ export function calculateLocalServiceability(
       freeDeliveryThreshold: settings.freeDeliveryThreshold,
       isFreeDelivery: true,
       storeLocation: {
-        name: settings.storeName,
-        address: settings.storeAddress,
-        latitude: settings.latitude,
-        longitude: settings.longitude,
+        name: pickupName,
+        address: pickupAddr,
+        latitude: isCoimbatore ? 11.0168 : settings.latitude,
+        longitude: isCoimbatore ? 76.9675 : settings.longitude,
       },
     };
   }
@@ -140,7 +147,14 @@ export function calculateLocalServiceability(
     };
   }
 
-  const distanceKm = estimateRoadDistanceKm(settings.latitude, settings.longitude, lat, lng);
+  // Support flagship bakery and regional dispatch kitchens (e.g. Coimbatore hub)
+  const isCoimbatore = lat >= 10.8 && lat <= 11.3 && lng >= 76.7 && lng <= 77.3;
+  const kitchenLat = isCoimbatore ? 11.0168 : settings.latitude;
+  const kitchenLng = isCoimbatore ? 76.9675 : settings.longitude;
+  const kitchenName = isCoimbatore ? 'YOYO CAKES Coimbatore Kitchen' : settings.storeName;
+  const kitchenAddress = isCoimbatore ? '72, DB Road, RS Puram, Coimbatore, Tamil Nadu 641002' : settings.storeAddress;
+
+  const distanceKm = estimateRoadDistanceKm(kitchenLat, kitchenLng, lat, lng);
   const estimatedMinutes = Math.round(25 + distanceKm * 2.5);
 
   if (settings.minOrderValue > 0 && subtotal > 0 && subtotal < settings.minOrderValue) {
@@ -155,10 +169,10 @@ export function calculateLocalServiceability(
       freeDeliveryThreshold: settings.freeDeliveryThreshold,
       isFreeDelivery: false,
       storeLocation: {
-        name: settings.storeName,
-        address: settings.storeAddress,
-        latitude: settings.latitude,
-        longitude: settings.longitude,
+        name: kitchenName,
+        address: kitchenAddress,
+        latitude: kitchenLat,
+        longitude: kitchenLng,
       },
     };
   }
@@ -175,10 +189,10 @@ export function calculateLocalServiceability(
       freeDeliveryThreshold: settings.freeDeliveryThreshold,
       isFreeDelivery: false,
       storeLocation: {
-        name: settings.storeName,
-        address: settings.storeAddress,
-        latitude: settings.latitude,
-        longitude: settings.longitude,
+        name: kitchenName,
+        address: kitchenAddress,
+        latitude: kitchenLat,
+        longitude: kitchenLng,
       },
     };
   }
@@ -203,10 +217,10 @@ export function calculateLocalServiceability(
     freeDeliveryThreshold: settings.freeDeliveryThreshold,
     isFreeDelivery: isFree,
     storeLocation: {
-      name: settings.storeName,
-      address: settings.storeAddress,
-      latitude: settings.latitude,
-      longitude: settings.longitude,
+      name: kitchenName,
+      address: kitchenAddress,
+      latitude: kitchenLat,
+      longitude: kitchenLng,
     },
   };
 }

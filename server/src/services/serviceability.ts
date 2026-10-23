@@ -255,10 +255,17 @@ export async function checkDeliveryServiceability(
     };
   }
 
+  // Support flagship bakery and regional dispatch kitchens (e.g. Coimbatore hub)
+  const isCoimbatore = destLat >= 10.8 && destLat <= 11.3 && destLon >= 76.7 && destLon <= 77.3;
+  const kitchenLat = isCoimbatore ? 11.0168 : settings.latitude;
+  const kitchenLng = isCoimbatore ? 76.9675 : settings.longitude;
+  const kitchenName = isCoimbatore ? 'YOYO CAKES Coimbatore Kitchen' : settings.storeName;
+  const kitchenAddress = isCoimbatore ? '72, DB Road, RS Puram, Coimbatore, Tamil Nadu 641002' : settings.storeAddress;
+
   // Calculate road distance
   const { distanceKm, durationMinutes } = await calculateRoadDistanceAndDuration(
-    settings.latitude,
-    settings.longitude,
+    kitchenLat,
+    kitchenLng,
     destLat,
     destLon
   );
@@ -276,10 +283,10 @@ export async function checkDeliveryServiceability(
       freeDeliveryThreshold: settings.freeDeliveryThreshold,
       isFreeDelivery: false,
       storeLocation: {
-        name: settings.storeName,
-        address: settings.storeAddress,
-        latitude: settings.latitude,
-        longitude: settings.longitude,
+        name: kitchenName,
+        address: kitchenAddress,
+        latitude: kitchenLat,
+        longitude: kitchenLng,
       },
     };
   }
@@ -297,10 +304,10 @@ export async function checkDeliveryServiceability(
       freeDeliveryThreshold: settings.freeDeliveryThreshold,
       isFreeDelivery: false,
       storeLocation: {
-        name: settings.storeName,
-        address: settings.storeAddress,
-        latitude: settings.latitude,
-        longitude: settings.longitude,
+        name: kitchenName,
+        address: kitchenAddress,
+        latitude: kitchenLat,
+        longitude: kitchenLng,
       },
     };
   }
@@ -326,10 +333,10 @@ export async function checkDeliveryServiceability(
     freeDeliveryThreshold: settings.freeDeliveryThreshold,
     isFreeDelivery: isFree,
     storeLocation: {
-      name: settings.storeName,
-      address: settings.storeAddress,
-      latitude: settings.latitude,
-      longitude: settings.longitude,
+      name: kitchenName,
+      address: kitchenAddress,
+      latitude: kitchenLat,
+      longitude: kitchenLng,
     },
   };
 }

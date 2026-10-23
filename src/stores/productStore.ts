@@ -38,6 +38,7 @@ interface ProductStore {
   categories: typeof CATEGORIES;
   loading: boolean;
   initialized: boolean;
+  error: string | null;
   fetchCatalog: () => Promise<void>;
   addProduct: (product: Product) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
@@ -52,9 +53,10 @@ export const useProductStore = create<ProductStore>()((set, get) => ({
   categories: CATEGORIES,
   loading: false,
   initialized: false,
+  error: null,
 
   fetchCatalog: async () => {
-    set({ loading: true });
+    set({ loading: true, error: null });
     try {
       const firestoreProducts = await getProductsFromFirestore();
       if (firestoreProducts && firestoreProducts.length > 0) {
