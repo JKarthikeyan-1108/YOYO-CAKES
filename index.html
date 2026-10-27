@@ -3,20 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
     <!-- Primary Meta Tags -->
     <title>YOYO CAKES — Every bite, a little happiness</title>
     <meta name="title" content="YOYO CAKES — Every bite, a little happiness" />
     <meta name="description" content="Artisanal bakery selling handcrafted cakes, brownies, classic tiramisu, tea cakes, cookie pies, and mini jar cakes. Order fresh online with local delivery and store pickup." />
-    <meta name="theme-color" content="#853612" />
+    <meta name="theme-color" content="#FFF8F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17110F" media="(prefers-color-scheme: dark)" />
 
     <!-- PWA & Mobile Meta Tags -->
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/images/logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="YOYO CAKES" />
+    <meta name="format-detection" content="telephone=no" />
 
     <!-- Google Fonts (Plus Jakarta Sans & Inter for modern Amazon-style e-commerce typography) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,9 +39,13 @@
           if (isDark) {
             document.documentElement.setAttribute('data-theme', 'dark');
             document.documentElement.classList.add('dark');
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#17110F');
           } else {
             document.documentElement.setAttribute('data-theme', 'cream');
             document.documentElement.classList.remove('dark');
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#FFF8F0');
           }
         } catch (e) {}
       })();

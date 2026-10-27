@@ -23,6 +23,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useProductStore } from '@/stores/productStore';
 import ProductCard from '@/components/product/ProductCard';
+import { triggerHaptic } from '@/services/mobileService';
 
 interface ReviewItem {
   id: string;
@@ -137,6 +138,7 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
+    triggerHaptic('medium');
     addItem(product, quantity, {
       customMessage: customMessage.trim() || undefined,
       includeCandles,
@@ -146,11 +148,47 @@ export default function ProductDetailPage() {
 
   const handleBuyNow = () => {
     if (!product) return;
+    triggerHaptic('heavy');
     addItem(product, quantity, {
       customMessage: customMessage.trim() || undefined,
       includeCandles,
     });
     navigate('/checkout');
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    triggerHaptic('light');
+    toggleWishlist(product.id);
+    if (!isInWishlist) {
+      toast.success(`${product.name} added to wishlist!`);
+    } else {
+      toast('Removed from wishlist', { icon: '🤍' });
+    }
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    triggerHaptic('light');
+    const shareData = {
+      title: `${product.name} | YOYO CAKES`,
+      text: `Check out ${product.name} from YOYO CAKES Artisanal Patisserie!`,
+      url: window.location.href,
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          navigator.clipboard?.writeText(window.location.href);
+          toast.success('Product link copied to clipboard!');
+        }
+      }
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+      toast.success('Product link copied to clipboard!');
+    }
   };
 
   const handleWhatsAppOrder = () => {
@@ -169,19 +207,6 @@ export default function ProductDetailPage() {
 
     const waUrl = `https://wa.me/${hotline}?text=${encodeURIComponent(messageLines.join('\n'))}`;
     window.open(waUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `${product.name} — YOYO CAKES`,
-        text: product.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard');
-    }
   };
 
   const handleSubmitReview = (e: React.FormEvent) => {
@@ -232,12 +257,12 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="bg-[var(--color-brand-cream)] min-h-screen pb-20 lg:pb-12">
+    <div className="bg-[var(--color-brand-cream)] min-h-screen pb-36 lg:pb-12 text-[var(--color-brand-chocolate)]">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-[var(--color-brand-primary-light)]/20">
+      <div className="bg-[var(--color-brand-surface)] border-b border-[var(--color-brand-border)]">
         <div className="container-main py-3.5">
           <nav className="flex items-center gap-2 text-sm text-[var(--color-brand-muted)]">
-            <Link to="/" className="hover:text-[var(--color-brand-primary-dark)] transition-colors">
+            <Link to="/" className="hover:text-[var(--color-brand-primary)] transition-colors">
               Home
             </Link>
             <span>/</span>
@@ -285,6 +310,32 @@ export default function ProductDetailPage() {
                 </span>
               )}
             </div>
+
+            {/* Top Right Floating Action Buttons: Share & Wishlist */}
+            <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+              <button
+                type="button"
+                onClick={handleShare}
+                aria-label="Share product"
+                className="w-10 h-10 rounded-full bg-[var(--color-brand-surface)]/90 backdrop-blur-md border border-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+                title="Share with friends"
+              >
+                <Share2 size={17} />
+              </button>
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                className={`w-10 h-10 rounded-full backdrop-blur-md border border-[var(--color-brand-border)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer ${
+                  isInWishlist
+                    ? 'bg-rose-500/15 border-rose-500/30 text-rose-500'
+                    : 'bg-[var(--color-brand-surface)]/90 text-[var(--color-brand-chocolate)]'
+                }`}
+                title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+              >
+                <Heart size={18} className={isInWishlist ? 'fill-rose-500 text-rose-500' : ''} />
+              </button>
+            </div>
           </div>
 
           {/* Details */}
@@ -300,14 +351,14 @@ export default function ProductDetailPage() {
             </h1>
 
             <div className="flex items-baseline gap-3 mb-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">
+              <span className="text-3xl sm:text-4xl font-extrabold text-[var(--color-brand-chocolate)]">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-xs text-[var(--color-brand-success)] font-bold bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="text-xs text-[var(--color-brand-success)] font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-500/20">
                 <CheckCircle size={13} /> In Stock
               </span>
             </div>
-            <p className="text-xs text-gray-500 mb-6">
+            <p className="text-xs text-[var(--color-brand-muted)] mb-6">
               Inclusive of all taxes • Handcrafted small-batch daily bake
             </p>
 
@@ -316,61 +367,61 @@ export default function ProductDetailPage() {
             </p>
 
             {/* Bakery Delivery Promise Box */}
-            <div className="bg-[var(--color-brand-cream-dark)]/70 rounded-xl p-4 mb-6 border border-[var(--color-brand-primary-light)]/40 space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-gray-800 font-semibold">
-                <Truck size={16} className="text-[var(--color-brand-primary-dark)]" />
+            <div className="bg-[var(--color-brand-surface-elevated)] rounded-xl p-4 mb-6 border border-[var(--color-brand-border)] space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-[var(--color-brand-chocolate)] font-semibold">
+                <Truck size={16} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]" />
                 <span>Direct Bakery Delivery across Chennai</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Clock size={16} className="text-green-600" />
-                <span>Order within <strong className="text-gray-900">3 hrs 40 mins</strong> for Today Evening Delivery</span>
+              <div className="flex items-center gap-2 text-[var(--color-brand-muted)]">
+                <Clock size={16} className="text-green-600 dark:text-green-400" />
+                <span>Order within <strong className="text-[var(--color-brand-chocolate)]">3 hrs 40 mins</strong> for Today Evening Delivery</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <ShieldCheck size={16} className="text-blue-600" />
+              <div className="flex items-center gap-2 text-[var(--color-brand-muted)]">
+                <ShieldCheck size={16} className="text-blue-600 dark:text-blue-400" />
                 <span>100% Real Belgian Chocolate & Pure Dairy Cream</span>
               </div>
             </div>
 
             {/* Quantity Selector */}
             <div className="mb-6">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-2 block">
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-chocolate)] mb-2 block">
                 Select Quantity
               </label>
               <div className="flex items-center gap-3">
-                <div className="flex items-center bg-white border border-gray-300 rounded-xl overflow-hidden shadow-xs">
+                <div className="flex items-center bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] rounded-xl overflow-hidden shadow-xs">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3.5 py-2.5 hover:bg-gray-100 transition-colors text-gray-700"
+                    className="px-3.5 py-2.5 hover:bg-[var(--color-brand-cream-dark)] transition-colors text-[var(--color-brand-chocolate)] cursor-pointer"
                     disabled={quantity <= 1}
                   >
                     <Minus size={15} />
                   </button>
-                  <span className="px-5 py-2.5 font-bold text-center min-w-[3rem] border-x border-gray-200 text-gray-900 text-sm">
+                  <span className="px-5 py-2.5 font-bold text-center min-w-[3rem] border-x border-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] text-sm">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-3.5 py-2.5 hover:bg-gray-100 transition-colors text-gray-700"
+                    className="px-3.5 py-2.5 hover:bg-[var(--color-brand-cream-dark)] transition-colors text-[var(--color-brand-chocolate)] cursor-pointer"
                     disabled={quantity >= product.stockQuantity}
                   >
                     <Plus size={15} />
                   </button>
                 </div>
-                <span className="text-xs text-gray-500 font-medium">
+                <span className="text-xs text-[var(--color-brand-muted)] font-medium">
                   {product.stockQuantity} ready for today's delivery slots
                 </span>
               </div>
             </div>
 
             {/* Cake Customization: Message on Cake & Free Candles */}
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 mb-6 space-y-3.5 shadow-xs">
+            <div className="bg-[var(--color-brand-surface)] rounded-2xl p-5 border border-[var(--color-brand-border)] mb-6 space-y-3.5 shadow-xs">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-[var(--color-brand-primary-dark)]" />
+                  <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]" />
                     Message on Cake (Optional)
                   </label>
-                  <span className="text-[11px] text-gray-500">{customMessage.length}/35 chars</span>
+                  <span className="text-[11px] text-[var(--color-brand-muted)]">{customMessage.length}/35 chars</span>
                 </div>
                 <input
                   type="text"
@@ -378,33 +429,33 @@ export default function ProductDetailPage() {
                   value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
                   placeholder="e.g., Happy Birthday Rahul! 🎉"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-[var(--color-brand-primary-dark)] outline-none text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-brand-border)] focus:border-[var(--color-brand-primary)] outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] placeholder:text-[var(--color-brand-muted)] bg-[var(--color-brand-surface-elevated)]"
                 />
-                <p className="text-[11px] text-gray-500 mt-1">
+                <p className="text-[11px] text-[var(--color-brand-muted)] mt-1">
                   Hand-piped on the cake surface or placed on a dark chocolate plaque.
                 </p>
               </div>
 
-              <label className="flex items-center gap-2.5 cursor-pointer pt-3 border-t border-gray-100">
+              <label className="flex items-center gap-2.5 cursor-pointer pt-3 border-t border-[var(--color-brand-border)]/50">
                 <input
                   type="checkbox"
                   checked={includeCandles}
                   onChange={(e) => setIncludeCandles(e.target.checked)}
                   className="w-4 h-4 rounded text-[var(--color-brand-primary-dark)] accent-[var(--color-brand-primary-dark)] cursor-pointer"
                 />
-                <span className="text-xs text-gray-700 font-medium">
+                <span className="text-xs text-[var(--color-brand-chocolate)] font-medium">
                   Include complimentary wooden cake knife & birthday candle pack (FREE)
                 </span>
               </label>
             </div>
 
-            {/* Action Buttons: Amazon Gold Add to Cart + Orange Buy Now + WhatsApp */}
+            {/* Action Buttons: Brand Themed Add to Cart + Buy Now + WhatsApp */}
             <div className="space-y-3 mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={handleAddToCart}
                   disabled={!product.inStock}
-                  className="py-3.5 px-4 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 border border-[#FCD200]"
+                  className="py-3.5 px-4 rounded-xl bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
                 >
                   <ShoppingCart size={17} /> Add to Cart — {formatPrice(product.price * quantity)}
                 </button>
@@ -413,7 +464,7 @@ export default function ProductDetailPage() {
                   type="button"
                   onClick={handleBuyNow}
                   disabled={!product.inStock}
-                  className="py-3.5 px-4 rounded-xl bg-[#FFA41C] hover:bg-[#FA8900] active:bg-[#E87A00] text-[#0F1111] font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 border border-[#FF8F00]"
+                  className="py-3.5 px-4 rounded-xl bg-[var(--color-brand-primary)] hover:opacity-95 text-[#1E1008] font-black text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
                 >
                   <Zap size={17} /> Buy Now (Instant Checkout)
                 </button>
@@ -423,7 +474,7 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={handleWhatsAppOrder}
-                  className="flex-1 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 text-xs sm:text-sm"
+                  className="flex-1 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer"
                   title="Order directly with bakery on WhatsApp"
                 >
                   <MessageCircle size={18} /> 1-Click WhatsApp Concierge Order
@@ -439,10 +490,10 @@ export default function ProductDetailPage() {
                         : `${product.name} added to wishlist`
                     );
                   }}
-                  className={`p-3 rounded-xl border transition-colors ${
+                  className={`p-3 rounded-xl border transition-colors cursor-pointer ${
                     isInWishlist
-                      ? 'border-red-500 bg-red-50 text-red-500'
-                      : 'border-gray-300 hover:border-gray-400 text-gray-700 bg-white'
+                      ? 'border-red-500 bg-red-500/10 text-red-500'
+                      : 'border-[var(--color-brand-border)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] bg-[var(--color-brand-surface)]'
                   }`}
                   title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
@@ -452,7 +503,7 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="p-3 rounded-xl border border-gray-300 hover:border-gray-400 text-gray-700 bg-white transition-colors"
+                  className="p-3 rounded-xl border border-[var(--color-brand-border)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] bg-[var(--color-brand-surface)] transition-colors cursor-pointer"
                   title="Share treat"
                 >
                   <Share2 size={18} />
@@ -778,36 +829,74 @@ export default function ProductDetailPage() {
         )}
       </div>
 
-      {/* Mobile Sticky Add to Cart Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-3 z-40 flex items-center justify-between gap-3 shadow-elevated">
-        <div className="flex-shrink-0">
-          <span className="text-[10px] text-gray-500 block uppercase font-bold">Total</span>
-          <span className="font-heading text-base font-extrabold text-gray-900 leading-none">
-            {formatPrice(product.price * quantity)}
-          </span>
+      {/* Mobile Sticky Add to Cart Bar (Positioned above BottomNav with safe-area support) */}
+      <div
+        className="lg:hidden fixed left-0 right-0 bg-[var(--color-brand-surface)]/95 backdrop-blur-md border-t border-[var(--color-brand-border)] p-3 z-40 flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]"
+        style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div className="flex items-center gap-2">
+          {/* Quick Quantity Stepper */}
+          <div className="flex items-center bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setQuantity(Math.max(1, quantity - 1));
+              }}
+              className="p-1.5 text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)] disabled:opacity-40 transition-colors"
+              disabled={quantity <= 1}
+              aria-label="Decrease quantity"
+            >
+              <Minus size={13} />
+            </button>
+            <span className="px-2 py-1 text-xs font-bold text-[var(--color-brand-chocolate)] border-x border-[var(--color-brand-border)] min-w-[1.75rem] text-center">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setQuantity(quantity + 1);
+              }}
+              className="p-1.5 text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)] disabled:opacity-40 transition-colors"
+              disabled={quantity >= product.stockQuantity}
+              aria-label="Increase quantity"
+            >
+              <Plus size={13} />
+            </button>
+          </div>
+          <div className="leading-tight">
+            <span className="text-[10px] text-[var(--color-brand-muted)] block uppercase font-bold">Total</span>
+            <span className="font-heading text-sm font-extrabold text-[var(--color-brand-chocolate)] leading-none">
+              {formatPrice(product.price * quantity)}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-1.5 flex-1 justify-end">
           <button
             type="button"
             onClick={handleWhatsAppOrder}
-            className="bg-[#25D366] text-white p-2.5 rounded-xl flex items-center justify-center shadow-xs flex-shrink-0"
+            className="bg-[#25D366] text-white p-2.5 rounded-xl flex items-center justify-center shadow-xs flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
             title="Order on WhatsApp"
+            aria-label="Order on WhatsApp"
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={17} />
           </button>
           <button
+            type="button"
             onClick={handleAddToCart}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] active:bg-[#F0B800] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FCD200] flex items-center justify-center gap-1"
+            className="flex-1 py-2.5 px-3 rounded-xl bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] active:scale-95 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1 cursor-pointer transition-transform"
             disabled={!product.inStock}
           >
-            <ShoppingCart size={15} /> Add to Cart
+            <ShoppingCart size={14} /> Add to Cart
           </button>
           <button
+            type="button"
             onClick={handleBuyNow}
-            className="flex-1 py-2.5 px-3 rounded-xl bg-[#FFA41C] hover:bg-[#FA8900] active:bg-[#E87A00] text-[#0F1111] font-bold text-xs shadow-xs border border-[#FF8F00] flex items-center justify-center gap-1"
+            className="py-2.5 px-3 rounded-xl bg-[var(--color-brand-primary)] hover:opacity-95 active:scale-95 text-[#1E1008] font-black text-xs shadow-xs flex items-center justify-center gap-1 cursor-pointer transition-transform flex-shrink-0"
             disabled={!product.inStock}
           >
-            <Zap size={15} /> Buy Now
+            <Zap size={14} /> Buy
           </button>
         </div>
       </div>

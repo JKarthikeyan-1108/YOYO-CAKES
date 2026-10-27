@@ -1,28 +1,68 @@
 {
+  "id": "/",
   "name": "YOYO CAKES — Artisanal Bakery",
   "short_name": "YOYO CAKES",
-  "description": "Every bite, a little happiness. Handcrafted cakes, brownies, tiramisu, and mini jar cakes.",
+  "description": "Every bite, a little happiness. Handcrafted 100% Eggless cakes, brownies, tiramisu, and mini jar cakes.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#FFF8F0",
-  "theme_color": "#3D2417",
-  "orientation": "portrait",
+  "theme_color": "#FFF8F0",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/images/logo.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/images/logo.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Explore All Cakes",
+      "short_name": "Cakes",
+      "description": "Browse our 27 handcrafted artisanal treats",
+      "url": "/shop",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Cart",
+      "short_name": "Cart",
+      "description": "Check your cart and proceed to checkout",
+      "url": "/cart",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "Track live bakery and delivery status",
+      "url": "/orders",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Wishlist",
+      "short_name": "Wishlist",
+      "description": "View your saved dream cakes and treats",
+      "url": "/wishlist",
+      "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
     }
   ],
   "categories": [
     "food",
-    "shopping"
+    "shopping",
+    "lifestyle"
   ]
 }

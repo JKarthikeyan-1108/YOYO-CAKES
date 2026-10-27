@@ -70,7 +70,7 @@ const POLICIES: Record<string, PolicyData> = {
       },
       {
         heading: '2. Delivery Charges',
-        body: 'Enjoy complimentary FREE local delivery on all orders of ₹500 and above! For orders below ₹500, a standard delivery fee of ₹40 is applied at checkout.',
+        body: 'Delivery charges are calculated based on your delivery address, distance from our local patisserie kitchen, and selected delivery slot. Exact delivery fees are calculated and clearly shown at checkout before you make any payment.',
       },
       {
         heading: '3. Delivery Timelines',
@@ -111,7 +111,7 @@ export default function PolicyPage() {
   const Icon = policy.icon;
 
   return (
-    <div className="bg-[var(--color-brand-cream)] min-h-screen py-12 lg:py-20">
+    <div className="bg-[var(--color-brand-cream)] min-h-screen py-12 lg:py-20 text-[var(--color-brand-chocolate)]">
       <div className="container-main max-w-4xl">
         {/* Policy Navigation Tabs */}
         <div className="flex flex-wrap gap-2 justify-center mb-10">
@@ -128,8 +128,8 @@ export default function PolicyPage() {
                 to={tab.path}
                 className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-[var(--color-brand-chocolate)] text-white shadow-sm'
-                    : 'bg-white text-[var(--color-brand-chocolate-light)] hover:bg-[var(--color-brand-cream-dark)]'
+                    ? 'bg-[var(--color-brand-primary)] text-[var(--color-brand-chocolate)] shadow-sm font-bold'
+                    : 'bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] hover:bg-[var(--color-brand-cream-dark)]'
                 }`}
               >
                 {tab.label}
@@ -139,21 +139,21 @@ export default function PolicyPage() {
         </div>
 
         {/* Notice of Owner Approval */}
-        <div className="bg-[var(--color-brand-cream-dark)]/60 border border-[var(--color-brand-primary-light)]/40 rounded-xl p-3.5 mb-8 flex items-center gap-3 text-xs text-[var(--color-brand-chocolate-light)]">
-          <AlertCircle size={16} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+        <div className="bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] rounded-xl p-3.5 mb-8 flex items-center gap-3 text-xs text-[var(--color-brand-chocolate)]">
+          <AlertCircle size={16} className="text-[var(--color-brand-primary)] flex-shrink-0" />
           <span>
             <strong>Business Notice:</strong> Policy terms are maintained by YOYO CAKES management. Legal modifications are managed via Admin Settings.
           </span>
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-white rounded-3xl shadow-elevated p-8 sm:p-12 border border-[var(--color-brand-primary-light)]/20">
+        <div className="bg-[var(--color-brand-surface)] rounded-3xl shadow-elevated p-8 sm:p-12 border border-[var(--color-brand-border)]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary)] flex items-center justify-center">
               <Icon size={20} />
             </div>
             <div>
-              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-brand-primary-dark)]">
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-brand-primary)]">
                 {policy.badge}
               </span>
               <h1 className="font-heading text-3xl font-bold text-[var(--color-brand-chocolate)]">
@@ -161,7 +161,7 @@ export default function PolicyPage() {
               </h1>
             </div>
           </div>
-          <p className="text-xs text-[var(--color-brand-muted)] mb-8 pb-4 border-b border-gray-100">
+          <p className="text-xs text-[var(--color-brand-muted)] mb-8 pb-4 border-b border-[var(--color-brand-border)]">
             Last Updated: {policy.updatedAt} • YOYO CAKES Bakery Operations
           </p>
 
@@ -178,9 +178,9 @@ export default function PolicyPage() {
             ))}
           </div>
 
-          <div className="mt-12 pt-6 border-t border-gray-100 text-xs text-[var(--color-brand-muted)] flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="mt-12 pt-6 border-t border-[var(--color-brand-border)] text-xs text-[var(--color-brand-muted)] flex flex-col sm:flex-row justify-between items-center gap-4">
             <span>Questions regarding this policy?</span>
-            <Link to="/contact" className="text-[var(--color-brand-primary-dark)] font-semibold hover:underline">
+            <Link to="/contact" className="text-[var(--color-brand-primary)] font-semibold hover:underline">
               Contact our Support Desk →
             </Link>
           </div>

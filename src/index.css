@@ -6,28 +6,28 @@
 html[data-theme="cream"],
 html:not(.dark) {
   /* Artisanal Confectionery & Pastry Palette */
-  --color-brand-primary: #D97706; /* Warm golden caramel / honey amber glaze */
-  --color-brand-primary-dark: #853612; /* Rich caramelized toffee & dark chocolate roast */
-  --color-brand-primary-light: #FDE68A; /* Warm butter vanilla cream */
-  --color-brand-cream: #FFFDF9; /* Fresh mascarpone & whipped vanilla cream base */
-  --color-brand-cream-dark: #F5EDE2; /* Warm biscuit crust & sponge tone */
+  --color-brand-primary: #C9A184; /* Signature artisanal honey-tan accent */
+  --color-brand-primary-dark: #7F5643; /* Rich roasted cocoa & mocha */
+  --color-brand-primary-light: #E8D8CE; /* Warm milk foam & light biscuit */
+  --color-brand-cream: #FFF8F0; /* Soft artisanal pastry cream page background */
+  --color-brand-cream-dark: #F5EDE4; /* Warm biscuit crust & sponge tone */
   --color-brand-surface: #FFFFFF; /* Pure porcelain cake display */
   --color-brand-surface-elevated: #FFFBF5; /* Elevated confectionery box */
-  --color-brand-chocolate: #2B150C; /* Rich 70% dark Belgian chocolate */
-  --color-brand-chocolate-light: #5C3523; /* Creamy milk chocolate & cocoa */
-  --color-brand-muted: #784D37; /* Dusted cocoa powder */
-  --color-brand-border: #EBDCCB; /* Soft golden pastry crust border */
+  --color-brand-chocolate: #2B150C; /* Rich dark Belgian chocolate text */
+  --color-brand-chocolate-light: #5C3523; /* Creamy milk chocolate */
+  --color-brand-muted: #7F5643; /* Secondary warm artisanal tone */
+  --color-brand-border: #E8D8CE; /* Soft pastry border */
   --color-brand-input-bg: #FFFFFF;
-  --color-brand-input-border: #EBDCCB;
-  --color-brand-strip-bg: #241209; /* Deep dark chocolate ganache ribbon */
-  --color-brand-strip-text: #FFF9F0;
-  --color-brand-strip-muted: #D8BFAD;
-  --color-brand-footer-bg: #1A0D07; /* Decadent dark cocoa truffle box */
-  --color-brand-footer-strip: #26130A;
+  --color-brand-input-border: #E8D8CE;
+  --color-brand-strip-bg: #241914; /* Deep dark chocolate ribbon */
+  --color-brand-strip-text: #FFF8F0;
+  --color-brand-strip-muted: #D1BFB1;
+  --color-brand-footer-bg: #17110F; /* Dark cacao base */
+  --color-brand-footer-strip: #241914;
   --color-brand-footer-text: #FFF8F0;
-  --color-brand-footer-muted: #C7AFA0;
+  --color-brand-footer-muted: #D1BFB1;
   --color-brand-success: #16A34A; /* Pistachio fresh bake */
-  --color-brand-warning: #D97706; /* Golden honey */
+  --color-brand-warning: #C9A184; /* Warm caramel */
   --color-brand-error: #DC2626; /* Red velvet & ripe strawberry */
   --color-brand-info: #2563EB;
 
@@ -36,29 +36,29 @@ html:not(.dark) {
 
 html[data-theme="dark"],
 html.dark {
-  /* Midnight Cacao & Roasted Mocha Lounge */
-  --color-brand-primary: #F59E0B; /* Glowing melted caramel */
-  --color-brand-primary-dark: #D97706; /* Warm golden amber */
-  --color-brand-primary-light: #3A1E11; /* Dark mocha highlight */
-  --color-brand-cream: #140C08; /* Deep roasted cacao & espresso bean */
-  --color-brand-cream-dark: #1D110B; /* Dark chocolate fudge */
-  --color-brand-surface: #24140D; /* Decadent dark chocolate cake layer */
-  --color-brand-surface-elevated: #2F1A11; /* Elevated truffle box */
-  --color-brand-chocolate: #FFF8F0; /* Whipped vanilla cream */
-  --color-brand-chocolate-light: #E8D5C4; /* Sweet almond cream */
-  --color-brand-muted: #CBB19E; /* Fine Dutch cocoa powder */
-  --color-brand-border: #4D2B1B; /* Warm dark chocolate crust border */
-  --color-brand-input-bg: #24140D;
-  --color-brand-input-border: #4D2B1B;
-  --color-brand-strip-bg: #120905;
-  --color-brand-strip-text: #FFF8F0;
-  --color-brand-strip-muted: #CBB19E;
-  --color-brand-footer-bg: #0E0603;
-  --color-brand-footer-strip: #170A05;
-  --color-brand-footer-text: #FFF8F0;
-  --color-brand-footer-muted: #CBB19E;
+  /* Midnight Artisanal Cacao & Roasted Mocha Lounge */
+  --color-brand-primary: #C9A184; /* Primary accent */
+  --color-brand-primary-dark: #7F5643; /* Secondary mocha */
+  --color-brand-primary-light: #382A28; /* Dark roast highlight */
+  --color-brand-cream: #17110F; /* Page background */
+  --color-brand-cream-dark: #211B1A; /* Deep cacao background */
+  --color-brand-surface: #241914; /* Card background */
+  --color-brand-surface-elevated: #302219; /* Elevated surfaces */
+  --color-brand-chocolate: #FFF4EA; /* Main text */
+  --color-brand-chocolate-light: #E8D5C4; /* Light almond text */
+  --color-brand-muted: #D1BFB1; /* Secondary text */
+  --color-brand-border: #594337; /* Borders */
+  --color-brand-input-bg: #241914;
+  --color-brand-input-border: #594337;
+  --color-brand-strip-bg: #17110F;
+  --color-brand-strip-text: #FFF4EA;
+  --color-brand-strip-muted: #D1BFB1;
+  --color-brand-footer-bg: #17110F;
+  --color-brand-footer-strip: #241914;
+  --color-brand-footer-text: #FFF4EA;
+  --color-brand-footer-muted: #D1BFB1;
   --color-brand-success: #22C55E;
-  --color-brand-warning: #F59E0B;
+  --color-brand-warning: #C9A184;
   --color-brand-error: #EF4444;
   --color-brand-info: #3B82F6;
 
@@ -66,17 +66,17 @@ html.dark {
 }
 
 @theme {
-  --color-brand-primary: #D97706;
-  --color-brand-primary-dark: #853612;
-  --color-brand-primary-light: #FDE68A;
-  --color-brand-cream: #FFFDF9;
-  --color-brand-cream-dark: #F5EDE2;
+  --color-brand-primary: #C9A184;
+  --color-brand-primary-dark: #7F5643;
+  --color-brand-primary-light: #E8D8CE;
+  --color-brand-cream: #FFF8F0;
+  --color-brand-cream-dark: #F5EDE4;
   --color-brand-surface: #FFFFFF;
   --color-brand-chocolate: #2B150C;
   --color-brand-chocolate-light: #5C3523;
-  --color-brand-muted: #784D37;
+  --color-brand-muted: #7F5643;
   --color-brand-success: #16A34A;
-  --color-brand-warning: #D97706;
+  --color-brand-warning: #C9A184;
   --color-brand-error: #DC2626;
   --color-brand-info: #2563EB;
 
@@ -104,6 +104,7 @@ html.dark {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
@@ -111,11 +112,12 @@ html.dark {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Safe-area support for iPhone notch */
-    padding-top: env(safe-area-inset-top);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
     /* Prevent horizontal overflow globally */
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
   }
 
   body {
@@ -129,6 +131,7 @@ html.dark {
     overflow-x: hidden;
     /* Touch scrolling on iOS */
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
@@ -142,16 +145,20 @@ html.dark {
   a {
     color: inherit;
     text-decoration: none;
+    touch-action: manipulation;
+  }
+
+  button, input, select, textarea {
+    font-family: var(--font-body);
+    touch-action: manipulation;
   }
 
   img {
     max-width: 100%;
     height: auto;
     display: block;
-  }
-
-  input, textarea, select, button {
-    font-family: var(--font-body);
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
   /* Improve focus visibility for keyboard navigation */
@@ -176,31 +183,45 @@ html.dark {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
+
+  /* Prevent iOS automatic canvas zoom on input focus when font-size is < 16px */
+  @media (max-width: 639px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="search"],
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
 }
 
 /* ===== SYSTEM PREFERENCE FALLBACK ===== */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="cream"]) {
-    --color-brand-primary: #F59E0B;
-    --color-brand-primary-dark: #D97706;
-    --color-brand-primary-light: #3A1E11;
-    --color-brand-cream: #140C08;
-    --color-brand-cream-dark: #1D110B;
-    --color-brand-surface: #24140D;
-    --color-brand-surface-elevated: #2F1A11;
-    --color-brand-chocolate: #FFF8F0;
+    --color-brand-primary: #C9A184;
+    --color-brand-primary-dark: #7F5643;
+    --color-brand-primary-light: #382A28;
+    --color-brand-cream: #17110F;
+    --color-brand-cream-dark: #211B1A;
+    --color-brand-surface: #241914;
+    --color-brand-surface-elevated: #302219;
+    --color-brand-chocolate: #FFF4EA;
     --color-brand-chocolate-light: #E8D5C4;
-    --color-brand-muted: #CBB19E;
-    --color-brand-border: #4D2B1B;
-    --color-brand-input-bg: #24140D;
-    --color-brand-input-border: #4D2B1B;
-    --color-brand-strip-bg: #120905;
-    --color-brand-strip-text: #FFF8F0;
-    --color-brand-strip-muted: #CBB19E;
-    --color-brand-footer-bg: #0E0603;
-    --color-brand-footer-strip: #170A05;
-    --color-brand-footer-text: #FFF8F0;
-    --color-brand-footer-muted: #CBB19E;
+    --color-brand-muted: #D1BFB1;
+    --color-brand-border: #594337;
+    --color-brand-input-bg: #241914;
+    --color-brand-input-border: #594337;
+    --color-brand-strip-bg: #17110F;
+    --color-brand-strip-text: #FFF4EA;
+    --color-brand-strip-muted: #D1BFB1;
+    --color-brand-footer-bg: #17110F;
+    --color-brand-footer-strip: #241914;
+    --color-brand-footer-text: #FFF4EA;
+    --color-brand-footer-muted: #D1BFB1;
 
     color-scheme: dark;
   }
@@ -215,33 +236,33 @@ html.dark body {
 
 html[data-theme="dark"] [class*="bg-[var(--color-brand-chocolate)]"],
 html.dark [class*="bg-[var(--color-brand-chocolate)]"] {
-  background-color: #24140D !important;
-  color: #FFF8F0 !important;
+  background-color: #241914 !important;
+  color: #FFF4EA !important;
 }
 
 html[data-theme="dark"] [class*="text-[var(--color-brand-chocolate)]"],
 html.dark [class*="text-[var(--color-brand-chocolate)]"] {
-  color: #FFF8F0 !important;
+  color: #FFF4EA !important;
 }
 
 html[data-theme="dark"] [class*="hover:bg-[var(--color-brand-chocolate)]"]:hover,
 html.dark [class*="hover:bg-[var(--color-brand-chocolate)]"]:hover {
-  background-color: #2F1A11 !important;
+  background-color: #302219 !important;
 }
 
 html[data-theme="dark"] .bg-white,
 html.dark .bg-white {
-  background-color: #24140D !important;
+  background-color: #241914 !important;
 }
 
 html[data-theme="dark"] .bg-gray-50,
 html.dark .bg-gray-50 {
-  background-color: #1D110B !important;
+  background-color: #211B1A !important;
 }
 
 html[data-theme="dark"] .bg-gray-100,
 html.dark .bg-gray-100 {
-  background-color: #2F1A11 !important;
+  background-color: #302219 !important;
 }
 
 html[data-theme="dark"] [class*="bg-[#FAF7F2]"],
@@ -250,7 +271,7 @@ html[data-theme="dark"] [class*="bg-[#F7F3EC]"],
 html.dark [class*="bg-[#FAF7F2]"],
 html.dark [class*="bg-[#FAF4ED]"],
 html.dark [class*="bg-[#F7F3EC]"] {
-  background-color: #140C08 !important;
+  background-color: #17110F !important;
 }
 
 html[data-theme="dark"] [class*="bg-[#F7EFE6]"],
@@ -261,7 +282,7 @@ html.dark [class*="bg-[#F7EFE6]"],
 html.dark [class*="bg-[#F4EBE1]"],
 html.dark [class*="bg-[#F7ECE1]"],
 html.dark [class*="bg-[#F5EFE6]"] {
-  background-color: #24140D !important;
+  background-color: #241914 !important;
 }
 
 html[data-theme="dark"] [class*="bg-[#F5ECE1]"],
@@ -270,7 +291,7 @@ html[data-theme="dark"] [class*="bg-[#EBDCCF]"],
 html.dark [class*="bg-[#F5ECE1]"],
 html.dark [class*="bg-[#F3E7DB]"],
 html.dark [class*="bg-[#EBDCCF]"] {
-  background-color: #2F1A11 !important;
+  background-color: #302219 !important;
 }
 
 html[data-theme="dark"] .text-gray-900,
@@ -281,7 +302,7 @@ html.dark .text-gray-900,
 html.dark .text-gray-800,
 html.dark [class*="text-[#1E1008]"],
 html.dark [class*="text-[#0F1111]"] {
-  color: #FFF8F0 !important;
+  color: #FFF4EA !important;
 }
 
 html[data-theme="dark"] .text-gray-700,
@@ -306,7 +327,7 @@ html.dark [class*="text-[#7A451E]"],
 html.dark [class*="text-[#93582C]"],
 html.dark [class*="text-[#7A4B29]"],
 html.dark [class*="text-[#8C5E3C]"] {
-  color: #CBB19E !important;
+  color: #D1BFB1 !important;
 }
 
 html[data-theme="dark"] .border-gray-100,
@@ -327,7 +348,7 @@ html.dark [class*="border-[#E3D4C4]"],
 html.dark [class*="border-[#DEC4AC]"],
 html.dark [class*="border-[#E8D4C2]"],
 html.dark [class*="border-[#E8D9CC]"] {
-  border-color: #4D2B1B !important;
+  border-color: #594337 !important;
 }
 
 html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
@@ -345,7 +366,7 @@ html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder,
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #A68A78 !important;
+  color: #D1BFB1 !important;
 }
 
 html[data-theme="dark"] .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
@@ -354,15 +375,15 @@ html[data-theme="dark"] [class*="divide-[#E8DFD5]"] > :not([hidden]) ~ :not([hid
 html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
 html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
 html.dark [class*="divide-[#E8DFD5]"] > :not([hidden]) ~ :not([hidden]) {
-  border-color: #4D2B1B !important;
+  border-color: #594337 !important;
 }
 
 html[data-theme="dark"] header.bg-white,
 html[data-theme="dark"] header.bg-white\/95,
 html.dark header.bg-white,
 html.dark header.bg-white\/95 {
-  background-color: rgba(36, 20, 13, 0.95) !important;
-  border-color: #4D2B1B !important;
+  background-color: rgba(36, 25, 20, 0.95) !important;
+  border-color: #594337 !important;
 }
 
 /* ===== UTILITY CLASSES ===== */
@@ -665,3 +686,61 @@ html.dark header.bg-white\/95 {
     position: static !important;
   }
 }
+
+/* ===== MOBILE APP UTILITIES ===== */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.bottom-safe-cart {
+  bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.tap-active:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes crackShake {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(0.96) rotate(-2deg); }
+  50% { transform: scale(1.04) rotate(2deg); }
+  75% { transform: scale(0.98) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+.animate-crack-shake {
+  animation: crackShake 0.4s ease-in-out;
+}
+

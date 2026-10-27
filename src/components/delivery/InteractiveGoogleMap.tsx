@@ -56,7 +56,11 @@ export default function InteractiveGoogleMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [useFallbackMap, setUseFallbackMap] = useState(false);
+  const hasValidApiKey = Boolean(
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY &&
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY !== 'YOUR_GOOGLE_MAPS_API_KEY'
+  );
+  const [useFallbackMap, setUseFallbackMap] = useState(!hasValidApiKey);
   const [geoStatus, setGeoStatus] = useState<GeolocationStatus>('idle');
   const [geoErrorMsg, setGeoErrorMsg] = useState<string>('');
   
@@ -180,8 +184,7 @@ export default function InteractiveGoogleMap({
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey || apiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
-      // Gracefully switch to interactive canvas mode if no Google Maps API Key is configured yet
-      setUseFallbackMap(true);
+      // Gracefully operate in interactive canvas mode if no Google Maps API Key is configured yet
       performReverseGeocode(initialCoords.latitude, initialCoords.longitude);
       return;
     }

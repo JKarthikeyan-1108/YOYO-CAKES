@@ -4,6 +4,8 @@ import Footer from './Footer';
 import BottomNav from './BottomNav';
 import ScrollToTop from '@/components/common/ScrollToTop';
 import RouteProgressBar from '@/components/common/RouteProgressBar';
+import MobileAppInstallBanner from '@/components/common/MobileAppInstallBanner';
+import OfflineNotice from '@/components/common/OfflineNotice';
 import { Toaster } from 'react-hot-toast';
 
 export default function Layout() {
@@ -11,6 +13,8 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <OfflineNotice />
+      <MobileAppInstallBanner />
       <ScrollToTop />
       <RouteProgressBar />
       <Navbar />

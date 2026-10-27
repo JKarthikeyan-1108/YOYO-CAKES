@@ -6,6 +6,7 @@ import type { Product } from '@/data/products';
 import { formatPrice } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import { triggerHaptic } from '@/services/mobileService';
 
 interface ProductCardProps {
   product: Product;
@@ -47,6 +48,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    triggerHaptic('medium');
     addItem(product);
     toast.success(`${product.name} added to cart`);
   };
@@ -54,12 +56,14 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   const handleIncrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    triggerHaptic('light');
     updateQuantity(product.id, quantity + 1);
   };
 
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    triggerHaptic('light');
     if (quantity <= 1) {
       removeItem(product.id);
       toast.success(`${product.name} removed from cart`);
@@ -71,6 +75,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    triggerHaptic('light');
     toggleWishlist(product.id);
     toast.success(
       isInWishlist ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`
@@ -150,10 +155,18 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
           {/* Product Details (Swiggy-inspired Clean Food Card) */}
           <div className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-[11px] text-[var(--color-brand-muted)] mb-1">
-              <span className="uppercase tracking-wider font-semibold text-[var(--color-brand-muted)]">
-                {product.category}
-              </span>
-              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+              <div className="flex items-center gap-1.5">
+                <div
+                  className="w-3 h-3 border border-emerald-600 dark:border-emerald-400 p-[1.5px] flex items-center justify-center rounded-[2px] flex-shrink-0"
+                  title="100% Eggless Pure Vegetarian"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                </div>
+                <span className="uppercase tracking-wider font-semibold text-[var(--color-brand-muted)] truncate max-w-[90px] sm:max-w-none">
+                  {product.category}
+                </span>
+              </div>
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded flex-shrink-0">
                 <Check size={10} /> Fresh Bake
               </span>
             </div>
@@ -199,7 +212,7 @@ export default function ProductCard({ product, showQuickView = true }: ProductCa
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-full py-2 px-3 rounded-xl bg-white hover:bg-[var(--color-brand-cream-light)] text-[var(--color-brand-primary-dark)] hover:text-[var(--color-brand-chocolate)] border-2 border-[var(--color-brand-primary-dark)]/40 hover:border-[var(--color-brand-primary-dark)] text-xs font-black shadow-xs transition-all flex items-center justify-center gap-1 active:scale-[0.98] min-h-[38px]"
+              className="w-full py-2 px-3 rounded-xl bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] hover:text-[var(--color-brand-chocolate)] border-2 border-[var(--color-brand-primary)]/40 hover:border-[var(--color-brand-primary)] text-xs font-black shadow-xs transition-all flex items-center justify-center gap-1 active:scale-[0.98] min-h-[38px]"
               aria-label={`Add ${product.name} to cart`}
             >
               <Plus size={14} /> ADD

@@ -23,8 +23,6 @@ import {
   ClipboardList,
   MessageSquare,
   ChevronRight,
-  Sun,
-  Moon,
 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCartStore } from '@/stores/cartStore';
@@ -32,7 +30,6 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productStore';
 import { useLocationStore } from '@/stores/locationStore';
-import { useThemeStore } from '@/stores/themeStore';
 import BrandLogo from '@/components/common/BrandLogo';
 import ThemeToggle from '@/components/common/ThemeToggle';
 import DeliveryLocationModal from '@/components/common/DeliveryLocationModal';
@@ -58,7 +55,6 @@ export default function Navbar() {
   const { user, logout, isAdmin } = useAuthStore();
   const products = useProductStore((s) => s.products);
   const { currentLocation, openModal: openLocationModal } = useLocationStore();
-  const { resolvedTheme, toggleTheme } = useThemeStore();
 
   // Lock body scroll when drawer open
   useEffect(() => {
@@ -186,7 +182,7 @@ export default function Navbar() {
       </div>
 
       {/* Main Navigation Bar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs">
+      <header className="bg-[var(--color-brand-surface)] border-b border-[var(--color-brand-border)] sticky top-0 z-50 shadow-xs transition-colors">
         <div className="container-main py-2 sm:py-2.5">
           <div className="flex items-center gap-2 sm:gap-3 justify-between">
             {/* Left: Hamburger + Logo + Location */}
@@ -194,7 +190,7 @@ export default function Navbar() {
               <button
                 ref={hamburgerRef}
                 onClick={() => setMobileOpen(true)}
-                className="lg:hidden p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                className="lg:hidden p-1.5 rounded-lg text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-primary)] min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Open navigation menu"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-nav-drawer"
@@ -210,31 +206,31 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={openLocationModal}
-                className="flex items-center gap-1 py-1 px-2 sm:px-2.5 rounded-full hover:bg-amber-100/80 bg-amber-50/70 border border-amber-200 text-left transition-all text-[11px] sm:text-xs text-gray-700 cursor-pointer flex-shrink min-w-0"
+                className="flex items-center gap-1 py-1 px-2 sm:px-2.5 rounded-full hover:bg-[var(--color-brand-cream-dark)] bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] text-left transition-all text-[11px] sm:text-xs text-[var(--color-brand-chocolate)] cursor-pointer flex-shrink min-w-0"
                 aria-label="Change delivery location"
               >
-                <MapPin size={12} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
-                <span className="font-bold text-gray-900 truncate max-w-[60px] xs:max-w-[85px] sm:max-w-[120px]">
+                <MapPin size={12} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
+                <span className="font-bold text-[var(--color-brand-chocolate)] truncate max-w-[60px] xs:max-w-[85px] sm:max-w-[120px]">
                   {currentLocation.area}
                 </span>
-                <ChevronDown size={11} className="text-gray-400 flex-shrink-0" />
+                <ChevronDown size={11} className="text-[var(--color-brand-muted)] flex-shrink-0" />
               </button>
             </div>
 
             {/* Center: Search Bar (desktop) */}
             <div ref={searchContainerRef} className="hidden sm:block flex-1 max-w-xl mx-2 relative">
               <form onSubmit={handleSearch}>
-                <div className="flex rounded-full overflow-hidden border border-gray-200 focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 shadow-xs transition-all bg-gray-50 hover:bg-white">
+                <div className="flex rounded-full overflow-hidden border border-[var(--color-brand-border)] focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 shadow-xs transition-all bg-[var(--color-brand-surface-elevated)] hover:bg-[var(--color-brand-surface)]">
                   {/* Category Dropdown */}
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="hidden md:block bg-transparent text-gray-600 text-xs font-semibold px-3 py-2 border-r border-gray-200 outline-none hover:bg-gray-100 cursor-pointer"
+                    className="hidden md:block bg-transparent text-[var(--color-brand-chocolate)] text-xs font-semibold px-3 py-2 border-r border-[var(--color-brand-border)] outline-none hover:bg-[var(--color-brand-cream-dark)] cursor-pointer"
                     aria-label="Filter by category"
                   >
-                    <option value="all">All</option>
+                    <option value="all" className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)]">All</option>
                     {CATEGORIES.map((cat) => (
-                      <option key={cat.id} value={cat.slug}>
+                      <option key={cat.id} value={cat.slug} className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)]">
                         {cat.name}
                       </option>
                     ))}
@@ -242,7 +238,7 @@ export default function Navbar() {
 
                   {/* Search Input */}
                   <div className="relative flex-1 flex items-center">
-                    <Search size={16} className="ml-3 text-gray-400 flex-shrink-0" />
+                    <Search size={16} className="ml-3 text-[var(--color-brand-muted)] flex-shrink-0" />
                     <input
                       ref={searchInputRef}
                       type="text"
@@ -253,7 +249,7 @@ export default function Navbar() {
                         setIsSearchOpen(true);
                       }}
                       placeholder="Search cakes, brownies, tiramisu..."
-                      className="w-full px-2.5 py-2 text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400 bg-transparent"
+                      className="w-full px-2.5 py-2 text-sm outline-none font-medium text-[var(--color-brand-chocolate)] placeholder:text-[var(--color-brand-muted)] bg-transparent"
                       aria-label="Search products"
                       aria-autocomplete="list"
                       aria-controls={isSearchOpen ? 'search-results' : undefined}
@@ -291,23 +287,23 @@ export default function Navbar() {
                 <div
                   id="search-results"
                   role="listbox"
-                  className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden animate-fade-in"
+                  className="absolute left-0 right-0 top-full mt-2 bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-2xl shadow-2xl border border-[var(--color-brand-border)] z-50 overflow-hidden animate-fade-in"
                 >
                   {searchQuery.trim().length > 0 ? (
                     <div>
                       {searchResults.length > 0 ? (
                         <div>
-                          <div className="p-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 font-medium">
+                          <div className="p-2.5 bg-[var(--color-brand-surface-elevated)] border-b border-[var(--color-brand-border)] flex items-center justify-between text-xs text-[var(--color-brand-muted)] font-medium">
                             <span>Matching items ({searchResults.length})</span>
                             <span className="text-[11px]">Click item or Add to Cart</span>
                           </div>
-                          <div className="divide-y divide-gray-100">
+                          <div className="divide-y divide-[var(--color-brand-border)]">
                             {searchResults.map((item) => (
                               <div
                                 key={item.id}
                                 role="option"
                                 aria-selected="false"
-                                className="w-full p-3 hover:bg-[var(--color-brand-cream)]/60 transition-colors flex items-center justify-between gap-3 group"
+                                className="w-full p-3 hover:bg-[var(--color-brand-cream-dark)] transition-colors flex items-center justify-between gap-3 group"
                               >
                                 <button
                                   type="button"
@@ -317,18 +313,18 @@ export default function Navbar() {
                                   <img
                                     src={item.image || `/images/categories/${item.categorySlug}.jpg`}
                                     alt={item.name}
-                                    className="w-11 h-11 rounded-xl object-cover flex-shrink-0 bg-gray-100 border border-gray-200"
+                                    className="w-11 h-11 rounded-xl object-cover flex-shrink-0 bg-[var(--color-brand-cream-dark)] border border-[var(--color-brand-border)]"
                                     loading="lazy"
                                   />
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-xs sm:text-sm font-bold text-gray-900 truncate group-hover:text-[var(--color-brand-primary-dark)]">
+                                    <h4 className="text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] truncate group-hover:text-[var(--color-brand-primary)]">
                                       {item.name}
                                     </h4>
-                                    <p className="text-[11px] text-gray-500 truncate">{item.category}</p>
+                                    <p className="text-[11px] text-[var(--color-brand-muted)] truncate">{item.category}</p>
                                   </div>
                                 </button>
                                 <div className="flex items-center gap-2 flex-shrink-0">
-                                  <span className="font-heading text-sm font-extrabold text-gray-900">
+                                  <span className="font-heading text-sm font-extrabold text-[var(--color-brand-chocolate)]">
                                     {formatPrice(item.price)}
                                   </span>
                                   <button
@@ -419,7 +415,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileSearchVisible(!isMobileSearchVisible)}
-              className="sm:hidden p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 min-w-[40px] min-h-[40px] flex items-center justify-center"
+              className="sm:hidden p-1.5 rounded-lg text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)] min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
               aria-label="Search products"
             >
               <Search size={20} />
@@ -525,6 +521,11 @@ export default function Navbar() {
                 )}
               </Link>
 
+              {/* Mobile Quick Theme Toggle */}
+              <div className="sm:hidden flex items-center">
+                <ThemeToggle variant="compact" className="text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)]" />
+              </div>
+
               {/* Theme Toggle Button & Dropdown (desktop/tablet) */}
               <div className="hidden sm:flex items-center">
                 <ThemeToggle variant="desktop" />
@@ -533,13 +534,13 @@ export default function Navbar() {
               {/* Cart (visible on all sizes) */}
               <Link
                 to="/cart"
-                className="flex items-center gap-1 p-1.5 rounded-lg hover:bg-gray-100 text-gray-900 transition-colors relative min-w-[40px] min-h-[40px] justify-center"
+                className="flex items-center gap-1 p-1.5 rounded-lg hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] transition-colors relative min-w-[40px] min-h-[40px] justify-center"
                 aria-label={`Shopping cart, ${cartCount} items`}
               >
                 <div className="relative">
-                  <ShoppingCart size={20} className="text-gray-800" />
+                  <ShoppingCart size={20} className="text-[var(--color-brand-chocolate)]" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-[var(--color-brand-primary-dark)] text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center border border-white shadow-xs">
+                    <span className="absolute -top-1.5 -right-1.5 bg-[var(--color-brand-primary-dark)] text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center border border-[var(--color-brand-surface)] shadow-xs">
                       {cartCount > 99 ? '99+' : cartCount}
                     </span>
                   )}
@@ -553,9 +554,9 @@ export default function Navbar() {
         {/* Mobile Search Bar (slides down when toggled) */}
         {isMobileSearchVisible && (
           <div className="sm:hidden px-3 pb-2.5 animate-fade-in">
-            <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-gray-200 focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 bg-gray-50">
+            <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-[var(--color-brand-border)] focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 bg-[var(--color-brand-surface-elevated)]">
               <div className="relative flex-1 flex items-center">
-                <Search size={16} className="ml-3 text-gray-400 flex-shrink-0" />
+                <Search size={16} className="ml-3 text-[var(--color-brand-muted)] flex-shrink-0" />
                 <input
                   ref={mobileSearchInputRef}
                   type="text"
@@ -564,15 +565,15 @@ export default function Navbar() {
                     setSearchQuery(e.target.value);
                     setIsSearchOpen(true);
                   }}
-                  placeholder="Search cakes, brownies..."
-                  className="w-full px-2.5 py-2 text-sm outline-none font-medium text-gray-900 placeholder:text-gray-400 bg-transparent"
+                  placeholder="Search cakes, brownies, tiramisu..."
+                  className="w-full px-2.5 py-2 text-base outline-none font-medium text-[var(--color-brand-chocolate)] placeholder:text-[var(--color-brand-muted)] bg-transparent"
                   aria-label="Search products"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="px-2 text-gray-400 hover:text-gray-600 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                    className="px-2 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] min-w-[36px] min-h-[36px] flex items-center justify-center"
                     aria-label="Clear search"
                   >
                     <X size={14} />
@@ -582,7 +583,7 @@ export default function Navbar() {
               <button
                 type="submit"
                 aria-label="Search"
-                className="bg-[var(--color-brand-primary-dark)] px-3.5 flex items-center justify-center text-white min-h-[38px]"
+                className="bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] px-3.5 flex items-center justify-center text-white min-h-[38px] transition-colors"
               >
                 <Search size={16} />
               </button>
@@ -590,32 +591,32 @@ export default function Navbar() {
 
             {/* Mobile search results */}
             {isSearchOpen && searchQuery.trim().length > 0 && (
-              <div className="mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-h-64 overflow-y-auto">
+              <div className="mt-2 bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-xl shadow-lg border border-[var(--color-brand-border)] overflow-hidden max-h-64 overflow-y-auto">
                 {searchResults.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-[var(--color-brand-border)]">
                     {searchResults.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => handleSelectProduct(item.id)}
-                        className="w-full p-3 flex items-center gap-3 hover:bg-gray-50 text-left"
+                        className="w-full p-3 flex items-center gap-3 hover:bg-[var(--color-brand-cream-dark)] text-left transition-colors cursor-pointer"
                       >
                         <img
                           src={item.image || `/images/categories/${item.categorySlug}.jpg`}
                           alt={item.name}
-                          className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                          className="w-10 h-10 rounded-lg object-cover bg-[var(--color-brand-cream-dark)] border border-[var(--color-brand-border)]"
                           loading="lazy"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
-                          <p className="text-xs text-gray-500">{formatPrice(item.price)}</p>
+                          <p className="text-sm font-bold text-[var(--color-brand-chocolate)] truncate">{item.name}</p>
+                          <p className="text-xs text-[var(--color-brand-muted)]">{formatPrice(item.price)}</p>
                         </div>
-                        <ArrowRight size={14} className="text-gray-400 flex-shrink-0" />
+                        <ArrowRight size={14} className="text-[var(--color-brand-muted)] flex-shrink-0" />
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-xs text-gray-500">
+                  <div className="p-4 text-center text-xs text-[var(--color-brand-muted)]">
                     No results for "{searchQuery}"
                   </div>
                 )}
@@ -675,18 +676,18 @@ export default function Navbar() {
         role="dialog"
         aria-modal="true"
         aria-label="Navigation Menu"
-        className={`lg:hidden fixed top-0 left-0 h-full w-[300px] max-w-[85vw] z-[100] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed top-0 left-0 h-full w-[300px] max-w-[85vw] z-[100] bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out border-r border-[var(--color-brand-border)] ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-[var(--color-brand-cream)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-brand-border)] bg-[var(--color-brand-surface)]">
           <Link to="/" onClick={closeMobileMenu} aria-label="YOYO CAKES Home">
             <BrandLogo size="sm" />
           </Link>
           <button
             onClick={closeMobileMenu}
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2 rounded-full bg-[var(--color-brand-surface-elevated)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-[var(--color-brand-border)]"
             aria-label="Close navigation menu"
           >
             <X size={18} />
@@ -696,41 +697,41 @@ export default function Navbar() {
         {/* Drawer Scrollable Body */}
         <div className="flex-1 overflow-y-auto">
           {/* User Info / Sign In */}
-          <div className="p-4 bg-amber-50 border-b border-amber-100">
+          <div className="p-4 bg-[var(--color-brand-cream-dark)] border-b border-[var(--color-brand-border)]">
             {user ? (
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[var(--color-brand-primary)] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                   {(user.displayName || user.email || 'U')[0].toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">
+                  <p className="text-sm font-bold text-[var(--color-brand-chocolate)] truncate">
                     {user.displayName || 'Customer'}
                   </p>
-                  <p className="text-[11px] text-gray-500 truncate">
+                  <p className="text-[11px] text-[var(--color-brand-muted)] truncate">
                     {user.email || user.phoneNumber}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                  <User size={20} className="text-gray-500" />
+                <div className="w-10 h-10 rounded-full bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] flex items-center justify-center flex-shrink-0">
+                  <User size={20} className="text-[var(--color-brand-muted)]" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-800">Welcome, Guest</p>
+                  <p className="text-sm font-bold text-[var(--color-brand-chocolate)]">Welcome, Guest</p>
                   <div className="flex gap-3 mt-1">
                     <Link
                       to="/login"
                       onClick={closeMobileMenu}
-                      className="text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline"
+                      className="text-xs font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] hover:underline"
                     >
                       Sign In
                     </Link>
-                    <span className="text-gray-300">|</span>
+                    <span className="text-[var(--color-brand-border)]">|</span>
                     <Link
                       to="/register"
                       onClick={closeMobileMenu}
-                      className="text-xs font-bold text-[var(--color-brand-primary-dark)] hover:underline"
+                      className="text-xs font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] hover:underline"
                     >
                       Register
                     </Link>
@@ -747,18 +748,18 @@ export default function Navbar() {
               closeMobileMenu();
               openLocationModal();
             }}
-            className="w-full p-4 flex items-center justify-between border-b border-gray-100 hover:bg-gray-50 transition-colors"
+            className="w-full p-4 flex items-center justify-between border-b border-[var(--color-brand-border)] hover:bg-[var(--color-brand-surface-elevated)] transition-colors"
           >
             <div className="flex items-center gap-3">
-              <MapPin size={18} className="text-amber-600 flex-shrink-0" />
+              <MapPin size={18} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
               <div className="text-left">
-                <span className="text-[10px] text-gray-500 block font-medium">Deliver to</span>
-                <span className="text-sm font-bold text-gray-900">
+                <span className="text-[10px] text-[var(--color-brand-muted)] block font-medium">Deliver to</span>
+                <span className="text-sm font-bold text-[var(--color-brand-chocolate)]">
                   {currentLocation.area}, {currentLocation.city}
                 </span>
               </div>
             </div>
-            <span className="text-xs font-semibold text-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)] px-2.5 py-1 rounded-full flex-shrink-0">
+            <span className="text-xs font-semibold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] bg-[var(--color-brand-cream-dark)] px-2.5 py-1 rounded-full flex-shrink-0 border border-[var(--color-brand-border)]">
               Change
             </span>
           </button>
@@ -766,34 +767,34 @@ export default function Navbar() {
           {/* Navigation Links */}
           <nav aria-label="Main Navigation">
             <div className="py-2">
-              <p className="px-4 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Browse</p>
+              <p className="px-4 py-1.5 text-[10px] font-black text-[var(--color-brand-muted)] uppercase tracking-widest">Browse</p>
               {navLinks.map(({ to, label, icon: Icon }) => (
                 <Link
                   key={to + label}
                   to={to}
                   onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[var(--color-brand-cream)] hover:text-[var(--color-brand-primary-dark)] transition-colors group"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)] hover:text-[var(--color-brand-primary-dark)] transition-colors group"
                 >
-                  <Icon size={18} className="text-gray-400 group-hover:text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <Icon size={18} className="text-[var(--color-brand-muted)] group-hover:text-[var(--color-brand-primary-dark)] dark:group-hover:text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>{label}</span>
-                  <ChevronRight size={14} className="ml-auto text-gray-300 group-hover:text-amber-600" />
+                  <ChevronRight size={14} className="ml-auto text-[var(--color-brand-muted)] group-hover:text-[var(--color-brand-primary)]" />
                 </Link>
               ))}
             </div>
 
-            <div className="py-2 border-t border-gray-100">
-              <p className="px-4 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-widest">My Account</p>
+            <div className="py-2 border-t border-[var(--color-brand-border)]">
+              <p className="px-4 py-1.5 text-[10px] font-black text-[var(--color-brand-muted)] uppercase tracking-widest">My Account</p>
               {accountLinks.map(({ to, label, icon: Icon }) => (
                 <Link
                   key={label}
                   to={to}
                   onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-[var(--color-brand-cream)] hover:text-[var(--color-brand-primary-dark)] transition-colors group"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream-dark)] hover:text-[var(--color-brand-primary-dark)] transition-colors group"
                 >
-                  <Icon size={18} className="text-gray-400 group-hover:text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <Icon size={18} className="text-[var(--color-brand-muted)] group-hover:text-[var(--color-brand-primary-dark)] dark:group-hover:text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>{label}</span>
                   {label === 'Wishlist' && wishlistCount > 0 && (
-                    <span className="ml-auto bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                    <span className="ml-auto bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[10px] font-black px-1.5 py-0.5 rounded-full">
                       {wishlistCount}
                     </span>
                   )}
@@ -803,33 +804,33 @@ export default function Navbar() {
 
             {/* Admin Section — only shown to admins */}
             {isAdmin && (
-              <div className="py-2 border-t border-amber-200 bg-amber-50">
-                <p className="px-4 py-1.5 text-[10px] font-black text-amber-700 uppercase tracking-widest">
+              <div className="py-2 border-t border-[var(--color-brand-border)] bg-[var(--color-brand-cream-dark)]">
+                <p className="px-4 py-1.5 text-[10px] font-black text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] uppercase tracking-widest">
                   Admin
                 </p>
                 <Link
                   to="/admin"
                   onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-amber-900 hover:bg-amber-100 transition-colors group"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface)] transition-colors group"
                 >
-                  <ShieldCheck size={18} className="text-amber-600 flex-shrink-0" />
+                  <ShieldCheck size={18} className="text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Admin Dashboard</span>
-                  <ChevronRight size={14} className="ml-auto text-amber-400" />
+                  <ChevronRight size={14} className="ml-auto text-[var(--color-brand-muted)]" />
                 </Link>
                 <Link
                   to="/admin/products"
                   onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface)] transition-colors"
                 >
-                  <Package size={18} className="text-amber-500 flex-shrink-0" />
+                  <Package size={18} className="text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Products & Stock</span>
                 </Link>
                 <Link
                   to="/admin/orders"
                   onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface)] transition-colors"
                 >
-                  <ClipboardList size={18} className="text-amber-500 flex-shrink-0" />
+                  <ClipboardList size={18} className="text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Orders</span>
                 </Link>
               </div>
@@ -838,7 +839,7 @@ export default function Navbar() {
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50 space-y-3">
+        <div className="p-4 border-t border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] space-y-3">
           {/* Mobile Theme Switcher */}
           <ThemeToggle variant="mobile" />
 
@@ -849,7 +850,7 @@ export default function Navbar() {
                 closeMobileMenu();
                 toast.success('Signed out successfully');
               }}
-              className="w-full py-3 px-4 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-3 px-4 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 hover:bg-red-100 text-sm font-bold flex items-center justify-center gap-2 transition-colors border border-red-200 dark:border-red-900/50"
             >
               Sign Out
             </button>

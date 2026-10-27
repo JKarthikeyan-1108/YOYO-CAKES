@@ -98,7 +98,7 @@ export default function RegisterPage() {
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-elevated p-8 border border-[var(--color-brand-primary-light)]/20">
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-elevated p-8 border border-[var(--color-brand-border)]">
             {error && (
               <div className="bg-[var(--color-brand-error)]/10 border border-[var(--color-brand-error)]/30 text-[var(--color-brand-error)] text-sm rounded-xl p-3 mb-6 flex items-center justify-between">
                 <span>{error}</span>
@@ -202,7 +202,7 @@ export default function RegisterPage() {
             <button
               onClick={handleGoogleLogin}
               type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-[var(--color-brand-primary-light)]/70 bg-white hover:bg-[var(--color-brand-cream)] transition-all text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] shadow-xs"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] transition-all text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] shadow-xs cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path

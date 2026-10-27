@@ -141,27 +141,27 @@ export default function CartPage() {
 
   if (items.length === 0 && savedItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#F0F2F2] flex items-center justify-center py-16 px-4 pb-28 lg:pb-16">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center max-w-lg w-full">
-          <div className="w-20 h-20 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-5">
+      <div className="min-h-screen bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] flex items-center justify-center py-16 px-4 pb-28 lg:pb-16">
+        <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-sm border border-[var(--color-brand-border)] p-8 sm:p-12 text-center max-w-lg w-full">
+          <div className="w-20 h-20 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center mx-auto mb-5">
             <ShoppingCart size={40} />
           </div>
-          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F1111] mb-2">
+          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--color-brand-chocolate)] mb-2">
             Your YOYO Cart is empty
           </h2>
-          <p className="text-sm text-gray-600 mb-8 max-w-sm mx-auto">
+          <p className="text-sm text-[var(--color-brand-muted)] mb-8 max-w-sm mx-auto">
             Explore our fresh artisanal 5-in-1 Torte cakes, molten brownies, and handcrafted celebration treats!
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/shop"
-              className="px-8 py-3 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold rounded-full text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+              className="px-8 py-3 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold rounded-full text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               Shop All 27 Treats <ArrowRight size={16} />
             </Link>
             <Link
               to="/wishlist"
-              className="px-6 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold rounded-full text-sm transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] font-semibold rounded-full text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Heart size={16} className="text-red-500" /> View Wishlist
             </Link>
@@ -172,33 +172,33 @@ export default function CartPage() {
   }
 
   return (
-    <div className="bg-[#EAEDED] min-h-screen py-6 sm:py-8 font-sans pb-28 lg:pb-12">
+    <div className="bg-[var(--color-brand-cream)] min-h-screen py-6 sm:py-8 font-sans pb-36 lg:pb-12 text-[var(--color-brand-chocolate)]">
       <div className="container-main max-w-7xl px-4">
         {/* Checkout Progress Steps */}
         <div className="flex justify-center mb-6">
           <ul className="steps steps-horizontal w-full max-w-lg text-xs font-bold">
             <li className="step step-primary" data-content="1">Shopping Cart</li>
-            <li className="step text-gray-500" data-content="2">Delivery & Slots</li>
-            <li className="step text-gray-500" data-content="3">Payment & Review</li>
+            <li className="step text-[var(--color-brand-muted)]" data-content="2">Delivery & Slots</li>
+            <li className="step text-[var(--color-brand-muted)]" data-content="3">Payment & Review</li>
           </ul>
         </div>
 
         {/* Fresh Patisserie Kitchen Reassurance Strip */}
-        <div className="bg-white rounded-xl p-4 sm:p-5 mb-5 shadow-xs border border-gray-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-[var(--color-brand-surface)] rounded-xl p-4 sm:p-5 mb-5 shadow-xs border border-[var(--color-brand-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-primary)] flex items-center justify-center flex-shrink-0">
               <Sparkles size={20} />
             </div>
             <div>
-              <p className="text-xs sm:text-sm font-bold text-gray-900">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)]">
                 Fresh Patisserie Kitchen Dispatch
               </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">
+              <p className="text-[11px] text-[var(--color-brand-muted)] mt-0.5">
                 Handcrafted small-batch celebration treats baked fresh daily. Choose doorstep delivery or bakery hub pickup at checkout.
               </p>
             </div>
           </div>
-          <div className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg self-start sm:self-auto flex items-center gap-1.5 border border-emerald-100">
+          <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-lg self-start sm:self-auto flex items-center gap-1.5 border border-emerald-100 dark:border-emerald-900/40">
             <CheckCircle2 size={13} /> 100% Quality Guaranteed
           </div>
         </div>
@@ -207,18 +207,18 @@ export default function CartPage() {
           {/* Left Column: Cart Items & Saved For Later (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
             {/* Active Cart Items Card */}
-            <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-baseline justify-between border-b border-gray-200 pb-3 mb-4">
+            <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-4 sm:p-6">
+              <div className="flex items-baseline justify-between border-b border-[var(--color-brand-border)] pb-3 mb-4">
                 <div>
-                  <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F1111]">
+                  <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--color-brand-chocolate)]">
                     Shopping Cart
                   </h1>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-[var(--color-brand-muted)]">
                     {items.length === 0 ? 'No items selected' : `${itemCount} items currently in cart`}
                   </span>
                 </div>
                 <div className="text-right hidden sm:block">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-[var(--color-brand-muted)] uppercase tracking-wider">
                     Price
                   </span>
                 </div>
@@ -254,23 +254,23 @@ export default function CartPage() {
                             <div>
                               <Link
                                 to={`/product/${item.product.id}`}
-                                className="font-heading text-base sm:text-lg font-bold text-[#0F1111] hover:text-[var(--color-brand-primary-dark)] line-clamp-2 leading-snug"
+                                className="font-heading text-base sm:text-lg font-bold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary)] line-clamp-2 leading-snug"
                               >
                                 {item.product.name}
                               </Link>
-                              <p className="text-xs text-gray-500 mt-0.5">
+                              <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
                                 Category: {item.product.category}
                               </p>
-                              <div className="text-xs text-[#007600] font-semibold mt-1">
+                              <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
                                 In Stock • Baked Fresh Daily
                               </div>
                             </div>
                             <div className="text-left sm:text-right">
-                              <span className="text-base sm:text-lg font-extrabold text-[#0F1111]">
+                              <span className="text-base sm:text-lg font-extrabold text-[var(--color-brand-chocolate)]">
                                 {formatPrice(item.product.price * item.quantity)}
                               </span>
                               {item.quantity > 1 && (
-                                <span className="block text-[11px] text-gray-400">
+                                <span className="block text-[11px] text-[var(--color-brand-muted)]">
                                   ({formatPrice(item.product.price)} each)
                                 </span>
                               )}
@@ -279,14 +279,14 @@ export default function CartPage() {
 
                           {/* Custom Cake Message or Candle details */}
                           {(item.customMessage || item.includeCandles) && (
-                            <div className="mt-2 text-xs bg-amber-50/70 p-2.5 rounded-lg border border-amber-200/60 text-amber-900 space-y-1">
+                            <div className="mt-2 text-xs bg-[var(--color-brand-surface-elevated)] p-2.5 rounded-lg border border-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] space-y-1">
                               {item.customMessage && (
                                 <p className="font-medium">
                                   Message on Cake: <span className="font-bold">"{item.customMessage}"</span>
                                 </p>
                               )}
                               {item.includeCandles && (
-                                <p className="text-[11px] text-amber-800">
+                                <p className="text-[11px] text-[var(--color-brand-primary)] font-semibold">
                                   ✓ Celebration knife and candle included
                                 </p>
                               )}
@@ -294,9 +294,9 @@ export default function CartPage() {
                           )}
 
                           {/* Controls Bar: Stepper & Actions */}
-                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4 pt-3 border-t border-gray-100 text-xs">
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4 pt-3 border-t border-[var(--color-brand-border)] text-xs">
                             {/* Quantity Controls Stepper */}
-                            <div className="flex items-center rounded-lg border border-gray-300 bg-gray-50 overflow-hidden shadow-2xs">
+                            <div className="flex items-center rounded-lg border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] overflow-hidden shadow-2xs">
                               <button
                                 onClick={() => {
                                   if (item.quantity <= 1) {
@@ -306,61 +306,61 @@ export default function CartPage() {
                                     updateQuantity(item.product.id, item.quantity - 1);
                                   }
                                 }}
-                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-700"
+                                className="w-8 h-8 flex items-center justify-center hover:bg-[var(--color-brand-border)] transition-colors text-[var(--color-brand-chocolate)]"
                                 aria-label="Decrease quantity"
                               >
                                 <Minus size={13} />
                               </button>
-                              <span className="w-10 text-center font-bold text-gray-900 text-xs">
+                              <span className="w-10 text-center font-bold text-[var(--color-brand-chocolate)] text-xs">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                                className="w-8 h-8 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-700"
+                                className="w-8 h-8 flex items-center justify-center hover:bg-[var(--color-brand-border)] transition-colors text-[var(--color-brand-chocolate)]"
                                 aria-label="Increase quantity"
                               >
                                 <Plus size={13} />
                               </button>
                             </div>
 
-                            <span className="text-gray-300">|</span>
+                            <span className="text-[var(--color-brand-border)]">|</span>
 
                             <button
                               onClick={() => {
                                 removeItem(item.product.id);
                                 toast.success(`${item.product.name} removed from cart`);
                               }}
-                              className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium"
+                              className="text-[var(--color-brand-primary)] hover:underline font-medium cursor-pointer"
                             >
                               Delete
                             </button>
 
-                            <span className="text-gray-300">|</span>
+                            <span className="text-[var(--color-brand-border)]">|</span>
 
                             <button
                               onClick={() => {
                                 saveForLater(item.product.id);
                                 toast.success(`${item.product.name} saved for later`);
                               }}
-                              className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium"
+                              className="text-[var(--color-brand-primary)] hover:underline font-medium cursor-pointer"
                             >
                               Save for later
                             </button>
 
-                            <span className="text-gray-300">|</span>
+                            <span className="text-[var(--color-brand-border)]">|</span>
 
                             <button
                               onClick={() => handleMoveToWishlist(item.product)}
-                              className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium"
+                              className="text-[var(--color-brand-primary)] hover:underline font-medium cursor-pointer"
                             >
                               Move to Wishlist
                             </button>
 
-                            <span className="text-gray-300 hidden sm:inline">|</span>
+                            <span className="text-[var(--color-brand-border)] hidden sm:inline">|</span>
 
                             <button
                               onClick={() => handleShareProduct(item.product.id, item.product.name)}
-                              className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium hidden sm:flex items-center gap-1"
+                              className="text-[var(--color-brand-primary)] hover:underline font-medium hidden sm:flex items-center gap-1 cursor-pointer"
                             >
                               <Share2 size={12} /> Share
                             </button>
@@ -374,27 +374,27 @@ export default function CartPage() {
 
               {/* Subtotal bar at bottom of cart card */}
               {items.length > 0 && (
-                <div className="border-t border-gray-200 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="border-t border-[var(--color-brand-border)] mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => {
                         clearCart();
                         toast.success('Shopping cart cleared');
                       }}
-                      className="text-xs text-gray-500 hover:text-red-600 transition-colors flex items-center gap-1"
+                      className="text-xs text-[var(--color-brand-muted)] hover:text-red-500 transition-colors flex items-center gap-1 cursor-pointer"
                     >
                       <Trash2 size={13} /> Clear all items
                     </button>
                     <Link
                       to="/shop"
-                      className="text-xs text-[#007185] hover:text-[#C7511F] hover:underline font-medium"
+                      className="text-xs text-[var(--color-brand-primary)] hover:underline font-medium"
                     >
                       Continue shopping
                     </Link>
                   </div>
-                  <div className="text-sm sm:text-base text-gray-800">
+                  <div className="text-sm sm:text-base text-[var(--color-brand-chocolate)]">
                     Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'}):{' '}
-                    <span className="text-lg sm:text-xl font-extrabold text-[#0F1111]">
+                    <span className="text-lg sm:text-xl font-extrabold text-[var(--color-brand-chocolate)]">
                       {formatPrice(subtotal)}
                     </span>
                   </div>
@@ -404,13 +404,13 @@ export default function CartPage() {
 
             {/* Saved for Later Section */}
             {savedItems.length > 0 && (
-              <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-4 sm:p-6 animate-fade-in">
-                <div className="border-b border-gray-200 pb-3 mb-4">
-                  <h2 className="font-heading text-xl font-bold text-[#0F1111]">
+              <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-4 sm:p-6 animate-fade-in">
+                <div className="border-b border-[var(--color-brand-border)] pb-3 mb-4">
+                  <h2 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)]">
                     Saved for Later ({savedItems.length}{' '}
                     {savedItems.length === 1 ? 'item' : 'items'})
                   </h2>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[var(--color-brand-muted)]">
                     Items moved here won't be charged until you move them back to your cart.
                   </p>
                 </div>
@@ -419,7 +419,7 @@ export default function CartPage() {
                   {savedItems.map((sItem) => (
                     <div
                       key={sItem.product.id}
-                      className="p-4 rounded-xl border border-gray-200 flex gap-4 items-start bg-gray-50/50"
+                      className="p-4 rounded-xl border border-[var(--color-brand-border)] flex gap-4 items-start bg-[var(--color-brand-surface-elevated)]"
                     >
                       <img
                         src={sItem.product.image || `/images/categories/${sItem.product.categorySlug}.jpg`}
@@ -470,13 +470,13 @@ export default function CartPage() {
             )}
 
             {/* Recommended Bakery Pairings (From actual catalog) */}
-            <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-4 sm:p-6">
+            <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-heading text-lg font-bold text-[#0F1111] flex items-center gap-2">
+                  <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] flex items-center gap-2">
                     <Sparkles size={18} className="text-amber-500" /> Recommended Bakery Pairings
                   </h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[var(--color-brand-muted)]">
                     Fresh customer favorites to complement your order
                   </p>
                 </div>
@@ -486,21 +486,21 @@ export default function CartPage() {
                 {RECOMMENDED_PAIRINGS.map((addon) => (
                   <div
                     key={addon.id}
-                    className="p-3 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-2xs transition-all flex flex-col justify-between"
+                    className="p-3 rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] hover:border-[var(--color-brand-primary)]/50 hover:shadow-2xs transition-all flex flex-col justify-between"
                   >
                     <div>
-                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-[var(--color-brand-cream-dark)] mb-2">
                         <img
                           src={addon.image || `/images/categories/${addon.categorySlug}.jpg`}
                           alt={addon.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h4 className="font-bold text-xs text-gray-900 line-clamp-2 leading-snug mb-1">
+                      <h4 className="font-bold text-xs text-[var(--color-brand-chocolate)] line-clamp-2 leading-snug mb-1">
                         {addon.name}
                       </h4>
                       <div className="flex items-baseline gap-1.5 mb-2">
-                        <span className="text-xs font-extrabold text-[#0F1111]">
+                        <span className="text-xs font-extrabold text-[var(--color-brand-chocolate)]">
                           {formatPrice(addon.price)}
                         </span>
                       </div>
@@ -510,7 +510,7 @@ export default function CartPage() {
                         addItem(addon, 1);
                         toast.success(`${addon.name} added to cart`);
                       }}
-                      className="w-full py-1.5 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold text-[11px] rounded-full shadow-2xs transition-all flex items-center justify-center gap-1"
+                      className="w-full py-1.5 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold text-[11px] rounded-full shadow-2xs transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
                       + Add to Cart
                     </button>
@@ -522,10 +522,10 @@ export default function CartPage() {
 
           {/* Right Column: Buy Box & Order Summary (4 cols) */}
           <div className="lg:col-span-4 sticky top-20 space-y-4">
-            <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-5 sm:p-6">
+            <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-5 sm:p-6">
               {/* Distinct Delivery & Pickup Options */}
-              <div className="mb-4 pb-4 border-b border-gray-200">
-                <span className="text-xs font-bold text-gray-900 block mb-2">
+              <div className="mb-4 pb-4 border-b border-[var(--color-brand-border)]">
+                <span className="text-xs font-bold text-[var(--color-brand-chocolate)] block mb-2">
                   Choose Fulfillment Option
                 </span>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -534,14 +534,14 @@ export default function CartPage() {
                     onClick={() => setFulfillmentMode('delivery')}
                     className={`p-2.5 rounded-xl border text-left transition-all flex flex-col cursor-pointer ${
                       fulfillmentMode === 'delivery'
-                        ? 'border-[var(--color-brand-primary)] bg-amber-500/10 dark:bg-amber-500/20 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
-                        : 'border-gray-200 dark:border-[#4D2B1B] bg-white dark:bg-[#24140D] text-gray-700 dark:text-amber-100/70 hover:border-gray-300 dark:hover:border-amber-700/50'
+                        ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/15 font-bold text-[var(--color-brand-chocolate)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
+                        : 'border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] hover:border-[var(--color-brand-primary)]/40'
                     }`}
                   >
                     <span className="flex items-center gap-1.5 font-bold">
                       <Truck size={14} className="text-[var(--color-brand-primary)]" /> Doorstep Delivery
                     </span>
-                    <span className="text-[10px] text-gray-500 dark:text-amber-200/60 font-normal mt-1 leading-tight">
+                    <span className="text-[10px] text-[var(--color-brand-muted)] font-normal mt-1 leading-tight">
                       Calculated at checkout by address
                     </span>
                   </button>
@@ -551,8 +551,8 @@ export default function CartPage() {
                     onClick={() => setFulfillmentMode('pickup')}
                     className={`p-2.5 rounded-xl border text-left transition-all flex flex-col cursor-pointer ${
                       fulfillmentMode === 'pickup'
-                        ? 'border-[var(--color-brand-primary)] bg-amber-500/10 dark:bg-amber-500/20 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
-                        : 'border-gray-200 dark:border-[#4D2B1B] bg-white dark:bg-[#24140D] text-gray-700 dark:text-amber-100/70 hover:border-gray-300 dark:hover:border-amber-700/50'
+                        ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/15 font-bold text-[var(--color-brand-chocolate)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
+                        : 'border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] hover:border-[var(--color-brand-primary)]/40'
                     }`}
                   >
                     <span className="flex items-center gap-1.5 font-bold">
@@ -567,16 +567,16 @@ export default function CartPage() {
 
               {/* Subtotal Display */}
               <div className="mb-4">
-                <div className="text-sm text-gray-800">
+                <div className="text-sm text-[var(--color-brand-muted)]">
                   Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'}):
                 </div>
-                <div className="text-2xl font-extrabold text-[#0F1111]">
+                <div className="text-2xl font-extrabold text-[var(--color-brand-chocolate)]">
                   {formatPrice(subtotal)}
                 </div>
               </div>
 
               {/* Gift Checkbox */}
-              <label className="flex items-start gap-2.5 p-3 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer mb-5 text-xs text-gray-700 select-none">
+              <label className="flex items-start gap-2.5 p-3 rounded-lg bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] cursor-pointer mb-5 text-xs text-[var(--color-brand-chocolate)] select-none">
                 <input
                   type="checkbox"
                   checked={isGiftOrder}
@@ -584,10 +584,10 @@ export default function CartPage() {
                   className="rounded text-[var(--color-brand-primary-dark)] focus:ring-[var(--color-brand-primary)] mt-0.5"
                 />
                 <div className="flex-1">
-                  <span className="font-bold text-gray-900 flex items-center gap-1">
+                  <span className="font-bold text-[var(--color-brand-chocolate)] flex items-center gap-1">
                     <Gift size={13} className="text-amber-600" /> This order contains a celebration gift
                   </span>
-                  <span className="text-[11px] text-gray-500 block mt-0.5">
+                  <span className="text-[11px] text-[var(--color-brand-muted)] block mt-0.5">
                     We'll include a complimentary celebration box with personalized handwritten card.
                   </span>
                 </div>
@@ -609,16 +609,16 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={handleWhatsAppCartOrder}
-                className="w-full py-3 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold rounded-full text-center flex items-center justify-center gap-2 shadow-xs transition-all text-xs"
+                className="w-full py-3 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold rounded-full text-center flex items-center justify-center gap-2 shadow-xs transition-all text-xs cursor-pointer"
               >
                 <MessageCircle size={16} /> Order Cart via WhatsApp
               </button>
 
               {/* Promo Code Section */}
-              <div className="mt-5 pt-4 border-t border-gray-200">
-                <label className="text-xs font-bold text-gray-800 mb-2 flex items-center justify-between">
+              <div className="mt-5 pt-4 border-t border-[var(--color-brand-border)]">
+                <label className="text-xs font-bold text-[var(--color-brand-chocolate)] mb-2 flex items-center justify-between">
                   <span>Apply Promotional Code</span>
-                  <Tag size={13} className="text-gray-400" />
+                  <Tag size={13} className="text-[var(--color-brand-muted)]" />
                 </label>
                 <div className="join w-full mb-2">
                   <input
@@ -626,7 +626,7 @@ export default function CartPage() {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Enter code (e.g. YOYO10)"
-                    className="join-item input input-bordered input-sm flex-1 text-xs uppercase font-mono tracking-wider focus:outline-[var(--color-brand-primary)]"
+                    className="join-item input input-bordered input-sm flex-1 text-xs uppercase font-mono tracking-wider focus:outline-[var(--color-brand-primary)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] border-[var(--color-brand-border)]"
                     disabled={couponApplied}
                   />
                   <button
@@ -688,33 +688,33 @@ export default function CartPage() {
               </div>
 
               {/* Price Breakdown Summary */}
-              <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-xs text-gray-600">
+              <div className="mt-4 pt-4 border-t border-[var(--color-brand-border)] space-y-2 text-xs text-[var(--color-brand-muted)]">
                 <div className="flex justify-between">
                   <span>Items total</span>
-                  <span className="font-semibold text-gray-900">{formatPrice(subtotal)}</span>
+                  <span className="font-semibold text-[var(--color-brand-chocolate)]">{formatPrice(subtotal)}</span>
                 </div>
                 {couponApplied && (
-                  <div className="flex justify-between text-[#007600] font-semibold">
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                     <span>Promotion discount</span>
                     <span>-{formatPrice(discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Delivery charges</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-[var(--color-brand-chocolate)]">
                     {fulfillmentMode === 'pickup' ? (
-                      <span className="text-emerald-700 font-bold">₹0 (Bakery Pickup)</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹0 (Bakery Pickup)</span>
                     ) : (
-                      <span className="text-gray-600">Calculated at checkout</span>
+                      <span className="text-[var(--color-brand-muted)]">Calculated at checkout</span>
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm font-extrabold text-[#0F1111] pt-2 border-t border-gray-200">
+                <div className="flex justify-between text-sm font-extrabold text-[var(--color-brand-chocolate)] pt-2 border-t border-[var(--color-brand-border)]">
                   <span>Estimated Total:</span>
                   <div className="text-right">
-                    <span className="text-base text-[#B12704]">{formatPrice(estimatedTotal)}</span>
+                    <span className="text-base text-[var(--color-brand-primary)]">{formatPrice(estimatedTotal)}</span>
                     {fulfillmentMode === 'delivery' && (
-                      <span className="block text-[10px] text-gray-500 font-normal">
+                      <span className="block text-[10px] text-[var(--color-brand-muted)] font-normal">
                         + delivery fee confirmed at checkout
                       </span>
                     )}
@@ -723,9 +723,9 @@ export default function CartPage() {
               </div>
 
               {/* Trust Guarantee Box */}
-              <div className="mt-6 pt-4 border-t border-gray-100 space-y-2 text-[11px] text-gray-500">
+              <div className="mt-6 pt-4 border-t border-[var(--color-brand-border)] space-y-2 text-[11px] text-[var(--color-brand-muted)]">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck size={14} className="text-[#007600]" />
+                  <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
                   <span>256-Bit SSL Encrypted & Secure Checkout</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -733,7 +733,7 @@ export default function CartPage() {
                   <span>Fresh daily bakes across Chennai & Coimbatore</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <HelpCircle size={14} className="text-blue-600" />
+                  <HelpCircle size={14} className="text-blue-500" />
                   <span>WhatsApp Bakery Concierge Support</span>
                 </div>
               </div>
@@ -741,6 +741,43 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Sticky Checkout Bar (Positioned above BottomNav with safe-area support) */}
+      {items.length > 0 && (
+        <div
+          className="lg:hidden fixed left-0 right-0 z-40 bg-[var(--color-brand-surface)]/95 backdrop-blur-md border-t border-[var(--color-brand-border)] p-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3"
+          style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }}
+        >
+          <div>
+            <span className="text-[10px] text-[var(--color-brand-muted)] block uppercase font-bold">
+              Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+            </span>
+            <span className="font-heading text-base font-extrabold text-[var(--color-brand-chocolate)] leading-none">
+              {formatPrice(estimatedTotal)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleWhatsAppCartOrder}
+              className="bg-[#25D366] text-white p-2.5 rounded-full shadow-xs cursor-pointer active:scale-95 transition-transform"
+              title="Order cart on WhatsApp"
+              aria-label="Order cart on WhatsApp"
+            >
+              <MessageCircle size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={handleProceedToCheckout}
+              className="py-2.5 px-5 rounded-full bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] active:scale-95 text-white font-bold text-xs shadow-md flex items-center gap-1.5 cursor-pointer transition-all"
+            >
+              <span>Proceed to Buy</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

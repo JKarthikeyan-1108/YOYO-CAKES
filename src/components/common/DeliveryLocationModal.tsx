@@ -23,14 +23,16 @@ export default function DeliveryLocationModal() {
 
   // Focus close button when modal opens
   useEffect(() => {
-    if (isModalOpen) {
+    if (!isModalOpen) return;
+    const timer = setTimeout(() => {
       setPincodeInput(currentLocation.pincode);
       setCityTab(currentLocation.city === 'Coimbatore' ? 'Coimbatore' : 'All');
       setErrorMsg('');
       setGpsError('');
-      // Small delay to allow DOM render
-      setTimeout(() => closeButtonRef.current?.focus(), 50);
-    }
+      closeButtonRef.current?.focus();
+    }, 20);
+
+    return () => clearTimeout(timer);
   }, [isModalOpen, currentLocation.pincode, currentLocation.city]);
 
   // Escape key to close
@@ -111,20 +113,23 @@ export default function DeliveryLocationModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="location-modal-title"
-        className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg shadow-2xl border-0 sm:border border-gray-100 overflow-hidden max-h-[90vh] sm:max-h-[85vh] flex flex-col"
+        className="bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg shadow-2xl border-0 sm:border border-[var(--color-brand-border)] overflow-hidden max-h-[90vh] sm:max-h-[85vh] flex flex-col transition-colors"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="w-12 h-1.5 bg-[var(--color-brand-border)] rounded-full mx-auto my-2 sm:hidden flex-shrink-0" />
+
         {/* Header */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-50/80 via-white to-amber-50/50 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+        <div className="p-4 sm:p-5 bg-[var(--color-brand-surface-elevated)] border-b border-[var(--color-brand-border)] flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-              <MapPin size={20} className="text-amber-600" aria-hidden="true" />
+            <div className="w-10 h-10 rounded-2xl bg-[var(--color-brand-surface)] text-[var(--color-brand-primary-dark)] border border-[var(--color-brand-border)] flex items-center justify-center flex-shrink-0">
+              <MapPin size={20} className="text-[var(--color-brand-primary-dark)]" aria-hidden="true" />
             </div>
             <div>
-              <h2 id="location-modal-title" className="font-heading font-black text-base sm:text-lg text-gray-900 leading-tight">
+              <h2 id="location-modal-title" className="font-heading font-black text-base sm:text-lg text-[var(--color-brand-chocolate)] leading-tight">
                 Choose Delivery Location
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
                 Select your area for delivery estimates
               </p>
             </div>
@@ -133,7 +138,7 @@ export default function DeliveryLocationModal() {
           <button
             ref={closeButtonRef}
             onClick={closeModal}
-            className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors flex-shrink-0"
+            className="w-10 h-10 rounded-full bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer"
             aria-label="Close location picker"
           >
             <X size={18} aria-hidden="true" />
@@ -143,23 +148,23 @@ export default function DeliveryLocationModal() {
         {/* Scrollable Body */}
         <div className="overflow-y-auto flex-1 p-4 sm:p-5 space-y-4">
           {/* Current Location Badge */}
-          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between gap-3">
+          <div className="p-3.5 rounded-2xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" aria-hidden="true" />
               <div>
-                <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
+                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
                   Currently Delivering To
                 </span>
-                <span className="font-extrabold text-sm text-gray-900 block">
+                <span className="font-extrabold text-sm text-[var(--color-brand-chocolate)] block">
                   {currentLocation.area}, {currentLocation.city} – {currentLocation.pincode}
                 </span>
-                <span className="text-[11px] text-gray-600 flex items-center gap-1 mt-0.5">
-                  <Clock size={11} className="text-emerald-700" aria-hidden="true" />
-                  Est. <span className="font-bold text-emerald-800 ml-0.5">{currentLocation.estimatedTime}</span>
+                <span className="text-[11px] text-[var(--color-brand-muted)] flex items-center gap-1 mt-0.5">
+                  <Clock size={11} className="text-emerald-600" aria-hidden="true" />
+                  Est. <span className="font-bold text-emerald-600 ml-0.5">{currentLocation.estimatedTime}</span>
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-bold bg-emerald-500 text-white px-2 py-0.5 rounded-full flex-shrink-0">
+            <span className="text-[10px] font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-full flex-shrink-0">
               Active
             </span>
           </div>
@@ -170,13 +175,13 @@ export default function DeliveryLocationModal() {
               type="button"
               onClick={handleGpsDetect}
               disabled={detecting}
-              className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/40 hover:bg-amber-100/60 active:scale-[0.99] text-amber-950 font-bold text-sm flex items-center justify-center gap-2.5 transition-all disabled:opacity-60 disabled:cursor-wait"
+              className="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-[var(--color-brand-primary)] bg-[var(--color-brand-surface-elevated)] hover:bg-[var(--color-brand-surface)] active:scale-[0.99] text-[var(--color-brand-chocolate)] font-bold text-sm flex items-center justify-center gap-2.5 transition-all disabled:opacity-60 disabled:cursor-wait cursor-pointer"
               aria-busy={detecting}
             >
               {detecting ? (
-                <Loader2 size={18} className="animate-spin text-amber-600" aria-hidden="true" />
+                <Loader2 size={18} className="animate-spin text-[var(--color-brand-primary-dark)]" aria-hidden="true" />
               ) : (
-                <Navigation size={18} className="text-amber-600" aria-hidden="true" />
+                <Navigation size={18} className="text-[var(--color-brand-primary-dark)]" aria-hidden="true" />
               )}
               <span>
                 {detecting ? 'Detecting your location…' : 'Use My Current Location'}
@@ -186,17 +191,17 @@ export default function DeliveryLocationModal() {
             {gpsError && (
               <div
                 role="alert"
-                className="mt-2 flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-200"
+                className="mt-2 flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20"
               >
-                <AlertCircle size={15} className="text-red-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <p className="text-xs text-red-700 font-medium">{gpsError}</p>
+                <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-xs text-red-600 font-medium">{gpsError}</p>
               </div>
             )}
           </div>
 
           {/* Manual PIN Input */}
           <form onSubmit={handleApplyPincode} className="space-y-2">
-            <label htmlFor="pincode-input" className="text-xs font-bold text-gray-800 block">
+            <label htmlFor="pincode-input" className="text-xs font-bold text-[var(--color-brand-chocolate)] block">
               Or enter your 6-digit PIN code
             </label>
             <div className="flex gap-2">
@@ -212,18 +217,18 @@ export default function DeliveryLocationModal() {
                   setPincodeInput(e.target.value.replace(/\D/g, ''));
                 }}
                 placeholder="e.g. 600040"
-                className="flex-1 px-4 py-3 text-sm font-mono tracking-widest border border-gray-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 min-h-[44px]"
+                className="flex-1 px-4 py-3 text-sm font-mono tracking-widest border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:border-[var(--color-brand-primary-dark)] min-h-[44px]"
                 aria-describedby={errorMsg ? 'pincode-error' : undefined}
               />
               <button
                 type="submit"
-                className="px-4 py-3 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-extrabold text-sm rounded-xl shadow-xs transition-colors min-h-[44px] flex-shrink-0"
+                className="px-4 py-3 bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-extrabold text-sm rounded-xl shadow-xs transition-colors min-h-[44px] flex-shrink-0 cursor-pointer"
               >
                 Check &amp; Apply
               </button>
             </div>
             {errorMsg && (
-              <p id="pincode-error" role="alert" className="text-xs text-red-600 flex items-center gap-1 font-medium">
+              <p id="pincode-error" role="alert" className="text-xs text-red-500 flex items-center gap-1 font-medium">
                 <AlertCircle size={13} aria-hidden="true" /> {errorMsg}
               </p>
             )}
@@ -232,19 +237,19 @@ export default function DeliveryLocationModal() {
           {/* Popular Hubs */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-800 uppercase tracking-wide">
+              <span className="text-xs font-bold text-[var(--color-brand-chocolate)] uppercase tracking-wide">
                 Popular Delivery Areas
               </span>
-              <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-[11px] font-bold">
+              <div className="flex items-center gap-1 bg-[var(--color-brand-surface-elevated)] p-0.5 rounded-lg border border-[var(--color-brand-border)] text-[11px] font-bold">
                 {(['All', 'Chennai', 'Coimbatore'] as const).map((tab) => (
                   <button
                     key={tab}
                     type="button"
                     onClick={() => setCityTab(tab)}
-                    className={`px-2.5 py-1 rounded-md transition-all ${
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                       cityTab === tab
-                        ? 'bg-white text-[var(--color-brand-chocolate)] shadow-xs'
-                        : 'text-gray-500 hover:text-gray-900'
+                        ? 'bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] shadow-xs'
+                        : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                     }`}
                   >
                     {tab}
@@ -267,26 +272,26 @@ export default function DeliveryLocationModal() {
                         toast.success(`📍 Delivering to ${hub.area}, ${hub.city}`);
                         closeModal();
                       }}
-                      className={`p-3 rounded-2xl border text-left transition-all ${
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                         isSelected
-                          ? 'border-[var(--color-brand-primary-dark)] bg-amber-50/80 shadow-xs'
-                          : 'border-gray-200 bg-white hover:border-[var(--color-brand-primary-dark)] hover:bg-amber-50/30'
+                          ? 'border-[var(--color-brand-primary-dark)] bg-[var(--color-brand-surface-elevated)] shadow-xs ring-1 ring-[var(--color-brand-primary-dark)]/20'
+                          : 'border-[var(--color-brand-border)] bg-[var(--color-brand-surface)] hover:border-[var(--color-brand-primary-dark)]'
                       }`}
                       aria-pressed={isSelected}
                       aria-label={`${hub.area}, ${hub.city} – ${hub.estimatedTime}`}
                     >
                       <div className="flex items-start justify-between gap-1 mb-1">
                         <div className="min-w-0">
-                          <span className="font-bold text-xs text-gray-900 block leading-tight truncate">
+                          <span className="font-bold text-xs text-[var(--color-brand-chocolate)] block leading-tight truncate">
                             {hub.area}
                           </span>
-                          <span className="text-[10px] text-gray-500 block">
+                          <span className="text-[10px] text-[var(--color-brand-muted)] block">
                             {hub.city} • {hub.pincode}
                           </span>
                         </div>
-                        {isSelected && <Check size={14} className="text-[var(--color-brand-chocolate)] flex-shrink-0" aria-hidden="true" />}
+                        {isSelected && <Check size={14} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" aria-hidden="true" />}
                       </div>
-                      <span className="text-[10px] font-semibold text-emerald-700 block">
+                      <span className="text-[10px] font-semibold text-emerald-600 block">
                         ⚡ {hub.estimatedTime}
                       </span>
                     </button>
@@ -297,14 +302,14 @@ export default function DeliveryLocationModal() {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="p-4 bg-[var(--color-brand-surface-elevated)] border-t border-[var(--color-brand-border)] flex items-center justify-between text-xs text-[var(--color-brand-muted)] flex-shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <span className="flex items-center gap-1.5">
             <Sparkles size={13} className="text-[var(--color-brand-primary-dark)]" aria-hidden="true" />
             Freshly baked to order daily
           </span>
           <button
             onClick={closeModal}
-            className="text-xs font-bold text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-200/60 transition-colors min-h-[44px]"
+            className="text-xs font-bold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface)] px-3 py-2 rounded-lg border border-[var(--color-brand-border)] transition-colors min-h-[44px] cursor-pointer"
           >
             Done
           </button>

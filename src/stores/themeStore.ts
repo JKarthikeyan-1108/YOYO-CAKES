@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { syncMobileStatusBar } from '@/services/mobileService';
 
 export type Theme = 'cream' | 'dark' | 'system';
 
@@ -36,6 +37,9 @@ function applyThemeToDOM(resolved: 'cream' | 'dark') {
     root.setAttribute('data-theme', 'cream');
     root.classList.remove('dark');
   }
+
+  // Synchronize native mobile and web status bar
+  syncMobileStatusBar(resolved === 'dark');
 }
 
 const initialTheme = getInitialTheme();

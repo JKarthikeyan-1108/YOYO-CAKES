@@ -8,3 +8,18 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// Register PWA Service Worker for offline support and fast launch
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => {
+        console.info('YOYO CAKES PWA Service Worker registered successfully:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('YOYO CAKES PWA Service Worker registration failed:', err);
+      });
+  });
+}
+

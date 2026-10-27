@@ -1,18 +1,26 @@
-// YOYO CAKES Service Worker for offline asset caching
+// YOYO CAKES PWA Service Worker
 const CACHE_NAME = 'yoyo-cakes-v1';
-const ASSETS_TO_CACHE = [
+const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg'
+  '/favicon.svg',
+  '/images/logo.png',
+  '/images/products/dream-cake.jpg',
+  '/images/products/matilda-cake.jpg',
+  '/images/products/classic-tiramisu.jpg',
+  '/images/products/assorted-brownie.jpg',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+      return cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.warn('Failed to pre-cache some assets:', err);
+      });
+    })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -25,40 +33,59 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    })
   );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and skip browser extension or non-http requests
-  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Only handle GET requests and same-origin / images
+  if (req.method !== 'GET') return;
+
+  // For HTML navigation requests: Network First, fallback to cached /index.html
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).catch(() => {
+        return caches.match('/index.html') || caches.match('/');
+      })
+    );
     return;
   }
 
-  // Network-first for dynamic navigation and API calls, fallback to cache
-  event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            // Cache static assets and images
-            if (event.request.url.includes('/assets/') || event.request.url.includes('/images/')) {
-              cache.put(event.request, responseToCache);
+  // For static assets and images: Stale-While-Revalidate
+  if (
+    url.origin === self.location.origin &&
+    (url.pathname.startsWith('/assets/') ||
+     url.pathname.startsWith('/images/') ||
+     url.pathname.endsWith('.png') ||
+     url.pathname.endsWith('.jpg') ||
+     url.pathname.endsWith('.svg') ||
+     url.pathname.endsWith('.css') ||
+     url.pathname.endsWith('.js'))
+  ) {
+    event.respondWith(
+      caches.match(req).then((cachedResp) => {
+        const fetchPromise = fetch(req)
+          .then((networkResp) => {
+            if (networkResp && networkResp.status === 200) {
+              const respClone = networkResp.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(req, respClone));
             }
-          });
-        }
-        return networkResponse;
+            return networkResp;
+          })
+          .catch(() => cachedResp);
+
+        return cachedResp || fetchPromise;
       })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-        });
-      })
+    );
+    return;
+  }
+
+  // Default fetch
+  event.respondWith(
+    fetch(req).catch(() => caches.match(req))
   );
 });

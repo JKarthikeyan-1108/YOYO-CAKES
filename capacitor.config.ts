@@ -1,0 +1,30 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'om.example.yoyocakes',
+  appName: 'YOYO CAKES',
+  webDir: 'dist',
+  bundledWebRuntime: false,
+  backgroundColor: '#FFF8F0',
+  android: {
+    backgroundColor: '#FFF8F0',
+    allowMixedContent: false,
+  },
+  plugins: {
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#FFF8F0',
+    },
+    SplashScreen: {
+      launchShowDuration: 1800,
+      launchAutoHide: true,
+      backgroundColor: '#FFF8F0',
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false,
+    },
+    Haptics: {},
+  },
+};
+
+export default config;

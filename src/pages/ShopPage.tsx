@@ -118,21 +118,23 @@ export default function ShopPage() {
   const activeCategory = CATEGORIES.find((c) => c.slug === selectedCategory);
 
   const renderFilterSidebar = () => (
-    <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-5 space-y-6">
+    <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-5 space-y-6 text-[var(--color-brand-chocolate)]">
       {/* Category Filter */}
       <div>
-        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+        <h3 className="font-heading font-extrabold text-sm text-[var(--color-brand-chocolate)] mb-3">
           Category
         </h3>
         <div className="space-y-1.5 text-xs">
           <button
             onClick={() => handleCategoryChange('')}
-            className={`flex items-center justify-between w-full text-left py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors ${
-              !selectedCategory ? 'bg-amber-50 font-bold text-[var(--color-brand-primary-dark)]' : 'text-gray-700'
+            className={`flex items-center justify-between w-full text-left py-1.5 px-2 rounded-lg transition-colors cursor-pointer ${
+              !selectedCategory
+                ? 'bg-[var(--color-brand-primary)]/15 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]'
+                : 'text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface-elevated)]'
             }`}
           >
             <span>All Categories</span>
-            <span className="text-gray-400 font-mono text-[11px]">{products.length}</span>
+            <span className="text-[var(--color-brand-muted)] font-mono text-[11px]">{products.length}</span>
           </button>
           {CATEGORIES.map((cat) => {
             const count = products.filter((p) => p.categorySlug === cat.slug).length;
@@ -141,12 +143,14 @@ export default function ShopPage() {
               <button
                 key={cat.id}
                 onClick={() => handleCategoryChange(cat.slug)}
-                className={`flex items-center justify-between w-full text-left py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors ${
-                  isSelected ? 'bg-amber-50 font-bold text-[var(--color-brand-primary-dark)]' : 'text-gray-700'
+                className={`flex items-center justify-between w-full text-left py-1.5 px-2 rounded-lg transition-colors cursor-pointer ${
+                  isSelected
+                    ? 'bg-[var(--color-brand-primary)]/15 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]'
+                    : 'text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface-elevated)]'
                 }`}
               >
                 <span>{cat.name}</span>
-                <span className="text-gray-400 font-mono text-[11px]">{count}</span>
+                <span className="text-[var(--color-brand-muted)] font-mono text-[11px]">{count}</span>
               </button>
             );
           })}
@@ -154,11 +158,11 @@ export default function ShopPage() {
       </div>
 
       {/* Price Range Filter */}
-      <div className="pt-4 border-t border-gray-100">
-        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+      <div className="pt-4 border-t border-[var(--color-brand-border)]">
+        <h3 className="font-heading font-extrabold text-sm text-[var(--color-brand-chocolate)] mb-3">
           Price Range
         </h3>
-        <div className="space-y-2 text-xs text-gray-700">
+        <div className="space-y-2 text-xs text-[var(--color-brand-chocolate)]">
           {[
             { id: 'all', label: 'All Prices' },
             { id: 'under-100', label: 'Under ₹100' },
@@ -168,7 +172,7 @@ export default function ShopPage() {
           ].map((pOpt) => (
             <label
               key={pOpt.id}
-              className="flex items-center gap-2 cursor-pointer select-none hover:text-[#0F1111]"
+              className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--color-brand-primary)]"
             >
               <input
                 type="radio"
@@ -177,7 +181,7 @@ export default function ShopPage() {
                 onChange={() => setPriceRange(pOpt.id as PriceRangeOption)}
                 className="text-[var(--color-brand-primary-dark)] focus:ring-[var(--color-brand-primary)]"
               />
-              <span className={priceRange === pOpt.id ? 'font-bold text-[#0F1111]' : ''}>
+              <span className={priceRange === pOpt.id ? 'font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]' : ''}>
                 {pOpt.label}
               </span>
             </label>
@@ -186,11 +190,11 @@ export default function ShopPage() {
       </div>
 
       {/* Highlights Checkbox */}
-      <div className="pt-4 border-t border-gray-100">
-        <h3 className="font-heading font-extrabold text-sm text-[#0F1111] mb-3">
+      <div className="pt-4 border-t border-[var(--color-brand-border)]">
+        <h3 className="font-heading font-extrabold text-sm text-[var(--color-brand-chocolate)] mb-3">
           Highlights
         </h3>
-        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer select-none">
+        <label className="flex items-center gap-2 text-xs text-[var(--color-brand-chocolate)] cursor-pointer select-none">
           <input
             type="checkbox"
             checked={onlyBestsellers}
@@ -204,9 +208,9 @@ export default function ShopPage() {
       </div>
 
       {/* Fresh Kitchen Guarantee */}
-      <div className="pt-4 border-t border-gray-100 bg-amber-50/50 -mx-5 -mb-5 p-4 rounded-b-xl text-[11px] text-gray-600 space-y-1">
-        <div className="font-bold text-gray-900 flex items-center gap-1">
-          <Check size={14} className="text-[#007600]" /> 100% Fresh Daily Guarantee
+      <div className="pt-4 border-t border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] -mx-5 -mb-5 p-4 rounded-b-xl text-[11px] text-[var(--color-brand-muted)] space-y-1">
+        <div className="font-bold text-[var(--color-brand-chocolate)] flex items-center gap-1">
+          <Check size={14} className="text-emerald-600 dark:text-emerald-400" /> 100% Fresh Daily Guarantee
         </div>
         <p>Every cake is handcrafted in small batches for your celebration.</p>
       </div>
@@ -214,50 +218,50 @@ export default function ShopPage() {
   );
 
   return (
-    <div className="bg-[#EAEDED] min-h-screen font-sans">
+    <div className="bg-[var(--color-brand-cream)] min-h-screen font-sans text-[var(--color-brand-chocolate)]">
       {/* Breadcrumb & Header Banner */}
-      <div className="bg-white border-b border-gray-200 py-3.5 sm:py-4">
+      <div className="bg-[var(--color-brand-surface)] border-b border-[var(--color-brand-border)] py-3.5 sm:py-4">
         <div className="container-main px-4">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
-            <Link to="/" className="hover:text-[var(--color-brand-primary-dark)]">Home</Link>
+          <div className="flex items-center gap-1.5 text-xs text-[var(--color-brand-muted)] mb-2">
+            <Link to="/" className="hover:text-[var(--color-brand-primary)]">Home</Link>
             <ChevronRight size={12} />
-            <Link to="/shop" className="hover:text-[var(--color-brand-primary-dark)]">Fresh Bakery Menu</Link>
+            <Link to="/shop" className="hover:text-[var(--color-brand-primary)]">Fresh Bakery Menu</Link>
             {activeCategory && (
               <>
                 <ChevronRight size={12} />
-                <span className="font-bold text-gray-900">{activeCategory.name}</span>
+                <span className="font-bold text-[var(--color-brand-chocolate)]">{activeCategory.name}</span>
               </>
             )}
           </div>
 
           <div className="flex flex-col sm:flex-row items-baseline justify-between gap-2">
             <div>
-              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F1111]">
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--color-brand-chocolate)]">
                 {activeCategory ? activeCategory.name : 'All Handcrafted Cakes & Desserts'}
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
                 {activeCategory
                   ? activeCategory.description
                   : 'Artisanal collection of 27 fresh celebration treats baked daily in our patisserie kitchens.'}
               </p>
             </div>
-            <div className="text-xs text-gray-500">
-              Showing <span className="font-bold text-gray-900">{filteredProducts.length}</span> results
+            <div className="text-xs text-[var(--color-brand-muted)]">
+              Showing <span className="font-bold text-[var(--color-brand-chocolate)]">{filteredProducts.length}</span> results
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Category Filter Shortcut Pills Strip (Mobile & Desktop) */}
-      <div className="bg-[#FFF8F0] border-b border-[#E8DFD5] py-2.5">
+      <div className="bg-[var(--color-brand-surface-elevated)] border-b border-[var(--color-brand-border)] py-2.5">
         <div className="container-main px-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => handleCategoryChange('')}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex-shrink-0 ${
                 !selectedCategory
-                  ? 'bg-[var(--color-brand-primary-dark)] text-white shadow-xs'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
+                  ? 'bg-[var(--color-brand-primary)] text-[#1E1008] shadow-xs'
+                  : 'bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]'
               }`}
             >
               All ({products.length})
@@ -271,8 +275,8 @@ export default function ShopPage() {
                   onClick={() => handleCategoryChange(cat.slug)}
                   className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex-shrink-0 ${
                     isSelected
-                      ? 'bg-[var(--color-brand-primary-dark)] text-white shadow-xs'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
+                      ? 'bg-[var(--color-brand-primary)] text-[#1E1008] shadow-xs'
+                      : 'bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]'
                   }`}
                 >
                   {cat.name} ({count})
@@ -285,23 +289,23 @@ export default function ShopPage() {
 
       <div className="container-main py-5 sm:py-6 px-4">
         {/* Top Control Bar (Search, Active Chips, Sort) */}
-        <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-3.5 sm:p-4 mb-5 sm:mb-6">
+        <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-3.5 sm:p-4 mb-5 sm:mb-6">
           <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-center justify-between">
             {/* Search Box */}
             <div className="relative w-full lg:w-96">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search cakes, brownies, tiramisu..."
-                className="w-full pl-9 pr-8 py-2 text-xs border border-gray-300 rounded-lg outline-none focus:border-[var(--color-brand-primary-dark)]"
+                className="w-full pl-9 pr-8 py-2 text-xs border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] rounded-lg outline-none focus:border-[var(--color-brand-primary)]"
                 aria-label="Search products by name"
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] p-1 cursor-pointer"
                   aria-label="Clear search input"
                 >
                   <X size={14} />
@@ -313,18 +317,18 @@ export default function ShopPage() {
             <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
               <button
                 onClick={() => setShowFilters(true)}
-                className="lg:hidden px-3.5 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5"
+                className="lg:hidden px-3.5 py-2 border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] rounded-lg text-xs font-bold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-border)] flex items-center gap-1.5 cursor-pointer"
               >
                 <SlidersHorizontal size={14} /> Filters {hasActiveFilters && <span className="badge badge-warning badge-xs">Active</span>}
               </button>
 
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-gray-500 hidden sm:inline">Sort by:</span>
+                <span className="text-[var(--color-brand-muted)] hidden sm:inline">Sort by:</span>
                 <div className="relative">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="appearance-none bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 pr-8 text-xs font-bold text-gray-900 outline-none hover:bg-gray-100 cursor-pointer"
+                    className="appearance-none bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] text-[var(--color-brand-chocolate)] rounded-lg px-3 py-2 pr-8 text-xs font-bold outline-none hover:bg-[var(--color-brand-border)] cursor-pointer"
                     aria-label="Sort products"
                   >
                     <option value="relevance">Featured & Bestsellers</option>
@@ -334,7 +338,7 @@ export default function ShopPage() {
                   </select>
                   <ChevronDown
                     size={14}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)] pointer-events-none"
                   />
                 </div>
               </div>
@@ -402,14 +406,14 @@ export default function ShopPage() {
           {/* Mobile Filter Modal */}
           {showFilters && (
             <div className="modal modal-open lg:hidden" role="dialog" aria-modal="true" aria-label="Filter products">
-              <div className="modal-box max-w-md p-5 max-h-[85vh] overflow-y-auto">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-                  <h3 className="font-heading font-extrabold text-base text-[#0F1111] flex items-center gap-2">
-                    <SlidersHorizontal size={16} /> Filters & Sorting
+              <div className="modal-box max-w-md p-5 max-h-[85vh] overflow-y-auto bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] shadow-2xl">
+                <div className="flex items-center justify-between pb-3 border-b border-[var(--color-brand-border)] mb-4">
+                  <h3 className="font-heading font-extrabold text-base text-[var(--color-brand-chocolate)] flex items-center gap-2">
+                    <SlidersHorizontal size={16} className="text-[var(--color-brand-primary)]" /> Filters & Sorting
                   </h3>
                   <button
                     onClick={() => setShowFilters(false)}
-                    className="btn btn-sm btn-circle btn-ghost"
+                    className="p-1.5 rounded-full hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] transition-colors cursor-pointer"
                     aria-label="Close filters"
                   >
                     <X size={18} />
@@ -418,22 +422,22 @@ export default function ShopPage() {
 
                 {renderFilterSidebar()}
 
-                <div className="mt-4 pt-3 border-t border-gray-100 flex gap-2">
+                <div className="mt-4 pt-3 border-t border-[var(--color-brand-border)] flex gap-2">
                   <button
                     onClick={clearAllFilters}
-                    className="btn btn-outline btn-sm flex-1 text-xs"
+                    className="py-2.5 px-4 rounded-xl border border-[var(--color-brand-border)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] flex-1 text-xs font-bold transition-colors cursor-pointer"
                   >
                     Reset Filters
                   </button>
                   <button
                     onClick={() => setShowFilters(false)}
-                    className="btn btn-primary btn-sm flex-1 text-xs font-bold"
+                    className="py-2.5 px-4 rounded-xl bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white flex-1 text-xs font-bold shadow-xs transition-colors cursor-pointer"
                   >
                     Show {filteredProducts.length} Results
                   </button>
                 </div>
               </div>
-              <div className="modal-backdrop bg-black/50" onClick={() => setShowFilters(false)} />
+              <div className="modal-backdrop bg-black/60 backdrop-blur-xs" onClick={() => setShowFilters(false)} />
             </div>
           )}
 

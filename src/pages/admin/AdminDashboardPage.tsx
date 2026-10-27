@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Eye,
   ChefHat,
-  Sparkles,
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { getAllOrders, type Order } from '@/lib/orders';

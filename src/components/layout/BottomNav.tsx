@@ -3,6 +3,7 @@ import { Home, Search, Package, User, ShoppingCart, ArrowRight } from 'lucide-re
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { formatPrice } from '@/data/products';
+import { triggerHaptic } from '@/services/mobileService';
 
 interface NavItem {
   to: string;
@@ -60,7 +61,8 @@ export default function BottomNav() {
       {showFloatingCart && (
         <aside
           aria-label="Active cart summary"
-          className="lg:hidden fixed bottom-16 left-3 right-3 z-40 animate-slide-up max-w-lg mx-auto"
+          className="lg:hidden fixed left-3 right-3 z-40 animate-slide-up max-w-lg mx-auto"
+          style={{ bottom: 'calc(4.25rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <Link
             to="/cart"
@@ -110,7 +112,8 @@ export default function BottomNav() {
               <Link
                 key={label}
                 to={href}
-                className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative min-h-[44px] ${
+                onClick={() => triggerHaptic('light')}
+                className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all relative min-h-[44px] active:scale-95 ${
                   active
                     ? 'text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]'
                     : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'

@@ -10,7 +10,6 @@ import {
   ArrowRight, 
   ShieldCheck, 
   RefreshCw, 
-  Key, 
   Sparkles, 
   Truck, 
   Star, 
@@ -237,7 +236,7 @@ export default function LoginPage() {
         <div className="bg-[var(--color-brand-surface)] rounded-3xl shadow-2xl border border-[var(--color-brand-border)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
           
           {/* LEFT HERO SHOWCASE PANEL (Desktop Only) */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#2E180E] via-[#3E2114] to-[#1C0D07] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+          <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-[#2E180E] via-[#3E2114] to-[#1C0D07] text-white p-8 sm:p-10 flex-col justify-between relative overflow-hidden">
             {/* Ambient decorative glowing orbs */}
             <div className="absolute -top-16 -left-16 w-56 h-56 bg-[#FFD814]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-amber-700/20 rounded-full blur-3xl pointer-events-none" />
@@ -406,8 +405,8 @@ export default function LoginPage() {
                         <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-chocolate)] mb-1.5 block">
                           Mobile Number
                         </label>
-                        <div className="relative flex rounded-xl border border-[var(--color-brand-primary-light)]/60 focus-within:border-[var(--color-brand-primary-dark)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary-dark)]/15 transition-all overflow-hidden bg-white shadow-xs">
-                          <span className="inline-flex items-center px-3.5 bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] text-sm font-bold border-r border-[var(--color-brand-primary-light)]/60 select-none">
+                        <div className="relative flex rounded-xl border border-[var(--color-brand-border)] focus-within:border-[var(--color-brand-primary)] focus-within:ring-2 focus-within:ring-[var(--color-brand-primary)]/20 transition-all overflow-hidden bg-[var(--color-brand-surface)] shadow-xs">
+                          <span className="inline-flex items-center px-3.5 bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] text-sm font-bold border-r border-[var(--color-brand-border)] select-none">
                             🇮🇳 +91
                           </span>
                           <input
@@ -416,7 +415,7 @@ export default function LoginPage() {
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
                             required
-                            className="w-full px-3.5 py-3.5 text-sm text-[var(--color-brand-chocolate)] placeholder:text-[var(--color-brand-muted)]/60 outline-none font-medium"
+                            className="w-full px-3.5 py-3.5 text-base sm:text-sm text-[var(--color-brand-chocolate)] placeholder:text-[var(--color-brand-muted)]/60 outline-none font-medium bg-transparent"
                             placeholder="Enter 10-digit mobile number"
                             autoFocus
                           />
@@ -481,7 +480,7 @@ export default function LoginPage() {
                               value={digit}
                               onChange={(e) => handleOtpChange(i, e.target.value)}
                               onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                              className="w-11 sm:w-12 h-12 text-center text-lg font-bold font-mono rounded-xl border border-[var(--color-brand-primary-light)] focus:border-[var(--color-brand-primary-dark)] focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/20 outline-none bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] shadow-xs transition-all"
+                              className="w-11 sm:w-12 h-12 text-center text-lg font-bold font-mono rounded-xl border border-[var(--color-brand-border)] focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] shadow-xs transition-all"
                             />
                           ))}
                         </div>
@@ -536,7 +535,7 @@ export default function LoginPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
                         required
-                        className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-primary-dark)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="name@example.com"
                       />
                     </div>
@@ -549,7 +548,7 @@ export default function LoginPage() {
                       </label>
                       <Link
                         to="/forgot-password"
-                        className="text-xs text-[var(--color-brand-primary-dark)] font-semibold hover:underline"
+                        className="text-xs text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] font-semibold hover:underline"
                       >
                         Forgot password?
                       </Link>
@@ -563,7 +562,7 @@ export default function LoginPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={loading}
                         required
-                        className="w-full pl-10 pr-11 py-3.5 rounded-xl bg-[var(--color-brand-cream)] border border-[var(--color-brand-primary-light)]/50 focus:border-[var(--color-brand-primary-dark)] focus:bg-white focus:ring-2 focus:ring-[var(--color-brand-primary-dark)]/15 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        className="w-full pl-10 pr-11 py-3.5 rounded-xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="Enter your password"
                       />
                       <button
@@ -616,7 +615,7 @@ export default function LoginPage() {
                         onChange={(e) => setAdminEmail(e.target.value)}
                         disabled={loading}
                         required
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="Enter administrator email"
                       />
                     </div>
@@ -635,7 +634,7 @@ export default function LoginPage() {
                         onChange={(e) => setAdminPassword(e.target.value)}
                         disabled={loading}
                         required
-                        className="w-full pl-10 pr-11 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        className="w-full pl-10 pr-11 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="Enter your administrator password"
                       />
                       <button
@@ -670,9 +669,9 @@ export default function LoginPage() {
                 <>
                   <div className="relative my-6 text-center">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[var(--color-brand-primary-light)]/40" />
+                      <div className="w-full border-t border-[var(--color-brand-border)]" />
                     </div>
-                    <span className="relative bg-white px-3 text-[11px] font-bold uppercase tracking-widest text-[var(--color-brand-muted)]">
+                    <span className="relative bg-[var(--color-brand-surface)] px-3 text-[11px] font-bold uppercase tracking-widest text-[var(--color-brand-muted)]">
                       or sign in with
                     </span>
                   </div>
@@ -681,7 +680,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-brand-primary-light)]/70 bg-white hover:bg-[var(--color-brand-cream)] transition-all text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] shadow-xs active:scale-[0.99]"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] hover:bg-[var(--color-brand-cream-dark)] transition-all text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] shadow-xs active:scale-[0.99] cursor-pointer"
                   >
                     <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                       <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>

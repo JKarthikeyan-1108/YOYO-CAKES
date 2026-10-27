@@ -38,8 +38,8 @@ export default function Footer() {
         <ArrowUp size={14} /> Back to top
       </button>
 
-      {/* Main Footer Links & Info */}
-      <div className="container-main py-12 sm:py-16 px-4">
+      {/* Desktop Main Footer Links & Info */}
+      <div className="hidden lg:block container-main py-12 sm:py-16 px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           {/* Brand Info */}
           <div>
@@ -157,8 +157,8 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Payment Reassurance Strip */}
-      <div className="bg-[var(--color-brand-footer-bg)]/95 border-t border-[var(--color-brand-border)]/40 py-4 px-4 text-xs text-[var(--color-brand-footer-muted)]">
+      {/* Payment Reassurance Strip (Desktop) */}
+      <div className="hidden lg:block bg-[var(--color-brand-footer-bg)]/95 border-t border-[var(--color-brand-border)]/40 py-4 px-4 text-xs text-[var(--color-brand-footer-muted)]">
         <div className="container-main flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#A3E635]" />
@@ -182,14 +182,53 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Copyright Bar */}
-      <div className="bg-[var(--color-brand-footer-bg)] py-4 border-t border-[var(--color-brand-border)]/20">
+      {/* Copyright Bar (Desktop) */}
+      <div className="hidden lg:block bg-[var(--color-brand-footer-bg)] py-4 border-t border-[var(--color-brand-border)]/20">
         <div className="container-main px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[var(--color-brand-footer-muted)]/70">
           <p>© {CURRENT_YEAR} YOYO CAKES Private Limited. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Handcrafted with <Heart size={12} className="text-red-500 fill-red-500" /> in Chennai, India
           </p>
         </div>
+      </div>
+
+      {/* Streamlined Mobile App Footer (Mobile Viewports Only) */}
+      <div className="lg:hidden px-4 pt-7 pb-20 text-center space-y-4">
+        <div className="flex justify-center">
+          <BrandLogo variant="white" size="sm" showTagline={true} />
+        </div>
+
+        {/* Quality Badges */}
+        <div className="flex flex-wrap justify-center gap-1.5 text-[10px] text-white/80">
+          <span className="bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">✨ Fresh Bake Daily</span>
+          <span className="bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">🛡️ FSSAI Patisserie</span>
+          <span className="bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">🔒 256-Bit SSL</span>
+        </div>
+
+        {/* Central Kitchen Info */}
+        <div className="text-[11px] text-white/70 space-y-0.5">
+          <p className="font-semibold text-white">Central Kitchen • Anna Nagar & T. Nagar, Chennai</p>
+          <p>
+            Hotline:{' '}
+            <a href="tel:+918428855444" className="text-[#FFD814] font-bold underline">
+              +91 84288 55444
+            </a>
+          </p>
+        </div>
+
+        {/* Quick Links */}
+        <div className="flex flex-wrap justify-center gap-x-3.5 gap-y-1 text-[11px] text-white/60">
+          <Link to="/shipping-policy" className="hover:text-[#FFD814] underline">Delivery</Link>
+          <Link to="/cancellation-policy" className="hover:text-[#FFD814] underline">Refunds</Link>
+          <Link to="/privacy-policy" className="hover:text-[#FFD814] underline">Privacy</Link>
+          <Link to="/terms" className="hover:text-[#FFD814] underline">Terms</Link>
+          <Link to="/faq" className="hover:text-[#FFD814] underline">FAQs</Link>
+        </div>
+
+        {/* Copyright */}
+        <p className="text-[10px] text-white/40 pt-1 border-t border-white/10">
+          © {CURRENT_YEAR} YOYO CAKES Private Limited. Handcrafted with ❤️ in Chennai.
+        </p>
       </div>
     </footer>
   );

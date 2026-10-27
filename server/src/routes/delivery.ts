@@ -4,7 +4,6 @@ import {
   getDeliverySettings,
   updateDeliverySettings,
   checkDeliveryServiceability,
-  type DeliverySettings,
 } from '../services/serviceability';
 import { verifyAuth, requireAdmin, optionalAuth, AuthenticatedRequest } from '../middleware/auth';
 

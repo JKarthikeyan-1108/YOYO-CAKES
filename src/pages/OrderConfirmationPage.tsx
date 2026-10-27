@@ -64,15 +64,15 @@ export default function OrderConfirmationPage() {
   const currentStepIdx = STATUS_STEPS.findIndex((s) => s.key === order.orderStatus);
 
   return (
-    <div className="bg-[var(--color-brand-cream)] min-h-screen py-12">
-      <div className="container-main max-w-4xl">
-        <div className="bg-white rounded-2xl shadow-elevated overflow-hidden border border-[var(--color-brand-primary-light)]/20">
+    <div className="bg-[var(--color-brand-cream)] min-h-screen py-8 sm:py-12 transition-colors">
+      <div className="container-main max-w-4xl px-4">
+        <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-elevated overflow-hidden border border-[var(--color-brand-border)]">
           {/* Header Banner */}
-          <div className="bg-[var(--color-brand-chocolate)] text-white p-8 sm:p-10 text-center">
+          <div className="bg-[var(--color-brand-chocolate)] text-white p-6 sm:p-10 text-center">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={36} className="text-[#A3E635]" />
             </div>
-            <h1 className="font-heading text-3xl font-bold text-white mb-2">Order Status & Tracking</h1>
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-white mb-2">Order Status & Tracking</h1>
             <p className="text-white/80 text-sm">
               Order ID: <span className="font-mono font-bold text-white">{order.id}</span>
             </p>
@@ -81,13 +81,13 @@ export default function OrderConfirmationPage() {
             </p>
           </div>
 
-          <div className="p-6 sm:p-10">
+          <div className="p-5 sm:p-10">
             {/* Status Timeline */}
-            <div className="mb-10">
-              <h2 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)] mb-6">
+            <div className="mb-8 sm:mb-10">
+              <h2 className="font-heading text-lg sm:text-xl font-bold text-[var(--color-brand-chocolate)] mb-4 sm:mb-6">
                 Fulfillment Timeline
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-3">
                 {STATUS_STEPS.map((step, idx) => {
                   const isDone = idx <= currentStepIdx;
                   const isCurrent = idx === currentStepIdx;
@@ -99,7 +99,7 @@ export default function OrderConfirmationPage() {
                           ? 'border-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)] shadow-sm'
                           : isDone
                           ? 'border-[var(--color-brand-success)]/40 bg-[var(--color-brand-success)]/5 text-[var(--color-brand-chocolate)]'
-                          : 'border-gray-200 text-gray-400 opacity-60'
+                          : 'border-[var(--color-brand-border)] text-[var(--color-brand-muted)] opacity-60'
                       }`}
                     >
                       <div className="text-xs font-bold uppercase tracking-wider mb-1">Step {idx + 1}</div>
@@ -112,9 +112,9 @@ export default function OrderConfirmationPage() {
             </div>
 
             {/* Order Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
               {/* Customer & Delivery */}
-              <div className="bg-[var(--color-brand-cream)] rounded-xl p-5 border border-[var(--color-brand-primary-light)]/30">
+              <div className="bg-[var(--color-brand-surface-elevated)] rounded-xl p-5 border border-[var(--color-brand-border)]">
                 <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] mb-4 flex items-center gap-2">
                   {order.fulfillment === 'delivery' ? <Truck size={18} /> : <ChefHat size={18} />}
                   {order.fulfillment === 'delivery' ? 'Delivery Details' : 'Store Pickup Details'}
@@ -205,7 +205,7 @@ export default function OrderConfirmationPage() {
               </div>
 
               {/* Payment Info */}
-              <div className="bg-[var(--color-brand-cream)] rounded-xl p-5 border border-[var(--color-brand-primary-light)]/30">
+              <div className="bg-[var(--color-brand-surface-elevated)] rounded-xl p-5 border border-[var(--color-brand-border)]">
                 <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] mb-4 flex items-center gap-2">
                   <PackageCheck size={18} /> Payment Information
                 </h3>
@@ -221,10 +221,10 @@ export default function OrderConfirmationPage() {
                   {order.razorpayPaymentId && (
                     <div className="flex justify-between">
                       <span className="text-[var(--color-brand-muted)]">Payment Ref:</span>
-                      <span className="font-mono text-xs">{order.razorpayPaymentId}</span>
+                      <span className="font-mono text-xs text-[var(--color-brand-chocolate)]">{order.razorpayPaymentId}</span>
                     </div>
                   )}
-                  <div className="pt-2 border-t border-[var(--color-brand-primary-light)]/20 space-y-1">
+                  <div className="pt-2 border-t border-[var(--color-brand-border)] space-y-1">
                     <div className="flex justify-between text-xs text-[var(--color-brand-muted)]">
                       <span>Subtotal</span>
                       <span>{formatPrice(order.subtotal)}</span>
@@ -262,14 +262,14 @@ export default function OrderConfirmationPage() {
                   <Printer size={14} /> Print Receipt
                 </button>
               </div>
-              <div className="divide-y divide-[var(--color-brand-primary-light)]/20 border border-[var(--color-brand-primary-light)]/20 rounded-xl overflow-hidden bg-white">
+              <div className="divide-y divide-[var(--color-brand-border)] border border-[var(--color-brand-border)] rounded-xl overflow-hidden bg-[var(--color-brand-surface-elevated)]">
                 {order.items.map((item) => (
-                  <div key={item.id} className="p-4 flex items-center justify-between hover:bg-[var(--color-brand-cream)]/50 transition-colors">
+                  <div key={item.id} className="p-4 flex items-center justify-between hover:bg-[var(--color-brand-surface)] transition-colors">
                     <div className="flex items-center gap-3">
                       <img
                         src={item.image || `/images/categories/${item.category?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'cakes'}.jpg`}
                         alt={item.name}
-                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-[var(--color-brand-cream-dark)]"
+                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)]"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = '/images/categories/cakes.jpg';
                         }}
@@ -301,7 +301,7 @@ export default function OrderConfirmationPage() {
             </div>
 
             {/* Support Actions */}
-            <div className="bg-[var(--color-brand-cream)]/70 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h4 className="font-heading font-bold text-sm text-[var(--color-brand-chocolate)]">
                   Need assistance with this order?

@@ -38,6 +38,9 @@ android {
 }
 
 dependencies {
+    // Capacitor Android Core
+    implementation(project(":capacitor-android"))
+
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
 
@@ -58,3 +61,5 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
 }
+
+apply(from = "capacitor.build.gradle")

@@ -10,15 +10,11 @@ import {
   X,
   Filter,
   Upload,
-  ChevronDown,
-  ChevronUp,
   Package,
   AlertTriangle,
   Minus,
   CheckSquare,
   Square,
-  Layers,
-  Sparkles,
   ArrowUpRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -52,7 +48,6 @@ export default function AdminProductsPage() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -81,7 +76,6 @@ export default function AdminProductsPage() {
   const inStockCount = products.filter((p) => p.inStock && (p.stockQuantity ?? 1) > 0).length;
   const lowStockCount = products.filter((p) => p.inStock && (p.stockQuantity ?? 0) > 0 && (p.stockQuantity ?? 0) <= 5).length;
   const outOfStockCount = products.filter((p) => !p.inStock || (p.stockQuantity ?? 0) === 0).length;
-  const bestsellerCount = products.filter((p) => p.bestseller).length;
 
   const filtered = products.filter((p) => {
     const matchQuery =
@@ -658,7 +652,6 @@ export default function AdminProductsPage() {
           </div>
         ) : (
           filtered.map((product) => {
-            const isExpanded = expandedCard === product.id;
             const isChecked = selectedProductIds.includes(product.id);
 
             return (

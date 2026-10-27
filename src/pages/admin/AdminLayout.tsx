@@ -10,7 +10,6 @@ import {
   LogOut,
   Menu,
   X,
-  Sparkles,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import BrandLogo from '@/components/common/BrandLogo';

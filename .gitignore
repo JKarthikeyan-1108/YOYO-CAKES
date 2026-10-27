@@ -45,6 +45,8 @@ build/
 android/.gradle/
 android/build/
 android/app/build/
+android/app/src/main/assets/public/
+android/capacitor-cordova-android-plugins/
 local.properties
 *.keystore
 *.jks

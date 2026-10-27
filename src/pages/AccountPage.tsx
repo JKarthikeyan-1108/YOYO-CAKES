@@ -71,12 +71,20 @@ export default function AccountPage() {
   };
 
   useEffect(() => {
-    if (location.pathname === '/orders') {
-      setActiveTabState('orders');
-    } else if (tabFromQuery && ['orders', 'profile', 'addresses', 'support', 'settings'].includes(tabFromQuery)) {
-      setActiveTabState(tabFromQuery);
+    const target =
+      location.pathname === '/orders'
+        ? 'orders'
+        : tabFromQuery && ['orders', 'profile', 'addresses', 'support', 'settings'].includes(tabFromQuery)
+        ? tabFromQuery
+        : null;
+
+    if (target && target !== activeTab) {
+      const timer = setTimeout(() => {
+        setActiveTabState(target);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [location.pathname, tabFromQuery]);
+  }, [location.pathname, tabFromQuery, activeTab]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderFilter, setOrderFilter] = useState<'all' | 'in_progress' | 'delivered'>('all');
@@ -247,11 +255,11 @@ export default function AccountPage() {
   return (
     <div className="bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] min-h-screen py-8 font-sans transition-colors">
       <div className="container-main max-w-6xl px-4">
-        {/* Amazon-Style Account Welcome Header Banner */}
-        <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 sm:p-8 mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        {/* Account Welcome Header Banner */}
+        <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-xs border border-[var(--color-brand-border)] p-5 sm:p-8 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 sm:gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[var(--color-brand-primary-dark)] text-white flex items-center justify-center font-heading text-2xl font-bold shadow-xs">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[var(--color-brand-primary-dark)] text-white flex items-center justify-center font-heading text-xl sm:text-2xl font-bold shadow-xs flex-shrink-0">
                 {profileName
                   ? profileName.charAt(0).toUpperCase()
                   : user?.email
@@ -259,11 +267,11 @@ export default function AccountPage() {
                   : 'Y'}
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F1111]">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-heading text-xl sm:text-3xl font-extrabold text-[var(--color-brand-chocolate)]">
                     Hello, {profileName || 'Customer'}
                   </h1>
-                  <span className="px-2.5 py-0.5 bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] text-[11px] font-extrabold rounded-full flex items-center gap-1 shadow-2xs">
+                  <span className="px-2.5 py-0.5 bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-primary-dark)] border border-[var(--color-brand-border)] text-[11px] font-extrabold rounded-full flex items-center gap-1 shadow-2xs">
                     <Sparkles size={11} /> YOYO Member
                   </span>
                   {isAdmin && (
@@ -272,14 +280,14 @@ export default function AccountPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[var(--color-brand-muted)] mt-1">
                   {user?.email || 'Logged-in Customer'} • Chennai Express Delivery Zone
                 </p>
               </div>
             </div>
 
             {/* Quick Metrics & Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               {isAdmin && (
                 <Link
                   to="/admin"
@@ -290,139 +298,168 @@ export default function AccountPage() {
               )}
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 border border-gray-300 hover:bg-red-50 text-red-600 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 border border-[var(--color-brand-border)] hover:bg-red-500/10 text-red-600 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ml-auto sm:ml-0"
               >
                 <LogOut size={14} /> Sign Out
               </button>
             </div>
           </div>
 
-          {/* DaisyUI Stats Strip */}
-          <div className="stats stats-vertical sm:stats-horizontal shadow-xs border border-gray-200 bg-white w-full rounded-2xl overflow-hidden mt-6">
+          {/* 2x2 Mobile / 4-Col Desktop Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-0 sm:divide-x sm:divide-[var(--color-brand-border)] border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] rounded-2xl overflow-hidden mt-6 p-2 sm:p-0">
             <button
               type="button"
               onClick={() => setActiveTab('orders')}
-              className="stat hover:bg-gray-50 transition-colors text-left"
+              className="p-3 sm:p-4 hover:bg-[var(--color-brand-surface)] transition-colors text-left rounded-xl sm:rounded-none cursor-pointer"
             >
-              <div className="stat-figure text-amber-600">
-                <Package size={22} />
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-[var(--color-brand-muted)]">Total Orders</span>
+                <Package size={18} className="text-[var(--color-brand-primary-dark)]" />
               </div>
-              <div className="stat-title text-xs font-semibold text-gray-500">Total Orders</div>
-              <div className="stat-value text-2xl font-black text-gray-900">{orders.length}</div>
-              <div className="stat-desc text-[11px] text-gray-400">Past & active bakes</div>
+              <div className="text-xl sm:text-2xl font-black text-[var(--color-brand-chocolate)]">{orders.length}</div>
+              <div className="text-[10px] text-[var(--color-brand-muted)] truncate">Past & active bakes</div>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('addresses')}
-              className="stat hover:bg-gray-50 transition-colors text-left"
+              className="p-3 sm:p-4 hover:bg-[var(--color-brand-surface)] transition-colors text-left rounded-xl sm:rounded-none cursor-pointer"
             >
-              <div className="stat-figure text-blue-600">
-                <MapPin size={22} />
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-[var(--color-brand-muted)]">Addresses</span>
+                <MapPin size={18} className="text-blue-500" />
               </div>
-              <div className="stat-title text-xs font-semibold text-gray-500">Saved Addresses</div>
-              <div className="stat-value text-2xl font-black text-gray-900">{addresses.length}</div>
-              <div className="stat-desc text-[11px] text-gray-400">Chennai delivery spots</div>
+              <div className="text-xl sm:text-2xl font-black text-[var(--color-brand-chocolate)]">{addresses.length}</div>
+              <div className="text-[10px] text-[var(--color-brand-muted)] truncate">Delivery spots</div>
             </button>
 
             <Link
               to="/wishlist"
-              className="stat hover:bg-gray-50 transition-colors text-left"
+              className="p-3 sm:p-4 hover:bg-[var(--color-brand-surface)] transition-colors text-left rounded-xl sm:rounded-none cursor-pointer block"
             >
-              <div className="stat-figure text-red-500">
-                <Heart size={22} />
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-[var(--color-brand-muted)]">Wishlist</span>
+                <Heart size={18} className="text-red-500" />
               </div>
-              <div className="stat-title text-xs font-semibold text-gray-500">Wishlist Items</div>
-              <div className="stat-value text-2xl font-black text-gray-900">{wishlistCount}</div>
-              <div className="stat-desc text-[11px] text-gray-400">Saved for celebration</div>
+              <div className="text-xl sm:text-2xl font-black text-[var(--color-brand-chocolate)]">{wishlistCount}</div>
+              <div className="text-[10px] text-[var(--color-brand-muted)] truncate">Saved cakes</div>
             </Link>
 
             <button
               type="button"
               onClick={() => setActiveTab('support')}
-              className="stat hover:bg-gray-50 transition-colors text-left"
+              className="p-3 sm:p-4 hover:bg-[var(--color-brand-surface)] transition-colors text-left rounded-xl sm:rounded-none cursor-pointer"
             >
-              <div className="stat-figure text-emerald-600">
-                <MessageCircle size={22} />
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-[var(--color-brand-muted)]">Concierge</span>
+                <MessageCircle size={18} className="text-emerald-500" />
               </div>
-              <div className="stat-title text-xs font-semibold text-gray-500">Bakery Concierge</div>
-              <div className="stat-value text-base font-extrabold text-emerald-700 flex items-center gap-1.5 mt-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse" /> Live Online
+              <div className="text-sm sm:text-base font-extrabold text-emerald-600 flex items-center gap-1 mt-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" /> Live Online
               </div>
-              <div className="stat-desc text-[11px] text-gray-400">WhatsApp direct assistance</div>
+              <div className="text-[10px] text-[var(--color-brand-muted)] truncate">WhatsApp chat</div>
             </button>
           </div>
         </div>
 
-        {/* Amazon Iconic Feature Tiles Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {/* Mobile Horizontal Scrollable Tab Ribbon */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none sm:hidden">
+          {([
+            { id: 'orders', label: 'Orders', icon: Package },
+            { id: 'addresses', label: 'Addresses', icon: MapPin },
+            { id: 'profile', label: 'Profile', icon: User },
+            { id: 'support', label: 'Support', icon: Headphones },
+            { id: 'settings', label: 'Settings', icon: Sparkles },
+          ] as const).map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[var(--color-brand-primary-dark)] text-white shadow-xs'
+                    : 'bg-[var(--color-brand-surface)] text-[var(--color-brand-muted)] border border-[var(--color-brand-border)]'
+                }`}
+              >
+                <Icon size={14} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop Feature Tiles Grid */}
+        <div className="hidden sm:grid grid-cols-3 gap-4 mb-6">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+            className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
               activeTab === 'orders'
-                ? 'bg-white border-[#FF9900] shadow-sm ring-2 ring-[#FF9900]/20'
-                : 'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
+                ? 'bg-[var(--color-brand-surface)] border-[var(--color-brand-primary-dark)] shadow-sm ring-2 ring-[var(--color-brand-primary-dark)]/20'
+                : 'bg-[var(--color-brand-surface)] border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary-dark)] shadow-2xs'
             }`}
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-primary-dark)] flex items-center justify-center flex-shrink-0 border border-[var(--color-brand-border)]">
                 <Package size={24} />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-base text-[#0F1111]">Your Orders</h3>
-                <p className="text-xs text-gray-500">Track packages, view details, buy again</p>
+                <h3 className="font-heading font-bold text-base text-[var(--color-brand-chocolate)]">Your Orders</h3>
+                <p className="text-xs text-[var(--color-brand-muted)]">Track packages, view details, buy again</p>
               </div>
             </div>
-            <ChevronRight size={18} className="text-gray-400" />
+            <ChevronRight size={18} className="text-[var(--color-brand-muted)]" />
           </button>
 
           <button
             onClick={() => setActiveTab('addresses')}
-            className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+            className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
               activeTab === 'addresses'
-                ? 'bg-white border-[#FF9900] shadow-sm ring-2 ring-[#FF9900]/20'
-                : 'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
+                ? 'bg-[var(--color-brand-surface)] border-[var(--color-brand-primary-dark)] shadow-sm ring-2 ring-[var(--color-brand-primary-dark)]/20'
+                : 'bg-[var(--color-brand-surface)] border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary-dark)] shadow-2xs'
             }`}
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-surface-elevated)] text-blue-500 flex items-center justify-center flex-shrink-0 border border-[var(--color-brand-border)]">
                 <MapPin size={24} />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-base text-[#0F1111]">Your Addresses</h3>
-                <p className="text-xs text-gray-500">Manage delivery locations in Chennai</p>
+                <h3 className="font-heading font-bold text-base text-[var(--color-brand-chocolate)]">Your Addresses</h3>
+                <p className="text-xs text-[var(--color-brand-muted)]">Manage delivery locations in Chennai</p>
               </div>
             </div>
-            <ChevronRight size={18} className="text-gray-400" />
+            <ChevronRight size={18} className="text-[var(--color-brand-muted)]" />
           </button>
 
           <button
             onClick={() => setActiveTab('profile')}
-            className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+            className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-white border-[#FF9900] shadow-sm ring-2 ring-[#FF9900]/20'
-                : 'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
+                ? 'bg-[var(--color-brand-surface)] border-[var(--color-brand-primary-dark)] shadow-sm ring-2 ring-[var(--color-brand-primary-dark)]/20'
+                : 'bg-[var(--color-brand-surface)] border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary-dark)] shadow-2xs'
             }`}
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-surface-elevated)] text-green-500 flex items-center justify-center flex-shrink-0 border border-[var(--color-brand-border)]">
                 <User size={24} />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-base text-[#0F1111]">Login & Security</h3>
-                <p className="text-xs text-gray-500">Edit name, phone number, credentials</p>
+                <h3 className="font-heading font-bold text-base text-[var(--color-brand-chocolate)]">Login & Security</h3>
+                <p className="text-xs text-[var(--color-brand-muted)]">Edit name, phone number, credentials</p>
               </div>
             </div>
-            <ChevronRight size={18} className="text-gray-400" />
+            <ChevronRight size={18} className="text-[var(--color-brand-muted)]" />
           </button>
         </div>
 
         {/* Tab Content Display */}
         {activeTab === 'orders' && (
-          <div className="bg-white rounded-2xl shadow-xs border border-gray-200 p-6 sm:p-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-xs border border-[var(--color-brand-border)] p-5 sm:p-8 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--color-brand-border)]">
               <div>
-                <h2 className="font-heading text-2xl font-extrabold text-[#0F1111]">Your Past Orders</h2>
+                <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-[var(--color-brand-chocolate)]">Your Past Orders</h2>
                 <p className="text-xs text-gray-500 mt-0.5">
                   View and manage celebration orders, download tax invoices, or buy treats again.
                 </p>

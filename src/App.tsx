@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { useAuthStore } from '@/stores/authStore';
+import { initMobileAppListeners } from '@/services/mobileService';
 
 // Layouts & Boundary
 import Layout from '@/components/layout/Layout';
@@ -49,14 +50,21 @@ export default function App() {
   const setUser = useAuthStore((s) => s.setUser);
 
   useEffect(() => {
+    // Native mobile app back button and lifecycle listeners
+    const cleanupMobile = initMobileAppListeners();
+
     if (isFirebaseConfigured && auth) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         setUser(user);
       });
-      return () => unsubscribe();
+      return () => {
+        unsubscribe();
+        cleanupMobile();
+      };
     } else {
       // Set initialized when running in demo/offline mode
       useAuthStore.setState({ initialized: true, loading: false });
+      return () => cleanupMobile();
     }
   }, [setUser]);
 
