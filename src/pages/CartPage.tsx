@@ -26,6 +26,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { formatPrice, PRODUCTS } from '@/data/products';
 import { validateCouponInFirestore } from '@/services/firestoreService';
+import { triggerHaptic } from '@/services/mobileService';
 
 // Real bakery pairings from the 27 catalog products
 const RECOMMENDED_PAIRINGS = [
@@ -67,6 +68,7 @@ export default function CartPage() {
   const estimatedTotal = Math.max(0, subtotal - discount);
 
   const handleProceedToCheckout = () => {
+    triggerHaptic('heavy');
     if (!user) {
       toast.error('Please sign in or create an account to place your order.');
       navigate('/login?redirect=/checkout');
@@ -76,6 +78,7 @@ export default function CartPage() {
   };
 
   const handleWhatsAppCartOrder = () => {
+    triggerHaptic('medium');
     const hotline = '918428855444';
     const itemLines = items
       .map((i, idx) => {
@@ -110,11 +113,13 @@ export default function CartPage() {
     if (!code) return;
     const res = await validateCouponInFirestore(code, subtotal);
     if (res.valid) {
+      triggerHaptic('success');
       setCouponApplied(true);
       setDiscountAmount(res.discount);
       setCouponCode(code);
       toast.success(res.message || 'Coupon applied successfully!');
     } else {
+      triggerHaptic('error');
       setCouponApplied(false);
       setDiscountAmount(0);
       toast.error(res.message || 'Invalid coupon code');
@@ -300,9 +305,11 @@ export default function CartPage() {
                               <button
                                 onClick={() => {
                                   if (item.quantity <= 1) {
+                                    triggerHaptic('medium');
                                     removeItem(item.product.id);
                                     toast.success(`${item.product.name} removed from cart`);
                                   } else {
+                                    triggerHaptic('light');
                                     updateQuantity(item.product.id, item.quantity - 1);
                                   }
                                 }}
@@ -315,7 +322,10 @@ export default function CartPage() {
                                 {item.quantity}
                               </span>
                               <button
-                                onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                onClick={() => {
+                                  triggerHaptic('light');
+                                  updateQuantity(item.product.id, item.quantity + 1);
+                                }}
                                 className="w-8 h-8 flex items-center justify-center hover:bg-[var(--color-brand-border)] transition-colors text-[var(--color-brand-chocolate)]"
                                 aria-label="Increase quantity"
                               >
@@ -327,6 +337,7 @@ export default function CartPage() {
 
                             <button
                               onClick={() => {
+                                triggerHaptic('medium');
                                 removeItem(item.product.id);
                                 toast.success(`${item.product.name} removed from cart`);
                               }}

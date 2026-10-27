@@ -22,6 +22,7 @@ import BrandLogo from '@/components/common/BrandLogo';
 import { formatPrice } from '@/data/products';
 import { saveOrder, type Order } from '@/lib/orders';
 import { openRazorpayCheckout } from '@/lib/razorpay';
+import { triggerHaptic } from '@/services/mobileService';
 import { 
   getUserAddressesFromFirestore, 
   saveAddressToFirestore, 
@@ -270,25 +271,30 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (processing) return;
+    triggerHaptic('heavy');
 
     if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+      triggerHaptic('error');
       toast.error('Please fill in your name, email, and mobile number');
       return;
     }
 
     if (fulfillment === 'delivery') {
       if (!form.address.trim() || !form.city.trim() || !form.pincode.trim()) {
+        triggerHaptic('error');
         toast.error('Please provide a complete delivery address');
         return;
       }
 
       if (serviceability && !serviceability.serviceable) {
+        triggerHaptic('error');
         toast.error(serviceability.reason || 'This address is outside our delivery radius. Please switch to Store Pickup.');
         return;
       }
     }
 
     if (!form.agreeTerms) {
+      triggerHaptic('error');
       toast.error('Please accept the terms and conditions');
       return;
     }
@@ -385,6 +391,7 @@ export default function CheckoutPage() {
         setOrderPlaced(true);
         clearCart();
         setProcessing(false);
+        triggerHaptic('success');
         toast.success('Order placed successfully with Pay on Delivery!');
         return;
       }
@@ -409,14 +416,17 @@ export default function CheckoutPage() {
           setOrderPlaced(true);
           clearCart();
           setProcessing(false);
+          triggerHaptic('success');
           toast.success('Payment verified & fresh cake order placed!');
         },
         onDismiss: () => {
+          triggerHaptic('warning');
           toast.error('Payment cancelled. You can retry or choose Pay on Delivery.');
           setProcessing(false);
         },
       });
     } catch {
+      triggerHaptic('error');
       toast.error('Could not process order. Please try again.');
       setProcessing(false);
     }

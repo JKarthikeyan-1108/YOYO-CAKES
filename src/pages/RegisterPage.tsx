@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import BrandLogo from '@/components/common/BrandLogo';
+import { triggerHaptic } from '@/services/mobileService';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -33,37 +34,44 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    triggerHaptic('heavy');
     if (!name || !email || !password) {
+      triggerHaptic('error');
       toast.error('Please fill in all fields');
       return;
     }
     if (password.length < 6) {
+      triggerHaptic('error');
       toast.error('Password must be at least 6 characters');
       return;
     }
     if (password !== confirmPassword) {
+      triggerHaptic('error');
       toast.error('Passwords do not match');
       return;
     }
 
     try {
       await register(email, password);
+      triggerHaptic('success');
       setRegisteredSuccess(true);
       toast.success('Registration successful! Verification email sent.');
       setTimeout(() => {
         navigate(from, { replace: true });
       }, 1500);
     } catch {
-      // Error handled by store
+      triggerHaptic('error');
     }
   };
 
   const handleGoogleLogin = async () => {
+    triggerHaptic('medium');
     try {
       await loginWithGoogle();
+      triggerHaptic('success');
       navigate(from, { replace: true });
     } catch {
-      // Error handled by store
+      triggerHaptic('error');
     }
   };
 

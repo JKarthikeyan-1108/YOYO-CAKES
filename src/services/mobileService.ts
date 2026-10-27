@@ -33,7 +33,7 @@ export function isMobileDevice(): boolean {
  * Uses Capacitor Haptics on native devices with a fallback to Web Vibration API.
  */
 export async function triggerHaptic(
-  type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' = 'light'
+  type: 'light' | 'medium' | 'heavy' | 'selection' | 'success' | 'warning' | 'error' = 'light'
 ): Promise<void> {
   try {
     if (Capacitor.isPluginAvailable('Haptics')) {
@@ -43,6 +43,12 @@ export async function triggerHaptic(
         await Haptics.impact({ style: ImpactStyle.Medium });
       } else if (type === 'heavy') {
         await Haptics.impact({ style: ImpactStyle.Heavy });
+      } else if (type === 'selection') {
+        if (Capacitor.isNativePlatform()) {
+          await Haptics.selectionStart();
+        } else {
+          await Haptics.impact({ style: ImpactStyle.Light });
+        }
       } else if (type === 'success') {
         await Haptics.notification({ type: NotificationType.Success });
       } else if (type === 'warning') {
@@ -59,15 +65,73 @@ export async function triggerHaptic(
   // Web Vibration API fallback
   if (typeof window !== 'undefined' && 'vibrate' in navigator) {
     try {
-      if (type === 'light') navigator.vibrate(10);
-      else if (type === 'medium') navigator.vibrate(25);
+      if (type === 'selection') navigator.vibrate(8);
+      else if (type === 'light') navigator.vibrate(12);
+      else if (type === 'medium') navigator.vibrate(28);
       else if (type === 'heavy') navigator.vibrate(45);
       else if (type === 'success') navigator.vibrate([20, 40, 20]);
-      else if (type === 'error') navigator.vibrate([50, 50, 50]);
+      else if (type === 'warning') navigator.vibrate([30, 30]);
+      else if (type === 'error') navigator.vibrate([60, 40, 60]);
     } catch {
       // Ignore vibration error on unsupported platforms
     }
   }
+}
+
+/**
+ * Convenient shorthand object for invoking haptics.
+ */
+export const haptic = {
+  light: () => triggerHaptic('light'),
+  medium: () => triggerHaptic('medium'),
+  heavy: () => triggerHaptic('heavy'),
+  selection: () => triggerHaptic('selection'),
+  success: () => triggerHaptic('success'),
+  warning: () => triggerHaptic('warning'),
+  error: () => triggerHaptic('error'),
+};
+
+/**
+ * Automatically binds tactile haptic feedback to interactive elements across the site.
+ * Elements with [data-haptic="light|medium|heavy|success|selection"] or buttons/tabs
+ * trigger tactile response seamlessly.
+ */
+export function initHapticListeners(): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  let lastHapticTime = 0;
+
+  const handleClick = (e: MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    const now = Date.now();
+    // Throttle rapid clicks to at least 40ms to prevent actuator queuing
+    if (now - lastHapticTime < 40) return;
+
+    // 1. Explicit data-haptic override
+    const hapticEl = target.closest('[data-haptic]') as HTMLElement | null;
+    if (hapticEl) {
+      const type = (hapticEl.getAttribute('data-haptic') || 'light') as any;
+      lastHapticTime = now;
+      triggerHaptic(type);
+      return;
+    }
+
+    // 2. Buttons, interactive links, tabs, and checkboxes/radios
+    const interactive = target.closest(
+      'button:not([data-no-haptic]), [role="button"]:not([data-no-haptic]), [role="tab"]:not([data-no-haptic]), .btn:not([data-no-haptic]), input[type="radio"], input[type="checkbox"]'
+    );
+    if (interactive) {
+      lastHapticTime = now;
+      triggerHaptic('light');
+    }
+  };
+
+  document.addEventListener('click', handleClick, { capture: true, passive: true });
+  return () => {
+    document.removeEventListener('click', handleClick, { capture: true });
+  };
 }
 
 /**

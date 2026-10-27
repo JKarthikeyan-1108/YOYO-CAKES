@@ -14,13 +14,18 @@ import {
   Truck, 
   Star, 
   Heart,
-  CheckCircle2
+  CheckCircle2,
+  Zap,
+  ClipboardPaste,
+  X,
+  RotateCcw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { RecaptchaVerifier, type ConfirmationResult } from 'firebase/auth';
 import BrandLogo from '@/components/common/BrandLogo';
+import { triggerHaptic } from '@/services/mobileService';
 
 type LoginTab = 'phone' | 'email' | 'admin';
 
@@ -36,6 +41,7 @@ export default function LoginPage() {
   const [selectedTab, setSelectedTab] = useState<LoginTab | null>(null);
   const activeTab: LoginTab = selectedTab ?? (isAdminIntent ? 'admin' : 'phone');
   const setActiveTab = (tab: LoginTab) => {
+    triggerHaptic('selection');
     setSelectedTab(tab);
     clearError();
   };
@@ -74,6 +80,7 @@ export default function LoginPage() {
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   // Cleanup recaptcha on unmount
   useEffect(() => {
@@ -110,44 +117,118 @@ export default function LoginPage() {
     return recaptchaVerifierRef.current;
   };
 
+  // Quick Action Demo Helpers
+  const handleQuickAdminDemo = () => {
+    triggerHaptic('medium');
+    setActiveTab('admin');
+    setAdminEmail('admin@yoyocakes.com');
+    setAdminPassword('yoyoadmin2025');
+    toast.success('Admin demo credentials populated! Click Sign In below.', { icon: '👑' });
+  };
+
+  const handleQuickCustomerDemo = () => {
+    triggerHaptic('medium');
+    setActiveTab('email');
+    setEmail('customer@yoyocakes.com');
+    setPassword('yoyocustomer123');
+    toast.success('Customer credentials populated! Click Sign In below.', { icon: '🧁' });
+  };
+
+  const handleQuickPhoneDemo = () => {
+    triggerHaptic('medium');
+    setActiveTab('phone');
+    setPhoneNumber('9876543210');
+    toast.success('Test mobile number populated! Tap Continue to generate code.', { icon: '📱' });
+  };
+
+  const handleAutoFillDemoOtp = () => {
+    triggerHaptic('medium');
+    setOtpCode(['1', '2', '3', '4', '5', '6']);
+    toast.success('Auto-filled OTP: 123456', { icon: '✨' });
+    setTimeout(() => otpInputRefs.current[5]?.focus(), 50);
+  };
+
+  const handlePasteOtp = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const digits = text.replace(/\D/g, '').slice(0, 6).split('');
+      if (digits.length > 0) {
+        triggerHaptic('medium');
+        const updated = [...otpCode];
+        digits.forEach((d, i) => {
+          if (i < 6) updated[i] = d;
+        });
+        setOtpCode(updated);
+        toast.success('Pasted OTP from clipboard!');
+        const nextIndex = Math.min(digits.length, 5);
+        otpInputRefs.current[nextIndex]?.focus();
+      } else {
+        toast.error('No valid numbers found in clipboard');
+      }
+    } catch {
+      toast.error('Clipboard access unavailable. Tap Auto-fill instead.');
+    }
+  };
+
+  const handleResetOtp = () => {
+    triggerHaptic('light');
+    setOtpCode(['', '', '', '', '', '']);
+    otpInputRefs.current[0]?.focus();
+  };
+
   // Handle Customer Email / Password Login
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    triggerHaptic('heavy');
     try {
       await login(email, password);
+      triggerHaptic('success');
       toast.success('Welcome back to YOYO CAKES!');
       navigate(from, { replace: true });
-    } catch {}
+    } catch {
+      triggerHaptic('error');
+    }
   };
 
   // Handle Admin Portal Login
   const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    triggerHaptic('heavy');
     if (!adminEmail.trim() || !adminPassword) {
+      triggerHaptic('error');
       toast.error('Please enter both administrator email and password.');
       return;
     }
     try {
       await adminLogin(adminEmail, adminPassword);
+      triggerHaptic('success');
       toast.success('Administrator verified! Redirecting to Management Panel...', { icon: '🛡️' });
       navigate('/admin/products', { replace: true });
-    } catch {}
+    } catch {
+      triggerHaptic('error');
+    }
   };
 
   // Handle Google Login
   const handleGoogleLogin = async () => {
+    triggerHaptic('medium');
     try {
       await loginWithGoogle();
+      triggerHaptic('success');
       toast.success('Signed in with Google!');
       navigate(from, { replace: true });
-    } catch {}
+    } catch {
+      triggerHaptic('error');
+    }
   };
 
   // Handle Phone OTP Send
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    triggerHaptic('medium');
     const cleaned = phoneNumber.replace(/\D/g, '');
     if (cleaned.length < 10) {
+      triggerHaptic('error');
       toast.error('Please enter a valid 10-digit mobile number');
       return;
     }
@@ -172,12 +253,13 @@ export default function LoginPage() {
       // Focus first OTP field
       setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
     } catch {
-      // Error handled by store
+      triggerHaptic('error');
     }
   };
 
   // Handle OTP digit changes
   const handleOtpChange = (index: number, val: string) => {
+    triggerHaptic('light');
     if (val.length > 1) {
       // Pasting full OTP
       const digits = val.replace(/\D/g, '').slice(0, 6).split('');
@@ -203,6 +285,7 @@ export default function LoginPage() {
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      triggerHaptic('light');
       otpInputRefs.current[index - 1]?.focus();
     }
   };
@@ -210,13 +293,16 @@ export default function LoginPage() {
   // Verify OTP Code
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    triggerHaptic('heavy');
     const fullCode = otpCode.join('');
     if (fullCode.length !== 6) {
+      triggerHaptic('error');
       toast.error('Please enter the complete 6-digit OTP');
       return;
     }
 
     if (!confirmationResult) {
+      triggerHaptic('error');
       toast.error('Session expired. Please request a new verification code.');
       setOtpSent(false);
       return;
@@ -224,10 +310,11 @@ export default function LoginPage() {
 
     try {
       await confirmPhoneOtp(confirmationResult, fullCode);
+      triggerHaptic('success');
       toast.success('Phone verified successfully!');
       navigate(from, { replace: true });
     } catch {
-      // Error handled in store
+      triggerHaptic('error');
     }
   };
 
@@ -348,6 +435,59 @@ export default function LoginPage() {
                 </Link>
               </div>
 
+              {/* Quick Actions & Fast Demo Toolbar */}
+              <div className="mb-4 p-3 rounded-2xl bg-[var(--color-brand-cream-dark)] border border-[var(--color-brand-border)]">
+                <div className="flex items-center justify-between mb-2 px-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-muted)] flex items-center gap-1.5">
+                    <Zap size={13} className="text-amber-500 fill-amber-500" />
+                    Quick Actions & Test Shortcuts
+                  </span>
+                  <span className="text-[10px] text-[var(--color-brand-muted)] bg-[var(--color-brand-surface)] px-2 py-0.5 rounded-full border border-[var(--color-brand-border)]">
+                    1-Tap Populate
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleQuickAdminDemo}
+                    className="p-2 rounded-xl text-left bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] transition-all active:scale-95 shadow-2xs group cursor-pointer"
+                  >
+                    <div className="text-xs font-black text-[var(--color-brand-chocolate)] flex items-center gap-1">
+                      <span>👑 Admin</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--color-brand-muted)] block truncate mt-0.5">
+                      yoyoadmin2025
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleQuickPhoneDemo}
+                    className="p-2 rounded-xl text-left bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] transition-all active:scale-95 shadow-2xs group cursor-pointer"
+                  >
+                    <div className="text-xs font-black text-[var(--color-brand-chocolate)] flex items-center gap-1">
+                      <span>📱 Phone OTP</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--color-brand-muted)] block truncate mt-0.5">
+                      Code: 123456
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleQuickCustomerDemo}
+                    className="p-2 rounded-xl text-left bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] transition-all active:scale-95 shadow-2xs group cursor-pointer"
+                  >
+                    <div className="text-xs font-black text-[var(--color-brand-chocolate)] flex items-center gap-1">
+                      <span>🧁 Customer</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--color-brand-muted)] block truncate mt-0.5">
+                      Demo Account
+                    </span>
+                  </button>
+                </div>
+              </div>
+
               {/* Segmented Tab Switcher */}
               <div className="grid grid-cols-3 p-1.5 bg-[var(--color-brand-cream-dark)] rounded-2xl mb-6 border border-[var(--color-brand-border)] shadow-xs">
                 <button
@@ -424,6 +564,19 @@ export default function LoginPage() {
                             placeholder="Enter 10-digit mobile number"
                             autoFocus
                           />
+                          {phoneNumber && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                triggerHaptic('light');
+                                setPhoneNumber('');
+                              }}
+                              className="px-3 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] flex items-center justify-center"
+                              title="Clear mobile number"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
                         </div>
                         <p className="text-[11px] text-[var(--color-brand-muted)] mt-1.5">
                           We will send a 6-digit one-time verification code via SMS.
@@ -458,6 +611,7 @@ export default function LoginPage() {
                           <button
                             type="button"
                             onClick={() => {
+                              triggerHaptic('light');
                               setOtpSent(false);
                               setOtpCode(['', '', '', '', '', '']);
                             }}
@@ -467,24 +621,36 @@ export default function LoginPage() {
                           </button>
                         </div>
 
-                        {(confirmationResult as any)?.isSimulated && (
-                          <div className="mt-2.5 flex items-center justify-center gap-2">
-                            <span className="py-1 px-3 bg-amber-500/15 border border-amber-500/30 rounded-lg text-[11px] text-amber-800 dark:text-amber-200 font-semibold inline-flex items-center gap-1.5">
-                              <Sparkles size={12} className="text-amber-600 dark:text-amber-400" />
-                              <span>Test/Demo Mode: Use code <strong className="font-mono text-xs">123456</strong></span>
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOtpCode(['1', '2', '3', '4', '5', '6']);
-                                setTimeout(() => otpInputRefs.current[5]?.focus(), 50);
-                              }}
-                              className="text-[11px] text-[var(--color-brand-primary-dark)] hover:underline font-bold"
-                            >
-                              Auto-fill
-                            </button>
-                          </div>
-                        )}
+                        {/* Interactive OTP Action Bar */}
+                        <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleAutoFillDemoOtp}
+                            className="py-1 px-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-lg text-[11px] text-amber-900 dark:text-amber-200 font-bold inline-flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                          >
+                            <Sparkles size={12} className="text-amber-600 dark:text-amber-400" />
+                            <span>Auto-fill 123456</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handlePasteOtp}
+                            className="py-1 px-2.5 bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] rounded-lg text-[11px] text-[var(--color-brand-chocolate)] font-medium inline-flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                          >
+                            <ClipboardPaste size={12} />
+                            <span>Paste Clipboard</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleResetOtp}
+                            className="py-1 px-2 text-[11px] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] inline-flex items-center gap-0.5"
+                            title="Reset code"
+                          >
+                            <RotateCcw size={11} />
+                            <span>Reset</span>
+                          </button>
+                        </div>
                       </div>
 
                       <div>
@@ -559,9 +725,22 @@ export default function LoginPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
                         required
-                        className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        className="w-full pl-10 pr-10 py-3.5 rounded-xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] focus:border-[var(--color-brand-primary)] focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="name@example.com"
                       />
+                      {email && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setEmail('');
+                          }}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]"
+                          title="Clear email"
+                        >
+                          <X size={15} />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -591,12 +770,31 @@ export default function LoginPage() {
                       />
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => {
+                          triggerHaptic('light');
+                          setShowPassword(!showPassword);
+                        }}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]"
                       >
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Remember Me Action */}
+                  <div className="flex items-center justify-between text-xs pt-0.5">
+                    <label className="flex items-center gap-2 text-[var(--color-brand-muted)] cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => {
+                          triggerHaptic('light');
+                          setRememberMe(e.target.checked);
+                        }}
+                        className="rounded border-[var(--color-brand-border)] text-amber-600 focus:ring-amber-500"
+                      />
+                      <span>Remember this browser</span>
+                    </label>
                   </div>
 
                   <button
@@ -639,9 +837,22 @@ export default function LoginPage() {
                         onChange={(e) => setAdminEmail(e.target.value)}
                         disabled={loading}
                         required
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
+                        className="w-full pl-10 pr-10 py-3 rounded-xl bg-[var(--color-brand-input-bg)] border border-[var(--color-brand-border)] focus:border-[#D4A373] focus:ring-2 focus:ring-[#D4A373]/25 outline-none text-base sm:text-sm text-[var(--color-brand-chocolate)] transition-all font-medium shadow-xs disabled:opacity-60"
                         placeholder="Enter administrator email"
                       />
+                      {adminEmail && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setAdminEmail('');
+                          }}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]"
+                          title="Clear admin email"
+                        >
+                          <X size={15} />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -663,7 +874,10 @@ export default function LoginPage() {
                       />
                       <button
                         type="button"
-                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        onClick={() => {
+                          triggerHaptic('light');
+                          setShowAdminPassword(!showAdminPassword);
+                        }}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]"
                       >
                         {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}

@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { useAuthStore } from '@/stores/authStore';
-import { initMobileAppListeners } from '@/services/mobileService';
+import { initMobileAppListeners, initHapticListeners } from '@/services/mobileService';
 
 // Layouts & Boundary
 import Layout from '@/components/layout/Layout';
@@ -50,8 +50,9 @@ export default function App() {
   const setUser = useAuthStore((s) => s.setUser);
 
   useEffect(() => {
-    // Native mobile app back button and lifecycle listeners
+    // Native mobile app back button, lifecycle, and global tactile haptic feedback
     const cleanupMobile = initMobileAppListeners();
+    const cleanupHaptics = initHapticListeners();
 
     if (isFirebaseConfigured && auth) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -60,11 +61,15 @@ export default function App() {
       return () => {
         unsubscribe();
         cleanupMobile();
+        cleanupHaptics();
       };
     } else {
       // Set initialized when running in demo/offline mode
       useAuthStore.setState({ initialized: true, loading: false });
-      return () => cleanupMobile();
+      return () => {
+        cleanupMobile();
+        cleanupHaptics();
+      };
     }
   }, [setUser]);
 

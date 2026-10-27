@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, Monitor, Check, ChevronDown } from 'lucide-react';
 import { useThemeStore, type Theme } from '@/stores/themeStore';
+import { triggerHaptic } from '@/services/mobileService';
 import toast from 'react-hot-toast';
 
 interface ThemeToggleProps {
@@ -41,6 +42,7 @@ export default function ThemeToggle({
   }, [dropdownOpen]);
 
   const handleSelect = (selected: Theme) => {
+    triggerHaptic('light');
     setTheme(selected);
     setDropdownOpen(false);
     if (onThemeSelect) onThemeSelect(selected);
@@ -64,6 +66,7 @@ export default function ThemeToggle({
   };
 
   const handleCycle = () => {
+    triggerHaptic('light');
     const next = toggleTheme();
     if (onThemeSelect) onThemeSelect(next);
 
