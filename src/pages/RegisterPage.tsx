@@ -52,7 +52,7 @@ export default function RegisterPage() {
     }
 
     try {
-      await register(email, password);
+      await register(email, password, name.trim());
       triggerHaptic('success');
       setRegisteredSuccess(true);
       toast.success('Registration successful! Verification email sent.');

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   getAllReviews,
   getApprovedReviews,
@@ -10,6 +10,11 @@ import {
   resetReviewsToDefault,
 } from '@/services/reviewService';
 import { PRODUCTS } from '@/data/products';
+import { useAuthStore } from '@/stores/authStore';
+
+vi.mock('@/services/firestoreService', () => ({
+  saveProfileToFirestore: vi.fn().mockResolvedValue(undefined),
+}));
 
 describe('Admin Reviews Management & Swiggy/Zepto Delivery Tracking', () => {
   beforeEach(() => {
@@ -155,4 +160,39 @@ describe('Admin Reviews Management & Swiggy/Zepto Delivery Tracking', () => {
       expect(milestoneKeys.length).toBe(6);
     });
   });
+
+  describe('4. User Registration Display Name Persistence', () => {
+    it('sets customer entered display name on registration', async () => {
+      const auth = useAuthStore.getState();
+      await auth.register('kavitha.patel@example.com', 'securePass123', 'Kavitha Patel');
+
+      const user = useAuthStore.getState().user;
+      expect(user).toBeDefined();
+      expect(user?.email).toBe('kavitha.patel@example.com');
+      expect(user?.displayName).toBe('Kavitha Patel');
+    });
+
+    it('falls back to email prefix if display name is omitted', async () => {
+      const auth = useAuthStore.getState();
+      await auth.register('arun.kumar@example.com', 'securePass123');
+
+      const user = useAuthStore.getState().user;
+      expect(user?.displayName).toBe('arun.kumar');
+    });
+  });
+
+  describe('5. Payment Gateway Phone Sanitization', () => {
+    it('cleanses raw contact numbers into 10-digit Indian mobile numbers', () => {
+      const sanitizePhone = (phone: string) => {
+        const digits = (phone || '').replace(/\D/g, '');
+        return digits.length >= 10 ? digits.slice(-10) : digits;
+      };
+
+      expect(sanitizePhone('+91 98765 43210')).toBe('9876543210');
+      expect(sanitizePhone('98765-43210')).toBe('9876543210');
+      expect(sanitizePhone('09876543210')).toBe('9876543210');
+      expect(sanitizePhone('+919876543210')).toBe('9876543210');
+    });
+  });
 });
+

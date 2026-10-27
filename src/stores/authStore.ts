@@ -10,6 +10,7 @@ import {
   signInWithPopup,
   signInWithPhoneNumber,
   RecaptchaVerifier,
+  updateProfile,
   type ConfirmationResult,
   type User,
 } from 'firebase/auth';
@@ -26,7 +27,7 @@ interface AuthState {
   initialized: boolean;
   login: (email: string, password: string) => Promise<void>;
   adminLogin: (email: string, password: string, securityPin?: string) => Promise<boolean>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, displayName?: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   loginWithPhone: (phoneNumber: string, appVerifier?: RecaptchaVerifier) => Promise<ConfirmationResult>;
   confirmPhoneOtp: (confirmationResult: ConfirmationResult, code: string) => Promise<User | null>;
@@ -239,17 +240,24 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     throw new Error(errorMsg);
   },
 
-  register: async (email: string, password: string) => {
+  register: async (email: string, password: string, displayName?: string) => {
     set({ loading: true, error: null });
     const cleanEmail = email.trim().toLowerCase();
+    const finalName = displayName?.trim() || cleanEmail.split('@')[0];
 
     if (auth && isFirebaseConfigured) {
       try {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         if (result.user) {
+          if (finalName) {
+            try {
+              await updateProfile(result.user, { displayName: finalName });
+            } catch {}
+          }
           try {
             await sendEmailVerification(result.user);
           } catch {}
+          get().setUser(result.user);
         }
         set({ loading: false });
         return;
@@ -269,7 +277,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           const userObj: any = {
             uid: `user-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '')}`,
             email: cleanEmail,
-            displayName: cleanEmail.split('@')[0],
+            displayName: finalName,
             emailVerified: true,
             phoneNumber: null,
             photoURL: null,
@@ -289,7 +297,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const userObj: any = {
         uid: `user-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '')}`,
         email: cleanEmail,
-        displayName: cleanEmail.split('@')[0],
+        displayName: finalName,
         emailVerified: true,
         phoneNumber: null,
         photoURL: null,

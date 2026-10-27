@@ -24,6 +24,7 @@ import {
   MessageSquare,
   ChevronRight,
   Truck,
+  Star,
 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCartStore } from '@/stores/cartStore';
@@ -462,18 +463,32 @@ export default function Navbar() {
                         <p className="text-[11px] text-gray-500 truncate">{user.email || user.phoneNumber}</p>
                       </div>
                       {isAdmin && (
-                        <Link
-                          to="/admin/products"
-                          className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-amber-50 text-amber-900 hover:bg-amber-100 text-xs font-bold mb-2 border border-amber-200"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <ShieldCheck size={13} className="text-amber-700" />
-                            Admin Products & Stock
-                          </span>
-                          <span className="text-[9px] bg-amber-200 px-1 py-0.5 rounded text-amber-950 font-extrabold uppercase">
-                            Staff
-                          </span>
-                        </Link>
+                        <div className="space-y-1 mb-2">
+                          <Link
+                            to="/admin/products"
+                            className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-amber-50 text-amber-900 hover:bg-amber-100 text-xs font-bold border border-amber-200"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <ShieldCheck size={13} className="text-amber-700" />
+                              Admin Products & Stock
+                            </span>
+                            <span className="text-[9px] bg-amber-200 px-1 py-0.5 rounded text-amber-950 font-extrabold uppercase">
+                              Staff
+                            </span>
+                          </Link>
+                          <Link
+                            to="/admin/reviews"
+                            className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-amber-50 text-amber-900 hover:bg-amber-100 text-xs font-bold border border-amber-200"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <Star size={13} className="text-amber-700" />
+                              Moderate Reviews
+                            </span>
+                            <span className="text-[9px] bg-amber-200 px-1 py-0.5 rounded text-amber-950 font-extrabold uppercase">
+                              Mod
+                            </span>
+                          </Link>
+                        </div>
                       )}
                       <Link to="/account" className="block py-1.5 text-xs text-gray-700 hover:text-[var(--color-brand-primary-dark)] font-medium">
                         Your Profile & Addresses
@@ -839,6 +854,14 @@ export default function Navbar() {
                 >
                   <ClipboardList size={18} className="text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Orders</span>
+                </Link>
+                <Link
+                  to="/admin/reviews"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface)] transition-colors"
+                >
+                  <Star size={18} className="text-[var(--color-brand-primary)] flex-shrink-0" />
+                  <span>Customer Reviews</span>
                 </Link>
               </div>
             )}

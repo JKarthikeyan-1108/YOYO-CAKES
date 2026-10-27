@@ -73,6 +73,10 @@ export async function openRazorpayCheckout({
   const isLoaded = await loadRazorpayScript();
   const activeKey = RAZORPAY_TEST_KEY_ID;
 
+  // Sanitize Indian phone number (10 digits) for Razorpay checkout prefill
+  const digits = (customerPhone || '').replace(/\D/g, '');
+  const cleanPhone = digits.length >= 10 ? digits.slice(-10) : digits;
+
   if (isLoaded && window.Razorpay && activeKey) {
     try {
       const options: RazorpayOptions = {
@@ -88,7 +92,7 @@ export async function openRazorpayCheckout({
         prefill: {
           name: customerName,
           email: customerEmail,
-          contact: customerPhone,
+          contact: cleanPhone || customerPhone,
         },
         notes: {
           orderId,
