@@ -3,20 +3,26 @@ import { Heart, ShoppingCart, Trash2, ArrowRight, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
+import { useProductStore } from '@/stores/productStore';
 import { PRODUCTS, formatPrice } from '@/data/products';
+import { triggerHaptic } from '@/services/mobileService';
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlistStore();
   const addItem = useCartStore((s) => s.addItem);
+  const catalogProducts = useProductStore((s) => s.products);
 
-  const wishlistProducts = PRODUCTS.filter((p) => items.includes(p.id));
+  const allAvailable = catalogProducts.length > 0 ? catalogProducts : PRODUCTS;
+  const wishlistProducts = allAvailable.filter((p) => items.includes(p.id));
 
-  const handleAddToCart = (product: (typeof PRODUCTS)[0]) => {
+  const handleAddToCart = (product: (typeof allAvailable)[0]) => {
+    triggerHaptic('success');
     addItem(product);
     toast.success(`${product.name} moved to cart`);
   };
 
   const handleAddAllToCart = () => {
+    triggerHaptic('success');
     wishlistProducts.forEach((product) => {
       addItem(product);
     });
@@ -24,8 +30,14 @@ export default function WishlistPage() {
   };
 
   const handleRemove = (productId: string, productName: string) => {
+    triggerHaptic('light');
     removeItem(productId);
     toast.success(`${productName} removed from wishlist`);
+  };
+
+  const handleClearWishlist = () => {
+    triggerHaptic('warning');
+    clearWishlist();
   };
 
   return (
@@ -55,7 +67,7 @@ export default function WishlistPage() {
                   <ShoppingCart size={14} /> Move All to Cart
                 </button>
                 <button
-                  onClick={clearWishlist}
+                  onClick={handleClearWishlist}
                   className="text-xs text-[var(--color-brand-muted)] hover:text-red-600 transition-colors font-semibold px-2 py-1"
                 >
                   Clear All

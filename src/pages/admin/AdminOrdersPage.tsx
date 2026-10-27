@@ -36,6 +36,7 @@ import {
   type PaymentStatus,
 } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
+import { triggerHaptic } from '@/services/mobileService';
 
 function playNewOrderChime() {
   try {
@@ -157,6 +158,7 @@ export default function AdminOrdersPage() {
     newStatus: OrderStatus,
     newPayment?: PaymentStatus
   ) => {
+    triggerHaptic('success');
     await updateOrderStatus(orderId, newStatus, newPayment);
     toast.success(`Order #${orderId} transitioned to ${newStatus.replace('_', ' ')}`);
     if (selectedOrder && selectedOrder.id === orderId) {
@@ -169,6 +171,7 @@ export default function AdminOrdersPage() {
   };
 
   const handleQuickAdvance = async (order: Order) => {
+    triggerHaptic('medium');
     const next = getNextOrderStatus(order.orderStatus);
     if (!next) return;
 
@@ -188,6 +191,7 @@ export default function AdminOrdersPage() {
     e.preventDefault();
     if (!riderModalOrder) return;
     if (!riderName.trim()) {
+      triggerHaptic('error');
       toast.error('Please enter delivery rider name');
       return;
     }
@@ -195,9 +199,11 @@ export default function AdminOrdersPage() {
     setSubmittingRider(true);
     try {
       await assignOrderRider(riderModalOrder.id, riderName, riderPhone, riderNotes);
+      triggerHaptic('success');
       toast.success(`Order #${riderModalOrder.id} dispatched with ${riderName}!`, { icon: '🚴' });
       setRiderModalOrder(null);
     } catch {
+      triggerHaptic('error');
       toast.error('Failed to assign rider');
     } finally {
       setSubmittingRider(false);

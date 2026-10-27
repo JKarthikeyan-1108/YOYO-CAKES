@@ -42,6 +42,7 @@ import {
 } from '@/services/firestoreService';
 import { formatPrice } from '@/data/products';
 import toast from 'react-hot-toast';
+import { triggerHaptic } from '@/services/mobileService';
 
 type AccountTab = 'orders' | 'profile' | 'addresses' | 'support' | 'settings';
 
@@ -63,6 +64,7 @@ export default function AccountPage() {
   });
 
   const setActiveTab = (tab: AccountTab) => {
+    triggerHaptic('selection');
     setActiveTabState(tab);
     if (location.pathname !== '/orders') {
       searchParams.set('tab', tab);
@@ -169,6 +171,7 @@ export default function AccountPage() {
   }, [orders, orderSearchQuery, orderFilter]);
 
   const handleAddressSavedFromModal = (saved: SavedAddress) => {
+    triggerHaptic('success');
     setAddresses((prev) => {
       const exists = prev.some((a) => a.id === saved.id);
       if (exists) {
@@ -181,6 +184,7 @@ export default function AccountPage() {
   };
 
   const handleDeleteAddress = async (id: string) => {
+    triggerHaptic('warning');
     await deleteAddressFromFirestore(id);
     setAddresses((prev) => prev.filter((a) => a.id !== id));
     toast.success('Address removed');
@@ -188,12 +192,14 @@ export default function AccountPage() {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    triggerHaptic('success');
     toast.success('Profile details updated successfully');
   };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    triggerHaptic('success');
     useThemeStore.getState().setTheme(settings.theme);
     await saveUserSettingsToFirestore({
       ...settings,
@@ -202,7 +208,9 @@ export default function AccountPage() {
     toast.success('Account preferences saved to Firestore!');
   };
 
+
   const handleBuyAgain = (order: Order) => {
+    triggerHaptic('medium');
     buyAgainItems(
       order.items.map((i) => ({
         id: i.id,
@@ -215,6 +223,7 @@ export default function AccountPage() {
     toast.success(`Items from order ${order.id} added to cart!`);
     navigate('/cart');
   };
+
 
   const handleWhatsAppOrderSupport = (orderId: string) => {
     const text = encodeURIComponent(

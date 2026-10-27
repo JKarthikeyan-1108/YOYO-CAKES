@@ -77,4 +77,21 @@ describe('Tactile Haptics & Mobile Service', () => {
     cleanup();
     btn.remove();
   });
+
+  it('triggers haptic on [role="tab"] and [data-haptic] elements', async () => {
+    const cleanup = initHapticListeners();
+
+    const tab = document.createElement('div');
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('data-haptic', 'medium');
+    document.body.appendChild(tab);
+
+    tab.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(vibrateMock).toHaveBeenCalled();
+
+    cleanup();
+    tab.remove();
+  });
 });
+

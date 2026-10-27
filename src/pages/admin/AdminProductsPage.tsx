@@ -21,6 +21,7 @@ import toast from 'react-hot-toast';
 import { CATEGORIES, formatPrice, type Product } from '@/data/products';
 import { useProductStore } from '@/stores/productStore';
 import { uploadProductImageToStorage } from '@/services/firestoreService';
+import { triggerHaptic } from '@/services/mobileService';
 
 type StockFilterType = 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
 
@@ -239,6 +240,7 @@ export default function AdminProductsPage() {
         });
         setEditingProduct((prev) => (prev ? { ...prev, image: url } : null));
         setUploadError(null);
+        triggerHaptic('success');
         toast.success('Image uploaded successfully to Cloud Storage!');
         return;
       } catch (storageErr: any) {
@@ -251,10 +253,12 @@ export default function AdminProductsPage() {
       setEditingProduct((prev) => (prev ? { ...prev, image: optimizedDataUrl } : null));
       setUploadProgress(100);
       setUploadError(null);
+      triggerHaptic('success');
       toast.success('Image attached successfully to product!', { icon: '🖼️' });
     } catch (err: any) {
       const msg = err?.message || 'Image processing failed';
       setUploadError(msg);
+      triggerHaptic('error');
       toast.error(msg);
     } finally {
       setUploadingImage(false);
@@ -266,20 +270,24 @@ export default function AdminProductsPage() {
     if (!editingProduct) return;
 
     if (uploadingImage) {
+      triggerHaptic('warning');
       toast.error('Image is currently uploading. Please wait for upload to complete.');
       return;
     }
 
     if (uploadError) {
+      triggerHaptic('error');
       toast.error('Cannot save product while image upload has failed. Please resolve the error.');
       return;
     }
 
     if (!editingProduct.name.trim()) {
+      triggerHaptic('error');
       toast.error('Product name is required');
       return;
     }
     if (editingProduct.price <= 0) {
+      triggerHaptic('error');
       toast.error('Price must be greater than zero');
       return;
     }
@@ -287,14 +295,17 @@ export default function AdminProductsPage() {
     try {
       if (isNew) {
         await addProduct(editingProduct);
+        triggerHaptic('success');
         toast.success(`${editingProduct.name} added to catalog`);
       } else {
         await updateProduct(editingProduct);
+        triggerHaptic('success');
         toast.success(`${editingProduct.name} updated successfully`);
       }
       cleanupPreview();
       setEditingProduct(null);
     } catch (err: any) {
+      triggerHaptic('error');
       toast.error(err?.message || 'Failed to save product');
     }
   };
@@ -302,6 +313,7 @@ export default function AdminProductsPage() {
   const handleToggleStock = async (id: string) => {
     const target = products.find((p) => p.id === id);
     if (!target) return;
+    triggerHaptic('light');
     const willBeInStock = !target.inStock;
     await toggleStock(id);
     toast.success(`${target.name} marked ${willBeInStock ? 'In Stock' : 'Out of Stock'}`);
@@ -311,6 +323,7 @@ export default function AdminProductsPage() {
     if (!confirmDeleteId) return;
     const target = products.find((p) => p.id === confirmDeleteId);
     if (!target) return;
+    triggerHaptic('warning');
     await deleteProduct(confirmDeleteId);
     toast.success(`${target.name} deleted from catalog`);
     setConfirmDeleteId(null);

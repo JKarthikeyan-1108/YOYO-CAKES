@@ -134,11 +134,23 @@ export default function LoginPage() {
     toast.success('Customer credentials populated! Click Sign In below.', { icon: '🧁' });
   };
 
-  const handleQuickPhoneDemo = () => {
+  const handleQuickPhoneDemo = async () => {
     triggerHaptic('medium');
     setActiveTab('phone');
     setPhoneNumber('9876543210');
-    toast.success('Test mobile number populated! Tap Continue to generate code.', { icon: '📱' });
+    try {
+      const appVerifier = isFirebaseConfigured ? initRecaptcha() : undefined;
+      const result = await loginWithPhone('+919876543210', appVerifier || undefined);
+      setConfirmationResult(result);
+      setOtpSent(true);
+      setResendCountdown(30);
+      setOtpCode(['1', '2', '3', '4', '5', '6']);
+      triggerHaptic('success');
+      toast.success('Test code generated! Tap "Verify & Sign In" to proceed.', { duration: 4000, icon: '📱' });
+      setTimeout(() => otpInputRefs.current[5]?.focus(), 100);
+    } catch {
+      toast.success('Test mobile number populated! Tap Continue to generate code.', { icon: '📱' });
+    }
   };
 
   const handleAutoFillDemoOtp = () => {

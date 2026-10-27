@@ -1,4 +1,5 @@
 // Razorpay client integration utility
+import { triggerHaptic } from '@/services/mobileService';
 
 declare global {
   interface Window {
@@ -94,10 +95,12 @@ export async function openRazorpayCheckout({
           businessName: 'YOYO CAKES',
         },
         handler: (response: RazorpayPaymentSuccessResponse) => {
+          triggerHaptic('success');
           onSuccess(response);
         },
         modal: {
           ondismiss: () => {
+            triggerHaptic('warning');
             if (onDismiss) onDismiss();
           },
         },
@@ -106,6 +109,7 @@ export async function openRazorpayCheckout({
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', (response: any) => {
         console.warn('Payment failed:', response.error);
+        triggerHaptic('error');
         if (onDismiss) onDismiss();
       });
       rzp.open();
@@ -118,6 +122,7 @@ export async function openRazorpayCheckout({
   // Graceful test simulator for automated tests or environments where external scripts are blocked
   console.info('Razorpay test mode: simulated verification flow');
   setTimeout(() => {
+    triggerHaptic('success');
     onSuccess({
       razorpay_payment_id: `pay_test_${Math.random().toString(36).substring(2, 10)}`,
       razorpay_order_id: `order_test_${orderId}`,
@@ -125,3 +130,4 @@ export async function openRazorpayCheckout({
     });
   }, 1000);
 }
+
