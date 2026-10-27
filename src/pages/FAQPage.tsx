@@ -72,7 +72,7 @@ export default function FAQPage() {
 
         {/* Category Filter using DaisyUI tabs */}
         <div className="flex justify-center mb-10 overflow-x-auto">
-          <div className="tabs tabs-box bg-white p-1 rounded-2xl shadow-xs border border-gray-200">
+          <div className="tabs tabs-box bg-[var(--color-brand-surface)] p-1 rounded-2xl shadow-xs border border-[var(--color-brand-border)]">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -80,8 +80,8 @@ export default function FAQPage() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`tab text-xs font-bold rounded-xl transition-all ${
                   selectedCategory === cat
-                    ? 'tab-active bg-[var(--color-brand-chocolate)] text-white shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'tab-active bg-[var(--color-brand-primary-dark)] text-white shadow-xs'
+                    : 'text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
                 }`}
               >
                 {cat}
@@ -97,7 +97,7 @@ export default function FAQPage() {
             return (
               <div
                 key={idx}
-                className="collapse collapse-plus bg-white border border-[var(--color-brand-primary-light)]/30 rounded-2xl shadow-xs hover:border-[var(--color-brand-primary-dark)]/40 transition-colors"
+                className="collapse collapse-plus bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] rounded-2xl shadow-xs hover:border-[var(--color-brand-primary)]/60 transition-colors"
               >
                 <input
                   type="checkbox"
@@ -108,7 +108,7 @@ export default function FAQPage() {
                 <div className="collapse-title font-heading font-bold text-base sm:text-lg text-[var(--color-brand-chocolate)] pr-12">
                   {faq.q}
                 </div>
-                <div className="collapse-content text-sm text-[var(--color-brand-muted)] leading-relaxed border-t border-gray-100 pt-3">
+                <div className="collapse-content text-sm text-[var(--color-brand-muted)] leading-relaxed border-t border-[var(--color-brand-border)] pt-3">
                   <p>{faq.a}</p>
                 </div>
               </div>
@@ -117,8 +117,8 @@ export default function FAQPage() {
         </div>
 
         {/* Still have questions? */}
-        <div className="bg-white rounded-2xl shadow-elevated p-8 text-center border border-[var(--color-brand-primary-light)]/20">
-          <HelpCircle size={40} className="mx-auto text-[var(--color-brand-primary-dark)] mb-3" />
+        <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-elevated p-8 text-center border border-[var(--color-brand-border)]">
+          <HelpCircle size={40} className="mx-auto text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] mb-3" />
           <h3 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)] mb-2">
             Still Have Questions?
           </h3>

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft, Printer, MapPin, ExternalLink, Store } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft, Printer, MapPin, ExternalLink, Store, RotateCw, MessageCircle } from 'lucide-react';
 import { getOrderById, type Order, type OrderStatus } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
+import { useCartStore } from '@/stores/cartStore';
+import { triggerHaptic } from '@/services/mobileService';
+import toast from 'react-hot-toast';
 import SwiggyLiveDeliveryMap from '@/components/delivery/SwiggyLiveDeliveryMap';
 
 const STATUS_STEPS: { key: OrderStatus; label: string; desc: string }[] = [
@@ -16,8 +19,49 @@ const STATUS_STEPS: { key: OrderStatus; label: string; desc: string }[] = [
 
 export default function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const addItem = useCartStore((s) => s.addItem);
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleReorder = () => {
+    if (!order) return;
+    triggerHaptic('heavy');
+    order.items.forEach((item) => {
+      addItem(
+        {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          category: item.category || 'Signature Cakes',
+          categorySlug: item.category ? item.category.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'cakes',
+          description: '',
+          image: item.image || '/images/categories/cakes.jpg',
+          inStock: true,
+          stockQuantity: 10,
+          featured: false,
+          bestseller: false,
+          ingredients: '',
+          allergens: '',
+        },
+        item.quantity,
+        {
+          customMessage: item.customMessage,
+          includeCandles: item.includeCandles,
+        }
+      );
+    });
+    toast.success('Items re-added to your cart!');
+    navigate('/cart');
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!order) return;
+    triggerHaptic('medium');
+    const trackingUrl = `${window.location.origin}/track/${order.id}`;
+    const text = `🍰 *YOYO CAKES Order #${order.id}*\nStatus: ${order.orderStatus.replace('_', ' ').toUpperCase()}\nTotal: ₹${order.total}\n\nTrack Live GPS Delivery:\n${trackingUrl}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   useEffect(() => {
     async function load() {
@@ -304,6 +348,30 @@ export default function OrderConfirmationPage() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Quick Action Toolbar: Track Fullscreen, Share on WhatsApp & Reorder */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Link
+                to={`/track/${order.id}`}
+                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+              >
+                <Truck size={16} /> Track on Fullscreen Map 🛵
+              </Link>
+              <button
+                type="button"
+                onClick={handleShareWhatsApp}
+                className="py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <MessageCircle size={16} /> Share Order on WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={handleReorder}
+                className="py-3 px-4 rounded-xl bg-[var(--color-brand-primary-dark)] hover:bg-[var(--color-brand-chocolate)] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <RotateCw size={15} /> Reorder These Cakes
+              </button>
             </div>
 
             {/* Support Actions */}

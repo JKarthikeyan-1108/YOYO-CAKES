@@ -163,21 +163,23 @@ describe('Admin Reviews Management & Swiggy/Zepto Delivery Tracking', () => {
 
   describe('4. User Registration Display Name Persistence', () => {
     it('sets customer entered display name on registration', async () => {
+      const email = `kavitha.${Date.now()}.${Math.random().toString(36).substring(2, 6)}@example.com`;
       const auth = useAuthStore.getState();
-      await auth.register('kavitha.patel@example.com', 'securePass123', 'Kavitha Patel');
+      await auth.register(email, 'securePass123', 'Kavitha Patel');
 
       const user = useAuthStore.getState().user;
       expect(user).toBeDefined();
-      expect(user?.email).toBe('kavitha.patel@example.com');
+      expect(user?.email).toBe(email);
       expect(user?.displayName).toBe('Kavitha Patel');
     });
 
     it('falls back to email prefix if display name is omitted', async () => {
+      const email = `arun.${Date.now()}.${Math.random().toString(36).substring(2, 6)}@example.com`;
       const auth = useAuthStore.getState();
-      await auth.register('arun.kumar@example.com', 'securePass123');
+      await auth.register(email, 'securePass123');
 
       const user = useAuthStore.getState().user;
-      expect(user?.displayName).toBe('arun.kumar');
+      expect(user?.displayName).toBe(email.split('@')[0]);
     });
   });
 

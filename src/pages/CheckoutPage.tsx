@@ -657,16 +657,22 @@ export default function CheckoutPage() {
               </div>
 
               {/* Actions */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <Link
+                  to={`/track/${placedOrder.id}`}
+                  className="w-full py-3 text-center rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Truck size={16} /> Track Live GPS 🛵
+                </Link>
                 <Link
                   to={`/order/${placedOrder.id}`}
-                  className="w-full py-3 text-center rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-sm shadow-sm transition-all border border-[#FCD200]"
+                  className="w-full py-3 text-center rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold text-xs sm:text-sm shadow-xs transition-all border border-[#FCD200] flex items-center justify-center gap-1.5"
                 >
-                  Track Your Delivery
+                  <CheckCircle size={15} /> Order Details
                 </Link>
                 <Link
                   to="/shop"
-                  className="w-full py-3 text-center rounded-xl bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] font-bold text-sm border border-[var(--color-brand-border)] shadow-sm transition-all"
+                  className="w-full py-3 text-center rounded-xl bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] font-bold text-xs sm:text-sm border border-[var(--color-brand-border)] shadow-xs transition-all flex items-center justify-center"
                 >
                   Continue Shopping
                 </Link>

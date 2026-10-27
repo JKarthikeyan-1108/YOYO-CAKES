@@ -8,6 +8,7 @@ import {
   AlertCircle,
   ShoppingBag,
   Star,
+  MessageCircle,
 } from 'lucide-react';
 import { getOrderById, getAllOrders, type Order } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
@@ -57,6 +58,14 @@ export default function LiveTrackingPage() {
     setActiveOrder(found || null);
     setLoading(false);
     setSearched(true);
+  };
+
+  const handleShareTrackingWhatsApp = () => {
+    if (!activeOrder) return;
+    triggerHaptic('medium');
+    const trackingUrl = `${window.location.origin}/track/${activeOrder.id}`;
+    const text = `🛵 *Track YOYO CAKES Live Delivery*\nOrder #${activeOrder.id}\nStatus: ${activeOrder.orderStatus.replace('_', ' ').toUpperCase()}\nTotal: ₹${activeOrder.total}\n\nLive GPS Radar Link:\n${trackingUrl}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const handleSelectRecent = (order: Order) => {
@@ -222,13 +231,23 @@ export default function LiveTrackingPage() {
                     Share your celebration experience with our patisserie kitchen team.
                   </p>
                 </div>
-                <Link
-                  to="/account?tab=orders"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-500/30 transition-all active:scale-95 flex-shrink-0"
-                >
-                  <Star size={13} className="fill-current text-amber-500" />
-                  <span>Rate Order in Account</span>
-                </Link>
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <button
+                    type="button"
+                    onClick={handleShareTrackingWhatsApp}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs shadow-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+                  >
+                    <MessageCircle size={14} />
+                    <span>Share on WhatsApp</span>
+                  </button>
+                  <Link
+                    to="/account?tab=orders"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-500/30 transition-all active:scale-95 flex-shrink-0"
+                  >
+                    <Star size={13} className="fill-current text-amber-500" />
+                    <span>Rate in Account</span>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

@@ -19,7 +19,7 @@ export default function AboutPage() {
         </div>
 
         {/* Story Section */}
-        <div className="bg-white rounded-3xl shadow-elevated p-8 sm:p-12 mb-12 border border-[var(--color-brand-primary-light)]/20">
+        <div className="bg-[var(--color-brand-surface)] rounded-3xl shadow-elevated p-8 sm:p-12 mb-12 border border-[var(--color-brand-border)]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
               <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[var(--color-brand-chocolate)] mb-4">
@@ -31,29 +31,29 @@ export default function AboutPage() {
               <p className="text-sm text-[var(--color-brand-muted)] leading-relaxed mb-6">
                 From our decadent <em>Dream Cake</em> and rich <em>Matilda Cake</em> to our crowd-favorite fudgy <em>Brownies</em> and delicate <em>Mini Jar Cakes</em>, every recipe is perfected with premium cocoa, velvety creams, and uncompromised love.
               </p>
-              <div className="flex items-center gap-3 text-xs font-semibold text-[var(--color-brand-primary-dark)]">
+              <div className="flex items-center gap-3 text-xs font-semibold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]">
                 <Sparkles size={16} /> <span>100% Handcrafted • Freshly Baked Daily</span>
               </div>
             </div>
 
-            <div className="bg-[var(--color-brand-cream)] p-8 rounded-2xl border border-[var(--color-brand-primary-light)]/40 text-center">
-              <div className="text-4xl font-heading font-black text-[var(--color-brand-primary-dark)] mb-2">
+            <div className="bg-[var(--color-brand-surface-elevated)] p-8 rounded-2xl border border-[var(--color-brand-border)] text-center">
+              <div className="text-4xl font-heading font-black text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] mb-2">
                 27+
               </div>
               <div className="text-sm font-bold text-[var(--color-brand-chocolate)] mb-6">
                 Signature Bakery Recipes
               </div>
-              <div className="space-y-3 text-sm text-[var(--color-brand-chocolate-light)] text-left">
+              <div className="space-y-3 text-sm text-[var(--color-brand-chocolate)] text-left">
                 <div className="flex items-center gap-2">
-                  <ChefHat size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <ChefHat size={18} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Small-batch artisanal baking techniques</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Award size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <Award size={18} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Finest Belgian chocolates & cocoa beans</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-[var(--color-brand-primary-dark)] flex-shrink-0" />
+                  <ShieldCheck size={18} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
                   <span>Hygienic, temperature-controlled kitchen</span>
                 </div>
               </div>
@@ -63,8 +63,8 @@ export default function AboutPage() {
 
         {/* Core Values */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
-          <div className="bg-white rounded-2xl p-6 text-center border border-[var(--color-brand-primary-light)]/20 shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center mx-auto mb-4">
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl p-6 text-center border border-[var(--color-brand-border)] shadow-xs">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center mx-auto mb-4">
               <ChefHat size={24} />
             </div>
             <h3 className="font-heading font-bold text-lg text-[var(--color-brand-chocolate)] mb-2">Fresh Ingredients</h3>
@@ -73,8 +73,8 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 text-center border border-[var(--color-brand-primary-light)]/20 shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center mx-auto mb-4">
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl p-6 text-center border border-[var(--color-brand-border)] shadow-xs">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center mx-auto mb-4">
               <Heart size={24} />
             </div>
             <h3 className="font-heading font-bold text-lg text-[var(--color-brand-chocolate)] mb-2">Baked with Love</h3>
@@ -83,8 +83,8 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 text-center border border-[var(--color-brand-primary-light)]/20 shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center mx-auto mb-4">
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl p-6 text-center border border-[var(--color-brand-border)] shadow-xs">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center mx-auto mb-4">
               <Sparkles size={24} />
             </div>
             <h3 className="font-heading font-bold text-lg text-[var(--color-brand-chocolate)] mb-2">Sweet Happiness</h3>

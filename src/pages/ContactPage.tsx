@@ -40,40 +40,40 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Details Card */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-2xl shadow-elevated p-6 border border-[var(--color-brand-primary-light)]/20">
+            <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-elevated p-6 border border-[var(--color-brand-border)]">
               <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] mb-5">
                 Bakery Hotline
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center flex-shrink-0">
                     <Phone size={18} />
                   </div>
                   <div>
                     <span className="text-xs text-[var(--color-brand-muted)] block">Call or WhatsApp</span>
-                    <a href="tel:+918428855444" className="text-sm font-semibold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] transition-colors block">
+                    <a href="tel:+918428855444" className="text-sm font-semibold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] dark:hover:text-[var(--color-brand-primary)] transition-colors block">
                       +91 84288 55444
                     </a>
-                    <a href="tel:+916379603744" className="text-sm font-semibold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] transition-colors block">
+                    <a href="tel:+916379603744" className="text-sm font-semibold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] dark:hover:text-[var(--color-brand-primary)] transition-colors block">
                       +91 63796 03744
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center flex-shrink-0">
                     <Mail size={18} />
                   </div>
                   <div>
                     <span className="text-xs text-[var(--color-brand-muted)] block">Email Support</span>
-                    <a href="mailto:hello@yoyocakes.in" className="text-sm font-semibold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] transition-colors">
+                    <a href="mailto:hello@yoyocakes.in" className="text-sm font-semibold text-[var(--color-brand-chocolate)] hover:text-[var(--color-brand-primary-dark)] dark:hover:text-[var(--color-brand-primary)] transition-colors">
                       hello@yoyocakes.in
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center flex-shrink-0">
                     <Clock size={18} />
                   </div>
                   <div>
@@ -85,7 +85,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream)] text-[var(--color-brand-primary-dark)] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex items-center justify-center flex-shrink-0">
                     <MapPin size={18} />
                   </div>
                   <div>
@@ -112,9 +112,9 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-elevated p-8 border border-[var(--color-brand-primary-light)]/20">
+            <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-elevated p-8 border border-[var(--color-brand-border)]">
               <h2 className="font-heading text-2xl font-bold text-[var(--color-brand-chocolate)] mb-6 flex items-center gap-2">
-                <MessageSquare size={22} className="text-[var(--color-brand-primary-dark)]" />
+                <MessageSquare size={22} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]" />
                 Send us a Message
               </h2>
 
