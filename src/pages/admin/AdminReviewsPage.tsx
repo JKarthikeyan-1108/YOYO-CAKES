@@ -372,6 +372,33 @@ export default function AdminReviewsPage() {
                     <label className="text-xs font-bold text-[var(--color-brand-chocolate)] block">
                       Write Official Bakery Response:
                     </label>
+                    {/* Quick Bakery Reply Templates */}
+                    <div className="space-y-1 mb-2">
+                      <span className="text-[10px] font-bold text-[var(--color-brand-muted)] uppercase tracking-wider block">
+                        Quick Reply Templates:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          '🎉 Thank you so much for celebrating with YOYO Patisserie! We are glad you loved every layer.',
+                          '🍫 Glad you enjoyed that iconic Belgian chocolate snap and silk mousse!',
+                          '🎂 Thank you for trusting us with your special celebration! Looking forward to baking for you again.',
+                          '📞 We apologize for the delay. Our store manager will reach out to you directly to make this right.',
+                        ].map((tmpl, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('light');
+                              setReplyText(tmpl);
+                            }}
+                            className="text-[10px] bg-[var(--color-brand-surface)] hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-chocolate)] px-2.5 py-1 rounded-md border border-[var(--color-brand-border)] transition-colors text-left font-medium cursor-pointer"
+                          >
+                            {tmpl.slice(0, 36)}...
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}

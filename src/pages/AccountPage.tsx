@@ -25,6 +25,8 @@ import {
   Sun,
   Moon,
   Monitor,
+  Star,
+  X,
 } from 'lucide-react';
 import AddressFormModal from '@/components/delivery/AddressFormModal';
 import { useAuthStore } from '@/stores/authStore';
@@ -40,6 +42,7 @@ import {
   type SavedAddress,
   type UserSettings,
 } from '@/services/firestoreService';
+import { addCustomerReview } from '@/services/reviewService';
 import { formatPrice } from '@/data/products';
 import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/services/mobileService';
@@ -105,6 +108,49 @@ export default function AccountPage() {
     orderUpdates: true,
     smsAlerts: true,
   });
+
+  // Customer order review state
+  const [reviewOrder, setReviewOrder] = useState<Order | null>(null);
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewHeadline, setReviewHeadline] = useState('');
+  const [reviewComment, setReviewComment] = useState('');
+
+  const handleOpenReviewModal = (order: Order) => {
+    triggerHaptic('medium');
+    setReviewOrder(order);
+    setReviewRating(5);
+    setReviewHeadline('');
+    setReviewComment('');
+  };
+
+  const handleSubmitOrderReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewOrder) return;
+    if (!reviewComment.trim()) {
+      toast.error('Please write a brief note about your celebration cake');
+      return;
+    }
+
+    triggerHaptic('success');
+    const firstItem = reviewOrder.items[0];
+
+    addCustomerReview({
+      customerName: user?.displayName || reviewOrder.customer.name || 'Valued Customer',
+      customerEmail: user?.email || reviewOrder.customer.email,
+      rating: reviewRating,
+      headline: reviewHeadline.trim() || `Celebration with Order #${reviewOrder.id}`,
+      comment: reviewComment.trim(),
+      productName: firstItem?.name || '5-in-1 Chocolate Dream Cake',
+      productId: firstItem?.id || 'cake-001',
+      category: 'cakes',
+      location: reviewOrder.customer.address || 'Chennai',
+      verified: true,
+      status: 'pending',
+    });
+
+    setReviewOrder(null);
+    toast.success('🎉 Thank you! Your review has been submitted to the patisserie team for moderation.', { duration: 5000 });
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -677,6 +723,13 @@ export default function AccountPage() {
                             >
                               <MessageCircle size={13} /> WhatsApp Help
                             </button>
+
+                            <button
+                              onClick={() => handleOpenReviewModal(order)}
+                              className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold text-xs rounded-full text-center transition-all flex items-center justify-center gap-1.5 border border-amber-500/30 cursor-pointer"
+                            >
+                              <Star size={13} className="fill-current text-amber-500" /> Rate & Review Order
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -1050,6 +1103,102 @@ export default function AccountPage() {
         onAddressSaved={handleAddressSavedFromModal}
         editingAddress={editingAddress}
       />
+
+      {/* Order Review Feedback Modal */}
+      {reviewOrder && (
+        <div className="modal modal-open" role="dialog" aria-modal="true">
+          <div className="modal-box max-w-md p-6 bg-[var(--color-brand-surface)] text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] shadow-2xl rounded-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-brand-border)] mb-4">
+              <div>
+                <h3 className="font-heading font-extrabold text-base text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
+                  <Star size={16} className="text-amber-500 fill-current" /> Rate Your Celebration Bake
+                </h3>
+                <p className="text-[11px] text-[var(--color-brand-muted)]">
+                  Order #{reviewOrder.id} • {reviewOrder.items.map((i) => i.name).join(', ')}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReviewOrder(null)}
+                className="p-1 rounded-full hover:bg-[var(--color-brand-cream-dark)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitOrderReview} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-[var(--color-brand-chocolate)] block mb-1.5">
+                  Your Overall Rating
+                </label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setReviewRating(star);
+                      }}
+                      className="p-1 text-2xl transition-transform hover:scale-125 cursor-pointer text-amber-400"
+                    >
+                      <Star
+                        size={24}
+                        fill={star <= reviewRating ? 'currentColor' : 'none'}
+                        className={star <= reviewRating ? 'text-amber-400' : 'text-neutral-300'}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[var(--color-brand-chocolate)] block mb-1">
+                  Headline / Short Title
+                </label>
+                <input
+                  type="text"
+                  value={reviewHeadline}
+                  onChange={(e) => setReviewHeadline(e.target.value)}
+                  placeholder="e.g., The dream cake chocolate crack was incredible!"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] outline-none focus:border-[var(--color-brand-primary)]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[var(--color-brand-chocolate)] block mb-1">
+                  Your Feedback / Experience
+                </label>
+                <textarea
+                  rows={4}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Tell our chefs how the sponge, chocolate ganache, and packaging felt..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] outline-none focus:border-[var(--color-brand-primary)] resize-none"
+                  required
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setReviewOrder(null)}
+                  className="px-4 py-2 text-xs font-bold text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-neutral-900 font-extrabold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+                >
+                  Submit for Quality Review
+                </button>
+              </div>
+            </form>
+          </div>
+          <div className="modal-backdrop bg-black/60 backdrop-blur-xs" onClick={() => setReviewOrder(null)} />
+        </div>
+      )}
     </div>
   );
 }

@@ -31,8 +31,8 @@ import { triggerHaptic } from '@/services/mobileService';
 // Real bakery pairings from the 27 catalog products
 const RECOMMENDED_PAIRINGS = [
   PRODUCTS.find((p) => p.id === 'cake-001') || PRODUCTS[0],
-  PRODUCTS.find((p) => p.id === 'br-010') || PRODUCTS[1],
-  PRODUCTS.find((p) => p.id === 'tira-001') || PRODUCTS[2],
+  PRODUCTS.find((p) => p.id === 'brownie-010') || PRODUCTS[1],
+  PRODUCTS.find((p) => p.id === 'tiramisu-001') || PRODUCTS[2],
   PRODUCTS.find((p) => p.id === 'jar-001') || PRODUCTS[3],
 ].filter(Boolean);
 
@@ -61,11 +61,12 @@ export default function CartPage() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [isGiftOrder, setIsGiftOrder] = useState(false);
+  const [tipAmount, setTipAmount] = useState<number>(0);
 
   const subtotal = getSubtotal();
   const itemCount = getItemCount();
   const discount = couponApplied ? discountAmount : 0;
-  const estimatedTotal = Math.max(0, subtotal - discount);
+  const estimatedTotal = Math.max(0, subtotal - discount + tipAmount);
 
   const handleProceedToCheckout = () => {
     triggerHaptic('heavy');
@@ -698,6 +699,67 @@ export default function CartPage() {
                 )}
               </div>
 
+              {/* Swiggy / Zepto Free Delivery Progress Meter */}
+              {fulfillmentMode === 'delivery' && (
+                <div className="mt-4 bg-[var(--color-brand-surface-elevated)] p-3 rounded-xl border border-[var(--color-brand-border)]">
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="font-bold text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
+                      <Truck size={14} className="text-[var(--color-brand-primary)]" />
+                      {subtotal >= 400 ? '🎉 Free Express Delivery Unlocked!' : `Add ${formatPrice(400 - subtotal)} for FREE Delivery`}
+                    </span>
+                    <span className="text-[10px] font-mono text-[var(--color-brand-muted)]">
+                      {Math.min(100, Math.round((subtotal / 400) * 100))}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-neutral-200 dark:bg-neutral-800 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-500 rounded-full ${
+                        subtotal >= 400 ? 'bg-emerald-500' : 'bg-[var(--color-brand-primary)]'
+                      }`}
+                      style={{ width: `${Math.min(100, (subtotal / 400) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Delivery Partner Tip (100% to Rider) */}
+              {fulfillmentMode === 'delivery' && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[var(--color-brand-chocolate)]">
+                      Tip Your Delivery Partner
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                      100% goes to rider
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { amt: 0, label: 'No Tip' },
+                      { amt: 20, label: '₹20' },
+                      { amt: 30, label: '₹30' },
+                      { amt: 50, label: '₹50' },
+                    ].map((t) => (
+                      <button
+                        type="button"
+                        key={t.amt}
+                        onClick={() => {
+                          triggerHaptic('light');
+                          setTipAmount(t.amt);
+                        }}
+                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+                          tipAmount === t.amt
+                            ? 'bg-[var(--color-brand-primary)] text-neutral-900 border-[var(--color-brand-primary)]'
+                            : 'bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Price Breakdown Summary */}
               <div className="mt-4 pt-4 border-t border-[var(--color-brand-border)] space-y-2 text-xs text-[var(--color-brand-muted)]">
                 <div className="flex justify-between">
@@ -708,6 +770,12 @@ export default function CartPage() {
                   <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                     <span>Promotion discount</span>
                     <span>-{formatPrice(discount)}</span>
+                  </div>
+                )}
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-xs text-[var(--color-brand-muted)]">
+                    <span>Delivery partner tip</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{formatPrice(tipAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">

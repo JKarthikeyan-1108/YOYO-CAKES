@@ -6,7 +6,8 @@ import {
   ArrowLeft,
   MapPin,
   AlertCircle,
-  ShoppingBag
+  ShoppingBag,
+  Star,
 } from 'lucide-react';
 import { getOrderById, getAllOrders, type Order } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
@@ -209,6 +210,25 @@ export default function LiveTrackingPage() {
                 <span className="flex items-center gap-1.5 font-mono">
                   Payment: <strong className="text-emerald-600 dark:text-emerald-400 uppercase">{activeOrder.paymentStatus} ({activeOrder.paymentMethod})</strong>
                 </span>
+              </div>
+
+              {/* Feedback CTA */}
+              <div className="mt-4 pt-4 border-t border-[var(--color-brand-border)] flex flex-col sm:flex-row items-center justify-between gap-3 bg-[var(--color-brand-surface-elevated)] -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 rounded-b-2xl">
+                <div>
+                  <p className="text-xs font-bold text-[var(--color-brand-chocolate)]">
+                    Enjoyed your fresh eggless bake?
+                  </p>
+                  <p className="text-[11px] text-[var(--color-brand-muted)]">
+                    Share your celebration experience with our patisserie kitchen team.
+                  </p>
+                </div>
+                <Link
+                  to="/account?tab=orders"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-500/30 transition-all active:scale-95 flex-shrink-0"
+                >
+                  <Star size={13} className="fill-current text-amber-500" />
+                  <span>Rate Order in Account</span>
+                </Link>
               </div>
             </div>
           </div>

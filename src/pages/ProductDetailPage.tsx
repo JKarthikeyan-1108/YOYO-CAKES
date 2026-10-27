@@ -24,52 +24,11 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { useProductStore } from '@/stores/productStore';
 import ProductCard from '@/components/product/ProductCard';
 import { triggerHaptic } from '@/services/mobileService';
-
-interface ReviewItem {
-  id: string;
-  name: string;
-  rating: number;
-  date: string;
-  comment: string;
-}
-
-const INITIAL_REVIEWS: Record<string, ReviewItem[]> = {
-  'cake-002': [
-    {
-      id: 'rev-1',
-      name: 'Priya Sundaram',
-      rating: 5,
-      date: '2 days ago',
-      comment: 'The Matilda cake is honestly the best chocolate cake in Chennai! Incredibly moist, deep cocoa fudge, and decadent without being overly sweet.',
-    },
-    {
-      id: 'rev-2',
-      name: 'Karthik Raja',
-      rating: 5,
-      date: '1 week ago',
-      comment: 'Ordered for our anniversary. The presentation was gorgeous and the chocolate fudge melted in our mouths. 10/10 recommend!',
-    },
-  ],
-  'cake-001': [
-    {
-      id: 'rev-3',
-      name: 'Ananya Ramesh',
-      rating: 5,
-      date: '3 days ago',
-      comment: 'Cracking the hard chocolate shell on the 5-in-1 Dream Cake was so satisfying! The 5 layers taste sensational together.',
-    },
-  ],
-};
-
-const DEFAULT_REVIEWS: ReviewItem[] = [
-  {
-    id: 'rev-default',
-    name: 'Shreya M.',
-    rating: 5,
-    date: 'Recent verified buyer',
-    comment: 'Authentic bakery quality with real Belgian chocolate and rich dairy cream. Arrived fresh and beautifully packaged.',
-  },
-];
+import {
+  getApprovedReviews,
+  addCustomerReview,
+  type CustomerReview,
+} from '@/services/reviewService';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -92,13 +51,14 @@ export default function ProductDetailPage() {
   const [customMessage, setCustomMessage] = useState('');
   const [includeCandles, setIncludeCandles] = useState(false);
 
-  // Review submission state
-  const [reviewsList, setReviewsList] = useState<ReviewItem[]>(() => {
-    return (id && INITIAL_REVIEWS[id]) ? INITIAL_REVIEWS[id] : DEFAULT_REVIEWS;
+  // Review submission state from real reviewService
+  const [reviewsList, setReviewsList] = useState<CustomerReview[]>(() => {
+    return getApprovedReviews().filter((r) => r.productId === id);
   });
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewerName, setNewReviewerName] = useState('');
   const [newRating, setNewRating] = useState(5);
+  const [newReviewHeadline, setNewReviewHeadline] = useState('');
   const [newReviewText, setNewReviewText] = useState('');
 
   // Always scroll to top when product ID loads or changes
@@ -216,19 +176,27 @@ export default function ProductDetailPage() {
       return;
     }
 
-    const review: ReviewItem = {
-      id: `rev-${Date.now()}`,
-      name: newReviewerName.trim(),
+    triggerHaptic('medium');
+    addCustomerReview({
+      customerName: newReviewerName.trim(),
+      customerEmail: 'customer@example.com',
       rating: newRating,
-      date: 'Just now',
+      headline: newReviewHeadline.trim() || `${product.name} review`,
       comment: newReviewText.trim(),
-    };
+      productName: product.name,
+      productId: product.id,
+      category: product.categorySlug,
+      location: 'Verified Customer, Chennai',
+      verified: true,
+      status: 'pending',
+    });
 
-    setReviewsList([review, ...reviewsList]);
+    setReviewsList(getApprovedReviews().filter((r) => r.productId === id));
     setNewReviewerName('');
+    setNewReviewHeadline('');
     setNewReviewText('');
     setShowReviewForm(false);
-    toast.success('Thank you! Your review has been submitted.');
+    toast.success('Thank you! Your review has been submitted to our patisserie team for moderation.', { duration: 5000 });
   };
 
   const handleAddCombo = () => {
@@ -670,6 +638,18 @@ export default function ProductDetailPage() {
                       </div>
                       <div>
                         <label className="text-xs font-medium text-[var(--color-brand-muted)] block mb-1">
+                          Headline
+                        </label>
+                        <input
+                          type="text"
+                          value={newReviewHeadline}
+                          onChange={(e) => setNewReviewHeadline(e.target.value)}
+                          placeholder="e.g., Heavenly melt-in-mouth chocolate!"
+                          className="w-full px-3.5 py-2.5 rounded-lg bg-[var(--color-brand-cream)] text-sm outline-none focus:ring-1 focus:ring-[var(--color-brand-primary)]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-[var(--color-brand-muted)] block mb-1">
                           Review Comment
                         </label>
                         <textarea
@@ -682,33 +662,73 @@ export default function ProductDetailPage() {
                         />
                       </div>
                       <button type="submit" className="btn-primary py-2 px-6 text-xs">
-                        Post Review
+                        Submit Review
                       </button>
                     </form>
                   )}
 
                   {/* Review List */}
                   <div className="space-y-4">
-                    {reviewsList.map((rev) => (
-                      <div key={rev.id} className="bg-white p-4 rounded-xl border border-[var(--color-brand-primary)]/10 space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <p className="font-semibold text-sm text-[var(--color-brand-chocolate)]">
-                            {rev.name}
-                          </p>
-                          <span className="text-xs text-[var(--color-brand-muted)]">
-                            {rev.date}
-                          </span>
-                        </div>
-                        <div className="flex text-amber-500">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <Star key={i} size={13} fill="currentColor" />
-                          ))}
-                        </div>
-                        <p className="text-xs text-[var(--color-brand-chocolate-light)] leading-relaxed">
-                          {rev.comment}
+                    {reviewsList.length === 0 ? (
+                      <div className="bg-white p-6 rounded-xl border border-[var(--color-brand-border)] text-center">
+                        <p className="text-xs text-[var(--color-brand-muted)]">
+                          No customer reviews published yet. Be the first celebration host to share your review!
                         </p>
                       </div>
-                    ))}
+                    ) : (
+                      reviewsList.map((rev) => (
+                        <div key={rev.id} className="bg-white p-4 rounded-xl border border-[var(--color-brand-primary)]/10 space-y-1.5 shadow-xs">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-sm text-[var(--color-brand-chocolate)]">
+                                {rev.customerName}
+                              </p>
+                              {rev.verified && (
+                                <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">
+                                  Verified
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-[var(--color-brand-muted)] font-mono">
+                              {new Date(rev.createdAt).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
+
+                          <div className="flex text-amber-500">
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <Star key={i} size={13} fill="currentColor" />
+                            ))}
+                          </div>
+
+                          {rev.headline && (
+                            <h4 className="font-bold text-xs text-[var(--color-brand-chocolate)]">
+                              "{rev.headline}"
+                            </h4>
+                          )}
+
+                          <p className="text-xs text-[var(--color-brand-chocolate-light)] leading-relaxed">
+                            {rev.comment}
+                          </p>
+
+                          {/* Official Patisserie Team Response */}
+                          {rev.adminResponse && (
+                            <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border-l-2 border-amber-500 text-xs">
+                              <div className="flex items-center gap-1.5 font-bold text-[var(--color-brand-chocolate)] mb-1">
+                                <ShieldCheck size={13} className="text-amber-600" />
+                                <span>Official YOYO Patisserie Reply:</span>
+                              </div>
+                              <p className="text-[var(--color-brand-muted)] italic leading-relaxed">
+                                "{rev.adminResponse}"
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
