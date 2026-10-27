@@ -76,7 +76,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-brand-cream)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[var(--color-brand-bg)] flex items-center justify-center px-4 py-12 transition-colors">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -91,9 +91,8 @@ export default function RegisterPage() {
           </p>
         </div>
 
-
         {registeredSuccess ? (
-          <div className="bg-white rounded-2xl shadow-elevated p-8 text-center border border-[var(--color-brand-primary-light)]/20">
+          <div className="bg-[var(--color-brand-surface)] rounded-2xl shadow-elevated p-8 text-center border border-[var(--color-brand-border)] transition-colors">
             <CheckCircle size={48} className="mx-auto text-[var(--color-brand-success)] mb-4" />
             <h2 className="font-heading text-xl font-bold text-[var(--color-brand-chocolate)] mb-2">
               Account Created!
@@ -201,9 +200,9 @@ export default function RegisterPage() {
 
             {/* Divider */}
             <div className="flex items-center my-6">
-              <div className="flex-1 border-t border-[var(--color-brand-primary-light)]/40" />
+              <div className="flex-1 border-t border-[var(--color-brand-border)]" />
               <span className="px-4 text-[11px] font-bold text-[var(--color-brand-muted)] uppercase tracking-wider">or</span>
-              <div className="flex-1 border-t border-[var(--color-brand-primary-light)]/40" />
+              <div className="flex-1 border-t border-[var(--color-brand-border)]" />
             </div>
 
             {/* Google OAuth Button */}

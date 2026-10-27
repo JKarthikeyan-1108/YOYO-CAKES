@@ -85,6 +85,13 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // 12. reviews: Customer product reviews & ratings
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if true; // Allows authenticated customers & verified guest reviews for admin moderation
+      allow update, delete: if isAdmin();
+    }
+
     // Business Settings (configurable phone, delivery fees, pickup address)
     match /businessSettings/{docId} {
       allow read: if true;

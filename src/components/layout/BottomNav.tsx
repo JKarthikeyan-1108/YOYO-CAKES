@@ -31,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: Package,
     match: (pathname, search) =>
       pathname === '/orders' ||
+      pathname.startsWith('/track') ||
       (pathname === '/account' && (search.includes('tab=orders') || !search.includes('tab='))),
   },
   {
@@ -53,7 +54,8 @@ export default function BottomNav() {
     return null;
   }
 
-  const showFloatingCart = cartCount > 0 && location.pathname !== '/cart';
+  // Hide floating cart on /cart and /track routes so full map and action buttons have unhindered viewport
+  const showFloatingCart = cartCount > 0 && location.pathname !== '/cart' && !location.pathname.startsWith('/track');
 
   return (
     <>

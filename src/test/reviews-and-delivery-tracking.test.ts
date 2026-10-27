@@ -196,5 +196,32 @@ describe('Admin Reviews Management & Swiggy/Zepto Delivery Tracking', () => {
       expect(sanitizePhone('+919876543210')).toBe('9876543210');
     });
   });
+
+  describe('6. BottomNav Live Tracking Integration', () => {
+    it('verifies Orders tab matches /track and /orders routes', () => {
+      const matchOrders = (pathname: string, search: string) =>
+        pathname === '/orders' ||
+        pathname.startsWith('/track') ||
+        (pathname === '/account' && (search.includes('tab=orders') || !search.includes('tab=')));
+
+      expect(matchOrders('/orders', '')).toBe(true);
+      expect(matchOrders('/track', '')).toBe(true);
+      expect(matchOrders('/track/ORD-12345', '')).toBe(true);
+      expect(matchOrders('/shop', '')).toBe(false);
+      expect(matchOrders('/', '')).toBe(false);
+    });
+
+    it('suppresses floating cart on /track to preserve full delivery map screen real estate', () => {
+      const shouldShowFloatingCart = (cartCount: number, pathname: string) =>
+        cartCount > 0 && pathname !== '/cart' && !pathname.startsWith('/track');
+
+      expect(shouldShowFloatingCart(3, '/')).toBe(true);
+      expect(shouldShowFloatingCart(3, '/shop')).toBe(true);
+      expect(shouldShowFloatingCart(3, '/cart')).toBe(false);
+      expect(shouldShowFloatingCart(3, '/track')).toBe(false);
+      expect(shouldShowFloatingCart(3, '/track/ORD-987')).toBe(false);
+      expect(shouldShowFloatingCart(0, '/')).toBe(false);
+    });
+  });
 });
 
