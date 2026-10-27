@@ -18,10 +18,12 @@ import {
   ShoppingBag,
   Plus,
   Eye,
-  ThumbsUp,
   Gift,
   Zap,
-  RotateCcw
+  RotateCcw,
+  Navigation,
+  Thermometer,
+  Award
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
 import { CATEGORIES, formatPrice, type Product } from '@/data/products';
@@ -93,65 +95,6 @@ const QUICK_HUBS = [
   { name: 'Gandhipuram', pin: '641012', city: 'Coimbatore', hub: 'Cross Cut Hub', time: '20–30 mins' },
 ];
 
-const TESTIMONIALS = [
-  {
-    id: 't-1',
-    category: 'dream-cake',
-    name: 'Priya Sundaram',
-    location: 'Anna Nagar, Chennai',
-    verified: true,
-    rating: 5,
-    date: '3 days ago',
-    headline: 'Best Chocolate Dream Cake in Chennai! Hands down.',
-    comment: 'Ordered the 5-in-1 Chocolate Dream Cake for my daughter’s birthday. The crack on the top chocolate shell was so crisp and satisfying, and the cocoa layers underneath were melt-in-mouth! Delivery was right on time at 7 PM sharp.',
-    productName: '5-in-1 Chocolate Dream Cake',
-    productImage: '/images/products/dream-cake.jpg',
-    initialHelpful: 24,
-  },
-  {
-    id: 't-2',
-    category: 'brownies',
-    name: 'Karthik Raja',
-    location: 'T. Nagar, Chennai',
-    verified: true,
-    rating: 5,
-    date: '1 week ago',
-    headline: 'Pure Belgian indulgence, absolutely uncompromised quality.',
-    comment: 'The Assorted Brownie Box (Nutella + Biscoff + Pista) is pure bliss. Unlike bakery brownies loaded with excess sugar, YOYO uses authentic cocoa and butter. You can literally taste the premium ingredients. 10/10 recommendation!',
-    productName: 'Assorted Brownie Box (6 Pcs)',
-    productImage: '/images/products/assorted-brownie.jpg',
-    initialHelpful: 19,
-  },
-  {
-    id: 't-3',
-    category: 'jars',
-    name: 'Ananya Krishnan',
-    location: 'Velachery, Chennai',
-    verified: true,
-    rating: 5,
-    date: '2 weeks ago',
-    headline: 'The Mini Jar Cakes are so cute and super fresh!',
-    comment: 'Ordered 10 Red Velvet and Mango mini jar cakes for an office anniversary party. The personal jars were a total hit—zero mess, perfectly portioned, and the cream cheese frosting was heavenly. Fast doorstep delivery in refrigerated packing.',
-    productName: 'Mini Jar Cakes (Assorted)',
-    productImage: '/images/products/mini-jar-cakes.jpg',
-    initialHelpful: 14,
-  },
-  {
-    id: 't-4',
-    category: 'tiramisu',
-    name: 'Vikram Chandran',
-    location: 'RS Puram, Coimbatore',
-    verified: true,
-    rating: 5,
-    date: '3 weeks ago',
-    headline: 'Classic Tiramisu done right with mascarpone cream.',
-    comment: 'Finally found real Italian-style tiramisu! Proper espresso soaked biscuits, light mascarpone layer, and fine dark cocoa powder. Delivered in cold insulated packaging so it arrived in picture-perfect shape.',
-    productName: 'Classic Italian Tiramisu',
-    productImage: '/images/products/classic-tiramisu.jpg',
-    initialHelpful: 31,
-  },
-];
-
 const FAQS = [
   {
     q: 'Are all YOYO cakes, brownies, and jar desserts 100% Eggless?',
@@ -203,16 +146,6 @@ export default function HomePage() {
   // 5. Interactive Daily Specials Category State
   const [specialsFilter, setSpecialsFilter] = useState<'all' | 'cakes' | 'brownies' | 'jars' | 'tiramisu'>('all');
 
-  // 6. Interactive Review Filter & Helpful Counters
-  const [reviewFilter, setReviewFilter] = useState<'all' | 'dream-cake' | 'brownies' | 'jars' | 'tiramisu'>('all');
-  const [helpfulVotes, setHelpfulVotes] = useState<Record<string, number>>(() => {
-    const initial: Record<string, number> = {};
-    TESTIMONIALS.forEach((t) => {
-      initial[t.id] = t.initialHelpful;
-    });
-    return initial;
-  });
-  const [votedReviews, setVotedReviews] = useState<string[]>([]);
 
   // 7. Interactive FAQs State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -391,7 +324,7 @@ export default function HomePage() {
       );
     }
     if (selectedMood === 'budget') {
-      return products.filter((p) => p.price <= 100);
+      return products.filter((p) => p.price <= 300);
     }
     // 'all'
     return products.filter((p) => p.bestseller).slice(0, 8);
@@ -415,24 +348,6 @@ export default function HomePage() {
     return list;
   }, [products, specialsFilter]);
 
-  // Filtered Reviews
-  const filteredReviews = useMemo(() => {
-    if (reviewFilter === 'all') return TESTIMONIALS;
-    return TESTIMONIALS.filter((t) => t.category === reviewFilter);
-  }, [reviewFilter]);
-
-  const handleHelpfulClick = (id: string) => {
-    if (votedReviews.includes(id)) {
-      toast('You already marked this review as helpful!', { icon: '✨' });
-      return;
-    }
-    setVotedReviews((prev) => [...prev, id]);
-    setHelpfulVotes((prev) => ({
-      ...prev,
-      [id]: (prev[id] || 0) + 1,
-    }));
-    toast.success('Thank you! Helpful vote recorded.');
-  };
 
   const activeLayer = DREAM_CAKE_LAYERS.find((l) => l.level === activeLayerLevel) || DREAM_CAKE_LAYERS[1];
   const currentHero = heroItems[heroIndex];
@@ -1047,119 +962,123 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================== */}
-      {/* 8. INTERACTIVE CUSTOMER REVIEWS WITH "HELPFUL" VOTING */}
+      {/* 8. PATISSERIE HERITAGE & EXPRESS ZEPTTO/SWIGGY LIVE DELIVERY */}
       {/* ============================================================== */}
       <section className="py-14 sm:py-16 bg-[var(--color-brand-surface)] border-t border-[var(--color-brand-border)]">
         <div className="container-main">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={16} fill="currentColor" />
-                  ))}
-                </div>
-                <span className="text-xs font-extrabold text-[var(--color-brand-chocolate)]">
-                  4.9 / 5.0 Rating
-                </span>
-                <span className="text-xs text-[var(--color-brand-muted)]">• 1,400+ Happy Celebrations</span>
-              </div>
-              <h2 className="font-heading text-2xl sm:text-4xl font-extrabold text-[var(--color-brand-chocolate)]">
-                Loved by Celebration Hosts
-              </h2>
+          {/* Header */}
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold mb-3">
+              <Award size={13} />
+              <span>Artisanal Quality Standard & Rapid Dispatch</span>
             </div>
-
-            {/* Review Filter Tags */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {[
-                { id: 'all', label: 'All Reviews' },
-                { id: 'dream-cake', label: 'Dream Cakes' },
-                { id: 'brownies', label: 'Brownies' },
-                { id: 'jars', label: 'Mini Jars' },
-                { id: 'tiramisu', label: 'Tiramisu' },
-              ].map((rf) => (
-                <button
-                  key={rf.id}
-                  onClick={() => setReviewFilter(rf.id as any)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
-                    reviewFilter === rf.id
-                      ? 'bg-[var(--color-brand-chocolate)] text-[var(--color-brand-cream)]'
-                      : 'bg-[var(--color-brand-cream)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
-                  }`}
-                >
-                  {rf.label}
-                </button>
-              ))}
-            </div>
+            <h2 className="font-heading text-2xl sm:text-4xl font-extrabold text-[var(--color-brand-chocolate)] tracking-tight">
+              The YOYO Patisserie Standard
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] mt-2">
+              Every creation is freshly baked in small batches, chilled with precision temperature telemetry, and dispatched directly through express couriers across Chennai & Coimbatore.
+            </p>
           </div>
 
-          {/* Testimonial Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {filteredReviews.map((t) => {
-              const helpfulCount = helpfulVotes[t.id] || t.initialHelpful;
-              const hasVoted = votedReviews.includes(t.id);
+          {/* 4 Craftsmanship Pillars */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            {[
+              {
+                icon: '🍫',
+                title: 'Belgian Couverture',
+                subtitle: 'Zero Palm Oil & Zero Compound',
+                desc: 'Single-origin cocoa mass and pure natural cocoa butter for a silken melt and glossy finish.'
+              },
+              {
+                icon: '🥛',
+                title: 'Cultured Dairy Butter',
+                subtitle: 'Slow-Churned Richness',
+                desc: '82% butterfat unsalted dairy butter infused with natural Bourbon vanilla beans for aromatic depth.'
+              },
+              {
+                icon: '🌱',
+                title: '100% Eggless Purity',
+                subtitle: 'Zero Gelatin Guaranteed',
+                desc: 'Crafted with premium plant-based stabilizers and food-grade agar-agar. Dedicated egg-free kitchen.'
+              },
+              {
+                icon: '❄️',
+                title: 'Cold-Chain Telemetry',
+                subtitle: 'Maintained at 4°C - 6°C',
+                desc: 'Insulated triple-walled thermocol boxes with food-safe gel ice packs protect delicate textures in transit.'
+              }
+            ].map((pillar, idx) => (
+              <div
+                key={idx}
+                className="bg-[var(--color-brand-surface-elevated)] rounded-2xl p-5 border border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]/40 hover:shadow-md transition-all duration-300"
+              >
+                <div className="text-2xl mb-3">{pillar.icon}</div>
+                <h3 className="font-heading font-extrabold text-sm sm:text-base text-[var(--color-brand-chocolate)] mb-1">
+                  {pillar.title}
+                </h3>
+                <p className="text-[11px] font-bold text-[var(--color-brand-primary)] mb-2">
+                  {pillar.subtitle}
+                </p>
+                <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed">
+                  {pillar.desc}
+                </p>
+              </div>
+            ))}
+          </div>
 
-              return (
-                <div
-                  key={t.id}
-                  className="bg-[var(--color-brand-surface-elevated)] rounded-2xl p-5 sm:p-6 border border-[var(--color-brand-border)] flex flex-col justify-between hover:shadow-md transition-shadow relative"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2.5">
-                      <div className="flex text-amber-400">
-                        {[...Array(t.rating)].map((_, i) => (
-                          <Star key={i} size={13} fill="currentColor" />
-                        ))}
-                      </div>
-                      <span className="text-[10px] text-[var(--color-brand-muted)] font-mono">{t.date}</span>
-                    </div>
+          {/* Express Live Tracking Hero Card */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-stone-900 border border-neutral-800 p-6 sm:p-8 text-white shadow-xl">
+            <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
-                    <h3 className="text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)] mb-2 leading-snug line-clamp-2">
-                      "{t.headline}"
-                    </h3>
-
-                    <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed line-clamp-4 mb-4">
-                      {t.comment}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 border-t border-[var(--color-brand-border)]">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-[var(--color-brand-primary)]/20 text-[var(--color-brand-primary)] font-bold text-xs flex items-center justify-center">
-                          {t.name[0]}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[var(--color-brand-chocolate)] leading-tight">{t.name}</p>
-                          <p className="text-[10px] text-[var(--color-brand-muted)]">{t.location}</p>
-                        </div>
-                      </div>
-
-                      {/* Interactive Helpful Button */}
-                      <button
-                        onClick={() => handleHelpfulClick(t.id)}
-                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold transition-all active:scale-95 ${
-                          hasVoted
-                            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-[var(--color-brand-cream)] text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)]'
-                        }`}
-                        title="Mark review as helpful"
-                      >
-                        <ThumbsUp size={11} className={hasVoted ? 'fill-current' : ''} />
-                        <span>{helpfulCount}</span>
-                      </button>
-                    </div>
-
-                    <div className="text-[10px] text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-1 rounded flex items-center justify-between">
-                      <span className="flex items-center gap-1 font-semibold">
-                        <CheckCircle2 size={11} /> Verified Order
-                      </span>
-                      <span className="truncate max-w-[100px] text-[var(--color-brand-muted)]">{t.productName}</span>
-                    </div>
-                  </div>
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+              <div className="max-w-xl text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-3">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Swiggy & Zepto Style Live GPS Active</span>
                 </div>
-              );
-            })}
+                <h3 className="text-xl sm:text-2xl font-heading font-black tracking-tight text-white mb-2">
+                  Track Your Bakery Dispatch in Real Time
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed mb-4">
+                  Experience full visibility on your fresh bakes: monitor rider transit along animated vector GPS routes, inspect live cold-chain box temperatures, and contact your assigned rider with 1 tap.
+                </p>
+
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs text-neutral-400">
+                  <span className="flex items-center gap-1 bg-neutral-800/80 px-2.5 py-1 rounded-lg border border-neutral-700/60">
+                    <Thermometer size={12} className="text-sky-400" /> Insulated at 4.2°C
+                  </span>
+                  <span className="flex items-center gap-1 bg-neutral-800/80 px-2.5 py-1 rounded-lg border border-neutral-700/60">
+                    <Clock size={12} className="text-amber-400" /> 30-45 Mins Fast Delivery
+                  </span>
+                  <span className="flex items-center gap-1 bg-neutral-800/80 px-2.5 py-1 rounded-lg border border-neutral-700/60">
+                    <MapPin size={12} className="text-emerald-400" /> Central Kitchens Active
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                <Link
+                  to="/track"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-extrabold text-sm shadow-lg shadow-orange-500/25 transition-all transform active:scale-95"
+                >
+                  <Navigation size={16} />
+                  <span>Launch Live GPS Tracking 🛵</span>
+                </Link>
+                <Link
+                  to="/shop"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-sm border border-neutral-700 transition-colors"
+                >
+                  <span>Order Fresh Now</span>
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-400 gap-2">
+              <span>🔒 Customer reviews are verified & moderated exclusively via the YOYO Admin Portal.</span>
+              <span className="text-amber-400 font-semibold font-mono">Anna Nagar Hub • RS Puram Hub</span>
+            </div>
           </div>
         </div>
       </section>

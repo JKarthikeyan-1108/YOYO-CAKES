@@ -665,11 +665,12 @@ export default function AccountPage() {
                               <RotateCw size={13} /> Buy it again
                             </button>
                             <Link
-                              to={`/order/${order.id}`}
-                              className="w-full py-2 bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 font-semibold text-xs rounded-full text-center transition-all flex items-center justify-center gap-1.5"
+                              to={`/track/${order.id}`}
+                              className="w-full py-2 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold text-xs rounded-full text-center transition-all flex items-center justify-center gap-1.5 shadow-xs"
                             >
-                              <Truck size={13} /> Track package
+                              <Truck size={13} /> Track Live (Swiggy GPS) 🛵
                             </Link>
+
                             <button
                               onClick={() => handleWhatsAppOrderSupport(order.id)}
                               className="w-full py-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] font-bold text-xs rounded-full text-center transition-all flex items-center justify-center gap-1.5"

@@ -668,15 +668,28 @@ export default function AdminOrdersPage() {
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="p-2 rounded-lg text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream)] min-h-[36px]"
-                        title="Inspect Order Details"
-                        aria-label={`Inspect order ${order.id}`}
-                      >
-                        <Eye size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <a
+                          href={`/track/${order.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 min-h-[36px] inline-flex items-center"
+                          title="View Live Swiggy/Zepto GPS Map"
+                          aria-label={`View live map for order ${order.id}`}
+                        >
+                          <Truck size={15} />
+                        </a>
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="p-2 rounded-lg text-[var(--color-brand-muted)] hover:text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-cream)] min-h-[36px]"
+                          title="Inspect Order Details"
+                          aria-label={`Inspect order ${order.id}`}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
                     </td>
+
                   </tr>
                 );
               })}

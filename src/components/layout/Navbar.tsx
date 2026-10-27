@@ -23,6 +23,7 @@ import {
   ClipboardList,
   MessageSquare,
   ChevronRight,
+  Truck,
 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCartStore } from '@/stores/cartStore';
@@ -145,6 +146,7 @@ export default function Navbar() {
   // Mobile nav items
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
+    { to: '/track', label: 'Track Live Order 🛵', icon: Truck },
     { to: '/shop', label: 'All Products', icon: Package },
     { to: '/shop?category=cakes', label: 'Cakes', icon: Cake },
     { to: '/shop?category=tiramisu-desserts', label: 'Tiramisu & Desserts', icon: Coffee },
@@ -152,6 +154,7 @@ export default function Navbar() {
     { to: '/shop?category=tea-cakes-pies', label: 'Tea Cakes & Pies', icon: BookOpen },
     { to: '/shop?category=mini-jar-cakes', label: 'Mini Jar Cakes', icon: IceCream },
   ];
+
 
   const accountLinks = [
     { to: '/cart', label: 'Shopping Cart', icon: ShoppingCart },
@@ -634,6 +637,10 @@ export default function Navbar() {
             <Link to="/shop?sort=bestseller" className="hover:text-[var(--color-brand-primary)] flex items-center gap-1">
               <Sparkles size={12} className="text-[var(--color-brand-primary)]" /> Best Sellers
             </Link>
+            <Link to="/track" className="hover:text-[var(--color-brand-primary)] flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+              <Truck size={13} /> Track Live 🛵
+            </Link>
+
             <Link to="/shop?category=cakes" className="hover:text-[var(--color-brand-primary)]">
               Signature Cakes
             </Link>

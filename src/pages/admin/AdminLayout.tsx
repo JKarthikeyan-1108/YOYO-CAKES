@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   ShoppingBag,
   ShoppingCart,
+  Star,
   Settings,
   ArrowLeft,
   ShieldCheck,
@@ -37,8 +38,10 @@ export default function AdminLayout() {
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/admin/products', label: 'Products & Stock', icon: ShoppingBag },
     { to: '/admin/orders', label: 'Orders & Kitchen', icon: ShoppingCart },
+    { to: '/admin/reviews', label: 'Customer Reviews', icon: Star },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];
+
 
   const renderSidebarContent = () => (
     <div className="flex flex-col h-full bg-gradient-to-b from-[#1C0E07] via-[#170B05] to-[#120803] text-amber-50">

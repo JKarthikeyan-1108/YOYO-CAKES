@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, Truck, ChefHat, PackageCheck, AlertCircle, Phone, ArrowLeft, Printer, MapPin, ExternalLink, Store } from 'lucide-react';
 import { getOrderById, type Order, type OrderStatus } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
+import SwiggyLiveDeliveryMap from '@/components/delivery/SwiggyLiveDeliveryMap';
 
 const STATUS_STEPS: { key: OrderStatus; label: string; desc: string }[] = [
   { key: 'placed', label: 'Order Placed', desc: 'Received & logged' },
@@ -81,35 +82,40 @@ export default function OrderConfirmationPage() {
             </p>
           </div>
 
-          <div className="p-5 sm:p-10">
-            {/* Status Timeline */}
-            <div className="mb-8 sm:mb-10">
-              <h2 className="font-heading text-lg sm:text-xl font-bold text-[var(--color-brand-chocolate)] mb-4 sm:mb-6">
-                Fulfillment Timeline
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-3">
-                {STATUS_STEPS.map((step, idx) => {
-                  const isDone = idx <= currentStepIdx;
-                  const isCurrent = idx === currentStepIdx;
-                  return (
-                    <div
-                      key={step.key}
-                      className={`p-3 rounded-xl border text-center transition-all ${
-                        isCurrent
-                          ? 'border-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)] shadow-sm'
-                          : isDone
-                          ? 'border-[var(--color-brand-success)]/40 bg-[var(--color-brand-success)]/5 text-[var(--color-brand-chocolate)]'
-                          : 'border-[var(--color-brand-border)] text-[var(--color-brand-muted)] opacity-60'
-                      }`}
-                    >
-                      <div className="text-xs font-bold uppercase tracking-wider mb-1">Step {idx + 1}</div>
-                      <div className="font-semibold text-xs mb-0.5">{step.label}</div>
-                      <div className="text-[10px] text-[var(--color-brand-muted)]">{step.desc}</div>
-                    </div>
-                  );
-                })}
+          <div className="p-5 sm:p-10 space-y-8">
+            {/* Swiggy / Zepto Live GPS Delivery Map */}
+            {order.fulfillment === 'delivery' ? (
+              <SwiggyLiveDeliveryMap order={order} autoSimulate={true} />
+            ) : (
+              <div className="mb-8 sm:mb-10">
+                <h2 className="font-heading text-lg sm:text-xl font-bold text-[var(--color-brand-chocolate)] mb-4 sm:mb-6">
+                  Store Pickup Status
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-3">
+                  {STATUS_STEPS.map((step, idx) => {
+                    const isDone = idx <= currentStepIdx;
+                    const isCurrent = idx === currentStepIdx;
+                    return (
+                      <div
+                        key={step.key}
+                        className={`p-3 rounded-xl border text-center transition-all ${
+                          isCurrent
+                            ? 'border-[var(--color-brand-primary-dark)] bg-[var(--color-brand-cream)] shadow-sm'
+                            : isDone
+                            ? 'border-[var(--color-brand-success)]/40 bg-[var(--color-brand-success)]/5 text-[var(--color-brand-chocolate)]'
+                            : 'border-[var(--color-brand-border)] text-[var(--color-brand-muted)] opacity-60'
+                        }`}
+                      >
+                        <div className="text-xs font-bold uppercase tracking-wider mb-1">Step {idx + 1}</div>
+                        <div className="font-semibold text-xs mb-0.5">{step.label}</div>
+                        <div className="text-[10px] text-[var(--color-brand-muted)]">{step.desc}</div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
+
 
             {/* Order Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">

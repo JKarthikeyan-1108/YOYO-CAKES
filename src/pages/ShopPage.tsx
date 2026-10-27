@@ -16,7 +16,7 @@ import { CATEGORIES } from '@/data/products';
 import { useProductStore } from '@/stores/productStore';
 
 type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'name-asc';
-type PriceRangeOption = 'all' | 'under-100' | '100-150' | '150-200' | 'over-200';
+type PriceRangeOption = 'all' | 'under-100' | '100-150' | '151-200' | 'over-200';
 
 export default function ShopPage() {
   const { products, loading, error, fetchCatalog } = useProductStore();
@@ -56,7 +56,7 @@ export default function ShopPage() {
       result = result.filter((p) => p.price < 100);
     } else if (priceRange === '100-150') {
       result = result.filter((p) => p.price >= 100 && p.price <= 150);
-    } else if (priceRange === '150-200') {
+    } else if (priceRange === '151-200') {
       result = result.filter((p) => p.price > 150 && p.price <= 200);
     } else if (priceRange === 'over-200') {
       result = result.filter((p) => p.price > 200);
@@ -165,11 +165,12 @@ export default function ShopPage() {
         <div className="space-y-2 text-xs text-[var(--color-brand-chocolate)]">
           {[
             { id: 'all', label: 'All Prices' },
-            { id: 'under-100', label: 'Under ₹100' },
-            { id: '100-150', label: '₹100 to ₹150' },
-            { id: '150-200', label: '₹150 to ₹200' },
-            { id: 'over-200', label: 'Above ₹200' },
+            { id: 'under-100', label: 'Under ₹100 (Bites & Mini Jars)' },
+            { id: '100-150', label: '₹100 – ₹150 (Signature Dream Cakes)' },
+            { id: '151-200', label: '₹151 – ₹200 (Fudge Cakes & Nutella)' },
+            { id: 'over-200', label: 'Above ₹200 (Luxury Cakes & Tiramisu)' },
           ].map((pOpt) => (
+
             <label
               key={pOpt.id}
               className="flex items-center gap-2 cursor-pointer select-none hover:text-[var(--color-brand-primary)]"
