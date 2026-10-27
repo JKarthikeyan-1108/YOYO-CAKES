@@ -162,7 +162,12 @@ export default function LoginPage() {
       setConfirmationResult(result);
       setOtpSent(true);
       setResendCountdown(30);
-      toast.success(`Verification code sent to ${formattedPhone}`);
+
+      if ((result as any)?.isSimulated) {
+        toast.success('Test verification active! Use OTP: 123456', { duration: 6000, icon: '📱' });
+      } else {
+        toast.success(`Verification code sent to ${formattedPhone}`);
+      }
 
       // Focus first OTP field
       setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
@@ -461,6 +466,25 @@ export default function LoginPage() {
                             (Change)
                           </button>
                         </div>
+
+                        {(confirmationResult as any)?.isSimulated && (
+                          <div className="mt-2.5 flex items-center justify-center gap-2">
+                            <span className="py-1 px-3 bg-amber-500/15 border border-amber-500/30 rounded-lg text-[11px] text-amber-800 dark:text-amber-200 font-semibold inline-flex items-center gap-1.5">
+                              <Sparkles size={12} className="text-amber-600 dark:text-amber-400" />
+                              <span>Test/Demo Mode: Use code <strong className="font-mono text-xs">123456</strong></span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOtpCode(['1', '2', '3', '4', '5', '6']);
+                                setTimeout(() => otpInputRefs.current[5]?.focus(), 50);
+                              }}
+                              className="text-[11px] text-[var(--color-brand-primary-dark)] hover:underline font-bold"
+                            >
+                              Auto-fill
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       <div>

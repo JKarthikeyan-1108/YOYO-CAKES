@@ -24,6 +24,43 @@ import { uploadProductImageToStorage } from '@/services/firestoreService';
 
 type StockFilterType = 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
 
+async function optimizeImageFile(file: File, maxWidth = 800, maxHeight = 800, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function AdminProductsPage() {
   const {
     products,
@@ -195,13 +232,28 @@ export default function AdminProductsPage() {
     setUploadProgress(0);
 
     try {
-      const url = await uploadProductImageToStorage(file, editingProduct.id, (percent) => {
-        setUploadProgress(percent);
-      });
-      setEditingProduct((prev) => (prev ? { ...prev, image: url } : null));
-      toast.success('Image uploaded successfully to Firebase Storage!');
+      // 1. Attempt upload to Firebase Storage
+      try {
+        const url = await uploadProductImageToStorage(file, editingProduct.id, (percent) => {
+          setUploadProgress(percent);
+        });
+        setEditingProduct((prev) => (prev ? { ...prev, image: url } : null));
+        setUploadError(null);
+        toast.success('Image uploaded successfully to Cloud Storage!');
+        return;
+      } catch (storageErr: any) {
+        console.warn('Cloud Storage upload failed, converting to optimized inline Data URL:', storageErr);
+      }
+
+      // 2. Resilient fallback: Convert to optimized compact Base64 so admin is never blocked
+      setUploadProgress(80);
+      const optimizedDataUrl = await optimizeImageFile(file);
+      setEditingProduct((prev) => (prev ? { ...prev, image: optimizedDataUrl } : null));
+      setUploadProgress(100);
+      setUploadError(null);
+      toast.success('Image attached successfully to product!', { icon: '🖼️' });
     } catch (err: any) {
-      const msg = err?.message || 'Image upload failed';
+      const msg = err?.message || 'Image processing failed';
       setUploadError(msg);
       toast.error(msg);
     } finally {
@@ -876,9 +928,25 @@ export default function AdminProductsPage() {
                       />
                     </label>
                     <p className="text-[10px] text-[var(--color-brand-muted)] mt-1">
-                      JPEG, PNG, WebP up to 5MB. Uploads to Firebase Storage.
+                      JPEG, PNG, WebP up to 5MB. Cloud Storage or instant inline storage.
                     </p>
                   </div>
+                </div>
+
+                <div className="mt-2.5">
+                  <span className="text-[11px] font-bold text-[var(--color-brand-muted)] block mb-1">
+                    Or enter Image URL:
+                  </span>
+                  <input
+                    type="text"
+                    value={editingProduct.image?.startsWith('data:') ? '' : (editingProduct.image || '')}
+                    onChange={(e) => {
+                      setUploadError(null);
+                      setEditingProduct({ ...editingProduct, image: e.target.value });
+                    }}
+                    placeholder="https://images.unsplash.com/... or /images/products/..."
+                    className="w-full px-3 py-2 text-xs border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] rounded-xl focus:outline-none focus:ring-1 focus:ring-[var(--color-brand-primary)]"
+                  />
                 </div>
 
                 {uploadProgress !== null && uploadingImage && (
