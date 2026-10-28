@@ -11,13 +11,13 @@ interface FAQItem {
 const FAQS: FAQItem[] = [
   {
     category: 'Orders & Fulfillment',
-    q: 'How does delivery work and what are the delivery charges?',
-    a: 'We offer temperature-controlled local city delivery across Chennai. Delivery charges are calculated based on your delivery address and distance from our kitchen, and are confirmed at checkout. Store pickup from our kitchen counter is always available with zero delivery charges.',
+    q: 'How does Kitchen Counter Pickup work and are there any charges?',
+    a: 'Kitchen pickup from our patisserie counters is 100% complimentary (₹0 fee). When you place an order, our pastry team prepares and packs your freshly baked treats in premium celebratory carry-boxes ready for collection within 1 to 2 hours of payment confirmation.',
   },
   {
     category: 'Orders & Fulfillment',
-    q: 'Can I pick up my order from the store/kitchen?',
-    a: 'Yes! You can choose "Store Pickup" at checkout with zero delivery charges. Orders are prepared and packed fresh, ready for collection within 2 hours of payment confirmation.',
+    q: 'Which kitchen counters can I collect my order from?',
+    a: 'You can collect your fresh treats from Anna Nagar Central Kitchen (14/2, 2nd Ave, Chennai), T. Nagar Patisserie Studio (45, Venkatnarayana Rd, Chennai), or our Coimbatore Kitchen Counter (72, DB Road, RS Puram). Counters are open daily from 9:00 AM to 10:30 PM.',
   },
   {
     category: 'Dessert Care & Shelf Life',
@@ -66,7 +66,7 @@ export default function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-sm sm:text-base text-[var(--color-brand-muted)] max-w-lg mx-auto">
-            Everything you need to know about our handcrafted baked treats, shipping, and care guidelines.
+            Everything you need to know about our handcrafted baked treats, kitchen pickup, and care guidelines.
           </p>
         </div>
 

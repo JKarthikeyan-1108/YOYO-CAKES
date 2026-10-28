@@ -15,7 +15,7 @@ import {
   Sparkles,
   RotateCw,
   ShoppingBag,
-  Truck,
+  Store,
   CheckCircle2,
   ChevronRight,
   Headphones,
@@ -336,7 +336,7 @@ export default function AccountPage() {
                   )}
                 </div>
                 <p className="text-xs text-[var(--color-brand-muted)] mt-1">
-                  {user?.email || 'Logged-in Customer'} • Chennai Express Delivery Zone
+                  {user?.email || 'Logged-in Customer'} • YOYO Patisserie Member
                 </p>
               </div>
             </div>
@@ -385,7 +385,7 @@ export default function AccountPage() {
                 <MapPin size={18} className="text-blue-500" />
               </div>
               <div className="text-xl sm:text-2xl font-black text-[var(--color-brand-chocolate)]">{addresses.length}</div>
-              <div className="text-[10px] text-[var(--color-brand-muted)] truncate">Delivery spots</div>
+              <div className="text-[10px] text-[var(--color-brand-muted)] truncate">Saved Addresses</div>
             </button>
 
             <Link
@@ -482,7 +482,7 @@ export default function AccountPage() {
               </div>
               <div>
                 <h3 className="font-heading font-bold text-base text-[var(--color-brand-chocolate)]">Your Addresses</h3>
-                <p className="text-xs text-[var(--color-brand-muted)]">Manage delivery locations in Chennai</p>
+                <p className="text-xs text-[var(--color-brand-muted)]">Manage your address and contact details</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-[var(--color-brand-muted)]" />
@@ -556,7 +556,7 @@ export default function AccountPage() {
                       orderFilter === 'delivered' ? 'bg-white shadow-2xs text-[#0F1111]' : 'text-gray-600 hover:text-black'
                     }`}
                   >
-                    Delivered
+                    Completed
                   </button>
                 </div>
               </div>
@@ -647,19 +647,19 @@ export default function AccountPage() {
                               {order.orderStatus === 'delivered' ? (
                                 <CheckCircle2 size={16} className="text-[#007600]" />
                               ) : (
-                                <Truck size={16} className="text-amber-600 animate-bounce" />
+                                <Store size={16} className="text-amber-600" />
                               )}
-                              Status: <span className="capitalize">{order.orderStatus.replace('_', ' ')}</span>
+                              Status: <span className="capitalize">{order.orderStatus === 'delivered' ? 'Collected' : order.orderStatus === 'out_for_delivery' ? 'Ready for Pickup' : order.orderStatus.replace('_', ' ')}</span>
                             </span>
                             <span className="text-xs text-gray-500">
-                              {order.fulfillment === 'pickup' ? 'Bakery Store Pickup' : 'Express Doorstep Delivery'}
+                              Bakery Kitchen Pickup (₹0 Free)
                             </span>
                           </div>
 
                           {/* Visual Progress Steps using DaisyUI steps */}
                           <div className="w-full py-2">
                             <ul className="steps steps-vertical sm:steps-horizontal w-full text-xs">
-                              {['Order Placed', 'Payment Confirmed', 'Baking in Kitchen', 'Out for Delivery / Ready'].map(
+                              {['Order Placed', 'Payment Confirmed', 'Baking in Kitchen', 'Ready at Counter'].map(
                                 (label, sIdx) => {
                                   const isDone = stepIdx >= sIdx;
                                   return (
@@ -714,7 +714,7 @@ export default function AccountPage() {
                               to={`/track/${order.id}`}
                               className="w-full py-2 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-bold text-xs rounded-full text-center transition-all flex items-center justify-center gap-1.5 shadow-xs"
                             >
-                              <Truck size={13} /> Track Live (Swiggy GPS) 🛵
+                              <Store size={13} /> Check Kitchen Status 🍰
                             </Link>
 
                             <button
@@ -748,7 +748,7 @@ export default function AccountPage() {
               <div>
                 <h2 className="font-heading text-2xl font-extrabold text-[#0F1111]">Your Addresses</h2>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Saved delivery locations for home celebrations, office treats, and gifting.
+                  Saved addresses for customer billing, pre-orders, and celebration contacts.
                 </p>
               </div>
               <button
@@ -960,7 +960,7 @@ export default function AccountPage() {
                   <Headphones size={24} />
                 </div>
                 <h4 className="font-bold text-sm text-gray-900 mb-1">FAQs & Policies</h4>
-                <p className="text-xs text-gray-500 mb-2">Shelf life, eggless & delivery FAQs</p>
+                <p className="text-xs text-gray-500 mb-2">Shelf life, eggless & pickup FAQs</p>
                 <span className="text-xs font-bold text-[#007185] group-hover:underline">
                   View FAQs
                 </span>
@@ -1053,10 +1053,10 @@ export default function AccountPage() {
                 />
                 <div>
                   <span className="text-xs font-bold text-gray-900 block">
-                    Baking & Delivery Milestones
+                    Baking & Kitchen Pickup Milestones
                   </span>
                   <span className="text-[11px] text-gray-500">
-                    Real-time status alerts when your cake enters the oven and dispatches with rider.
+                    Real-time status alerts when your cake enters the oven and is packed ready at counter.
                   </span>
                 </div>
               </label>

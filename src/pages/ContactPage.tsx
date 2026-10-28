@@ -33,7 +33,7 @@ export default function ContactPage() {
             We'd Love to Hear from You
           </h1>
           <p className="text-base text-[var(--color-brand-muted)] max-w-xl mx-auto">
-            Have questions about customized cakes, corporate orders, party dessert boxes, or delivery? Reach out directly!
+            Have questions about customized cakes, celebration orders, bulk party dessert boxes, or kitchen pickup? Reach out directly!
           </p>
         </div>
 
@@ -89,12 +89,12 @@ export default function ContactPage() {
                     <MapPin size={18} />
                   </div>
                   <div>
-                    <span className="text-xs text-[var(--color-brand-muted)] block">Fulfillment Options</span>
+                    <span className="text-xs text-[var(--color-brand-muted)] block">Fresh Kitchen Counters</span>
                     <p className="text-sm font-semibold text-[var(--color-brand-chocolate)]">
-                      Local City Delivery & Kitchen Pickup
+                      Fresh Kitchen Counter Collection (₹0 Complimentary)
                     </p>
                     <p className="text-xs text-[var(--color-brand-muted)] mt-0.5">
-                      Serving Anna Nagar, T. Nagar, Velachery, Adyar, and across Chennai with refrigerated delivery.
+                      Direct pickup from our patisserie kitchens in Anna Nagar & T. Nagar, Chennai and RS Puram, Coimbatore.
                     </p>
                   </div>
                 </div>

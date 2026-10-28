@@ -76,6 +76,8 @@ export interface Order {
   razorpayPaymentId?: string;
   deliveryAddressSnapshot?: DeliveryAddressSnapshot;
   pickupLocation?: PickupLocationInfo;
+  deliverySlot?: string;
+  scheduledDate?: string;
   distanceKm?: number;
   dispatchDetails?: {
     riderName?: string;

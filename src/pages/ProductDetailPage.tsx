@@ -11,7 +11,7 @@ import {
   Sparkles, 
   CheckCircle, 
   MessageCircle, 
-  Truck, 
+  Store, 
   ShieldCheck, 
   AlertCircle,
   Zap, 
@@ -162,7 +162,7 @@ export default function ProductDetailPage() {
       customMessage.trim() ? `• *Message on cake:* "${customMessage.trim()}"` : '',
       includeCandles ? `• *Complimentary:* Free wooden knife & candle included` : '',
       ``,
-      `Please confirm kitchen availability and delivery/pickup time. Thank you!`,
+      `Please confirm kitchen availability and counter pickup time. Thank you!`,
     ].filter(Boolean);
 
     const waUrl = `https://wa.me/${hotline}?text=${encodeURIComponent(messageLines.join('\n'))}`;
@@ -334,15 +334,15 @@ export default function ProductDetailPage() {
               {product.description}
             </p>
 
-            {/* Bakery Delivery Promise Box */}
+            {/* Bakery Kitchen Counter Pickup Promise Box */}
             <div className="bg-[var(--color-brand-surface-elevated)] rounded-xl p-4 mb-6 border border-[var(--color-brand-border)] space-y-2 text-xs">
               <div className="flex items-center gap-2 text-[var(--color-brand-chocolate)] font-semibold">
-                <Truck size={16} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]" />
-                <span>Direct Bakery Delivery across Chennai</span>
+                <Store size={16} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]" />
+                <span>Direct Kitchen Counter Pickup (₹0 Complimentary)</span>
               </div>
               <div className="flex items-center gap-2 text-[var(--color-brand-muted)]">
                 <Clock size={16} className="text-green-600 dark:text-green-400" />
-                <span>Order within <strong className="text-[var(--color-brand-chocolate)]">3 hrs 40 mins</strong> for Today Evening Delivery</span>
+                <span>Fresh Oven Batches Ready Daily • Pre-Order for Instant Collection</span>
               </div>
               <div className="flex items-center gap-2 text-[var(--color-brand-muted)]">
                 <ShieldCheck size={16} className="text-blue-600 dark:text-blue-400" />
@@ -376,7 +376,7 @@ export default function ProductDetailPage() {
                   </button>
                 </div>
                 <span className="text-xs text-[var(--color-brand-muted)] font-medium">
-                  {product.stockQuantity} ready for today's delivery slots
+                  {product.stockQuantity} ready for today's fresh kitchen batches
                 </span>
               </div>
             </div>
@@ -540,7 +540,7 @@ export default function ProductDetailPage() {
                       Storage & Serving Suggestion
                     </p>
                     <p className="text-xs text-[var(--color-brand-muted)]">
-                      Keep refrigerated at 2°C – 5°C. Best enjoyed within 48 hours of delivery. For maximum flavor, rest at room temperature for 10 minutes before slicing.
+                      Keep refrigerated at 2°C – 5°C. Best enjoyed within 48 hours of collection. For maximum flavor, rest at room temperature for 10 minutes before slicing.
                     </p>
                   </div>
                 </div>
@@ -821,11 +821,11 @@ export default function ProductDetailPage() {
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-500 font-medium">Best Before</span>
-              <span className="font-semibold text-gray-900">48 hours from delivery date</span>
+              <span className="font-semibold text-gray-900">48 hours from baking date</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-500 font-medium">Delivery Packaging</span>
-              <span className="font-semibold text-gray-900">Cold-insulated tamper-proof box</span>
+              <span className="text-gray-500 font-medium">Bakery Packaging</span>
+              <span className="font-semibold text-gray-900">Premium cake box with carry handle</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-500 font-medium">Bakery Kitchen</span>

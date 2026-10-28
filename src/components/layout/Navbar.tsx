@@ -6,7 +6,6 @@ import {
   Search,
   Menu,
   X,
-  MapPin,
   ChevronDown,
   Sparkles,
   Flame,
@@ -23,18 +22,16 @@ import {
   ClipboardList,
   MessageSquare,
   ChevronRight,
-  Truck,
   Star,
+  Store,
 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productStore';
-import { useLocationStore } from '@/stores/locationStore';
 import BrandLogo from '@/components/common/BrandLogo';
 import ThemeToggle from '@/components/common/ThemeToggle';
-import DeliveryLocationModal from '@/components/common/DeliveryLocationModal';
 import { CATEGORIES, formatPrice } from '@/data/products';
 import toast from 'react-hot-toast';
 
@@ -56,7 +53,6 @@ export default function Navbar() {
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const { user, logout, isAdmin } = useAuthStore();
   const products = useProductStore((s) => s.products);
-  const { currentLocation, openModal: openLocationModal } = useLocationStore();
 
   // Lock body scroll when drawer open
   useEffect(() => {
@@ -147,13 +143,13 @@ export default function Navbar() {
   // Mobile nav items
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/track', label: 'Track Live Order 🛵', icon: Truck },
     { to: '/shop', label: 'All Products', icon: Package },
     { to: '/shop?category=cakes', label: 'Cakes', icon: Cake },
     { to: '/shop?category=tiramisu-desserts', label: 'Tiramisu & Desserts', icon: Coffee },
     { to: '/shop?category=brownies', label: 'Brownies', icon: IceCream },
     { to: '/shop?category=tea-cakes-pies', label: 'Tea Cakes & Pies', icon: BookOpen },
     { to: '/shop?category=mini-jar-cakes', label: 'Mini Jar Cakes', icon: IceCream },
+    { to: '/about', label: 'Our Story & Kitchens', icon: Store },
   ];
 
 
@@ -205,20 +201,6 @@ export default function Navbar() {
               <Link to="/" className="group inline-flex items-center flex-shrink-0" aria-label="YOYO CAKES Home">
                 <BrandLogo size="sm" showTagline={false} />
               </Link>
-
-              {/* Delivery Location Selector (accessible on mobile & desktop) */}
-              <button
-                type="button"
-                onClick={openLocationModal}
-                className="flex items-center gap-1 py-1 px-2 sm:px-2.5 rounded-full hover:bg-[var(--color-brand-cream-dark)] bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] text-left transition-all text-[11px] sm:text-xs text-[var(--color-brand-chocolate)] cursor-pointer flex-shrink min-w-0"
-                aria-label="Change delivery location"
-              >
-                <MapPin size={12} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
-                <span className="font-bold text-[var(--color-brand-chocolate)] truncate max-w-[60px] xs:max-w-[85px] sm:max-w-[120px]">
-                  {currentLocation.area}
-                </span>
-                <ChevronDown size={11} className="text-[var(--color-brand-muted)] flex-shrink-0" />
-              </button>
             </div>
 
             {/* Center: Search Bar (desktop) */}
@@ -652,9 +634,6 @@ export default function Navbar() {
             <Link to="/shop?sort=bestseller" className="hover:text-[var(--color-brand-primary)] flex items-center gap-1">
               <Sparkles size={12} className="text-[var(--color-brand-primary)]" /> Best Sellers
             </Link>
-            <Link to="/track" className="hover:text-[var(--color-brand-primary)] flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
-              <Truck size={13} /> Track Live 🛵
-            </Link>
 
             <Link to="/shop?category=cakes" className="hover:text-[var(--color-brand-primary)]">
               Signature Cakes
@@ -762,29 +741,6 @@ export default function Navbar() {
               </div>
             )}
           </div>
-
-          {/* Delivery Location */}
-          <button
-            type="button"
-            onClick={() => {
-              closeMobileMenu();
-              openLocationModal();
-            }}
-            className="w-full p-4 flex items-center justify-between border-b border-[var(--color-brand-border)] hover:bg-[var(--color-brand-surface-elevated)] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <MapPin size={18} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] flex-shrink-0" />
-              <div className="text-left">
-                <span className="text-[10px] text-[var(--color-brand-muted)] block font-medium">Deliver to</span>
-                <span className="text-sm font-bold text-[var(--color-brand-chocolate)]">
-                  {currentLocation.area}, {currentLocation.city}
-                </span>
-              </div>
-            </div>
-            <span className="text-xs font-semibold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] bg-[var(--color-brand-cream-dark)] px-2.5 py-1 rounded-full flex-shrink-0 border border-[var(--color-brand-border)]">
-              Change
-            </span>
-          </button>
 
           {/* Navigation Links */}
           <nav aria-label="Main Navigation">
@@ -895,9 +851,6 @@ export default function Navbar() {
           )}
         </div>
       </div>
-
-      {/* Delivery Location Modal */}
-      <DeliveryLocationModal />
     </>
   );
 }

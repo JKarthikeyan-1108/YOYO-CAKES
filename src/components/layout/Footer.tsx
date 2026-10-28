@@ -176,7 +176,7 @@ export default function Footer() {
             <span>•</span>
             <span>Net Banking</span>
             <span>•</span>
-            <span>Pay on Delivery</span>
+            <span>Pay at Kitchen Counter</span>
           </div>
         </div>
       </div>

@@ -16,7 +16,6 @@ import {
   Sparkles,
   HelpCircle,
   Lock,
-  Truck,
   Store,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -56,17 +55,16 @@ export default function CartPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
-  const [fulfillmentMode, setFulfillmentMode] = useState<'delivery' | 'pickup'>('delivery');
+  const [fulfillmentMode] = useState<'pickup'>('pickup');
   const [couponCode, setCouponCode] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [isGiftOrder, setIsGiftOrder] = useState(false);
-  const [tipAmount, setTipAmount] = useState<number>(0);
 
   const subtotal = getSubtotal();
   const itemCount = getItemCount();
   const discount = couponApplied ? discountAmount : 0;
-  const estimatedTotal = Math.max(0, subtotal - discount + tipAmount);
+  const estimatedTotal = Math.max(0, subtotal - discount);
 
   const handleProceedToCheckout = () => {
     triggerHaptic('heavy');
@@ -98,11 +96,11 @@ export default function CartPage() {
       ``,
       `*Subtotal:* ${formatPrice(subtotal)}`,
       discount > 0 ? `*Discount:* -${formatPrice(discount)}` : '',
-      `*Fulfillment:* ${fulfillmentMode === 'pickup' ? 'Bakery Pickup (₹0)' : 'Home Delivery (charges calculated by address)'}`,
+      `*Fulfillment:* Bakery Kitchen Pickup (₹0)`,
       isGiftOrder ? `*Gift Packaging Requested:* Yes 🎁` : '',
       `*Estimated Total:* ${formatPrice(estimatedTotal)}`,
       ``,
-      `Please confirm kitchen availability for delivery/pickup in Chennai & Coimbatore. Thank you!`,
+      `Please confirm kitchen pickup availability in Chennai & Coimbatore. Thank you!`,
     ].filter(Boolean);
 
     const waUrl = `https://wa.me/${hotline}?text=${encodeURIComponent(messageLines.join('\n'))}`;
@@ -184,7 +182,7 @@ export default function CartPage() {
         <div className="flex justify-center mb-6">
           <ul className="steps steps-horizontal w-full max-w-lg text-xs font-bold">
             <li className="step step-primary" data-content="1">Shopping Cart</li>
-            <li className="step text-[var(--color-brand-muted)]" data-content="2">Delivery & Slots</li>
+            <li className="step text-[var(--color-brand-muted)]" data-content="2">Kitchen Pickup</li>
             <li className="step text-[var(--color-brand-muted)]" data-content="3">Payment & Review</li>
           </ul>
         </div>
@@ -197,15 +195,15 @@ export default function CartPage() {
             </div>
             <div>
               <p className="text-xs sm:text-sm font-bold text-[var(--color-brand-chocolate)]">
-                Fresh Patisserie Kitchen Dispatch
+                Fresh Patisserie Kitchen Pickup
               </p>
               <p className="text-[11px] text-[var(--color-brand-muted)] mt-0.5">
-                Handcrafted small-batch celebration treats baked fresh daily. Choose doorstep delivery or bakery hub pickup at checkout.
+                Handcrafted small-batch celebration treats baked fresh daily. Ready for collection at our Central Kitchen counters.
               </p>
             </div>
           </div>
           <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-lg self-start sm:self-auto flex items-center gap-1.5 border border-emerald-100 dark:border-emerald-900/40">
-            <CheckCircle2 size={13} /> 100% Quality Guaranteed
+            <CheckCircle2 size={13} /> 100% Eggless & Fresh Guaranteed
           </div>
         </div>
 
@@ -535,45 +533,16 @@ export default function CartPage() {
           {/* Right Column: Buy Box & Order Summary (4 cols) */}
           <div className="lg:col-span-4 sticky top-20 space-y-4">
             <div className="bg-[var(--color-brand-surface)] rounded-xl shadow-xs border border-[var(--color-brand-border)] p-5 sm:p-6">
-              {/* Distinct Delivery & Pickup Options */}
+              {/* Kitchen Pickup Badge */}
               <div className="mb-4 pb-4 border-b border-[var(--color-brand-border)]">
-                <span className="text-xs font-bold text-[var(--color-brand-chocolate)] block mb-2">
-                  Choose Fulfillment Option
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setFulfillmentMode('delivery')}
-                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col cursor-pointer ${
-                      fulfillmentMode === 'delivery'
-                        ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/15 font-bold text-[var(--color-brand-chocolate)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
-                        : 'border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] hover:border-[var(--color-brand-primary)]/40'
-                    }`}
-                  >
-                    <span className="flex items-center gap-1.5 font-bold">
-                      <Truck size={14} className="text-[var(--color-brand-primary)]" /> Doorstep Delivery
-                    </span>
-                    <span className="text-[10px] text-[var(--color-brand-muted)] font-normal mt-1 leading-tight">
-                      Calculated at checkout by address
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setFulfillmentMode('pickup')}
-                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col cursor-pointer ${
-                      fulfillmentMode === 'pickup'
-                        ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/15 font-bold text-[var(--color-brand-chocolate)] shadow-2xs ring-1 ring-[var(--color-brand-primary)]/30'
-                        : 'border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] hover:border-[var(--color-brand-primary)]/40'
-                    }`}
-                  >
-                    <span className="flex items-center gap-1.5 font-bold">
-                      <Store size={14} className="text-emerald-600 dark:text-emerald-400" /> Kitchen Pickup
-                    </span>
-                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold mt-1 leading-tight">
-                      ₹0 (Complimentary)
-                    </span>
-                  </button>
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-[var(--color-brand-chocolate)] mb-1">
+                    <Store size={15} className="text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)]" />
+                    <span>Bakery Kitchen Pickup (₹0 Free)</span>
+                  </div>
+                  <p className="text-[11px] text-[var(--color-brand-muted)] leading-relaxed">
+                    Collect freshly boxed treats from Anna Nagar Central Kitchen or T. Nagar Hub. Choose your pickup slot at checkout.
+                  </p>
                 </div>
               </div>
 
@@ -699,67 +668,6 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* Swiggy / Zepto Free Delivery Progress Meter */}
-              {fulfillmentMode === 'delivery' && (
-                <div className="mt-4 bg-[var(--color-brand-surface-elevated)] p-3 rounded-xl border border-[var(--color-brand-border)]">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-bold text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
-                      <Truck size={14} className="text-[var(--color-brand-primary)]" />
-                      {subtotal >= 400 ? '🎉 Free Express Delivery Unlocked!' : `Add ${formatPrice(400 - subtotal)} for FREE Delivery`}
-                    </span>
-                    <span className="text-[10px] font-mono text-[var(--color-brand-muted)]">
-                      {Math.min(100, Math.round((subtotal / 400) * 100))}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-neutral-200 dark:bg-neutral-800 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-500 rounded-full ${
-                        subtotal >= 400 ? 'bg-emerald-500' : 'bg-[var(--color-brand-primary)]'
-                      }`}
-                      style={{ width: `${Math.min(100, (subtotal / 400) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Delivery Partner Tip (100% to Rider) */}
-              {fulfillmentMode === 'delivery' && (
-                <div className="mt-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-bold text-[var(--color-brand-chocolate)]">
-                      Tip Your Delivery Partner
-                    </span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                      100% goes to rider
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {[
-                      { amt: 0, label: 'No Tip' },
-                      { amt: 20, label: '₹20' },
-                      { amt: 30, label: '₹30' },
-                      { amt: 50, label: '₹50' },
-                    ].map((t) => (
-                      <button
-                        type="button"
-                        key={t.amt}
-                        onClick={() => {
-                          triggerHaptic('light');
-                          setTipAmount(t.amt);
-                        }}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
-                          tipAmount === t.amt
-                            ? 'bg-[var(--color-brand-primary)] text-neutral-900 border-[var(--color-brand-primary)]'
-                            : 'bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] border-[var(--color-brand-border)] hover:border-[var(--color-brand-primary)]'
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Price Breakdown Summary */}
               <div className="mt-4 pt-4 border-t border-[var(--color-brand-border)] space-y-2 text-xs text-[var(--color-brand-muted)]">
                 <div className="flex justify-between">
@@ -772,31 +680,14 @@ export default function CartPage() {
                     <span>-{formatPrice(discount)}</span>
                   </div>
                 )}
-                {tipAmount > 0 && (
-                  <div className="flex justify-between text-xs text-[var(--color-brand-muted)]">
-                    <span>Delivery partner tip</span>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{formatPrice(tipAmount)}</span>
-                  </div>
-                )}
                 <div className="flex justify-between">
-                  <span>Delivery charges</span>
-                  <span className="font-semibold text-[var(--color-brand-chocolate)]">
-                    {fulfillmentMode === 'pickup' ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹0 (Bakery Pickup)</span>
-                    ) : (
-                      <span className="text-[var(--color-brand-muted)]">Calculated at checkout</span>
-                    )}
-                  </span>
+                  <span>Kitchen counter pickup</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">₹0 (Free)</span>
                 </div>
                 <div className="flex justify-between text-sm font-extrabold text-[var(--color-brand-chocolate)] pt-2 border-t border-[var(--color-brand-border)]">
-                  <span>Estimated Total:</span>
+                  <span>Total to Pay:</span>
                   <div className="text-right">
                     <span className="text-base text-[var(--color-brand-primary)]">{formatPrice(estimatedTotal)}</span>
-                    {fulfillmentMode === 'delivery' && (
-                      <span className="block text-[10px] text-[var(--color-brand-muted)] font-normal">
-                        + delivery fee confirmed at checkout
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>

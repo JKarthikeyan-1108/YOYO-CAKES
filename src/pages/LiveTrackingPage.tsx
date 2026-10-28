@@ -2,18 +2,30 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import {
   Search,
-  Truck,
+  Store,
   ArrowLeft,
   MapPin,
-  AlertCircle,
+  Clock,
+  Phone,
+  ExternalLink,
+  Sparkles,
   ShoppingBag,
   Star,
   MessageCircle,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { getOrderById, getAllOrders, type Order } from '@/lib/orders';
 import { formatPrice } from '@/data/products';
-import SwiggyLiveDeliveryMap from '@/components/delivery/SwiggyLiveDeliveryMap';
 import { triggerHaptic } from '@/services/mobileService';
+
+const KITCHEN_STEPS = [
+  { key: 'placed', label: 'Order Confirmed', desc: 'Sent to pastry kitchen', icon: '📋' },
+  { key: 'confirmed', label: 'Chef Verified', desc: 'Ingredients prepared', icon: '👨‍🍳' },
+  { key: 'preparing', label: 'Baking in Oven', desc: 'Ganache chilled & glazed', icon: '🎂' },
+  { key: 'ready', label: 'Ready at Counter', desc: 'Packed in celebration box', icon: '✨' },
+  { key: 'delivered', label: 'Collected', desc: 'Enjoy your fresh treat!', icon: '🎉' },
+];
 
 export default function LiveTrackingPage() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -64,7 +76,7 @@ export default function LiveTrackingPage() {
     if (!activeOrder) return;
     triggerHaptic('medium');
     const trackingUrl = `${window.location.origin}/track/${activeOrder.id}`;
-    const text = `🛵 *Track YOYO CAKES Live Delivery*\nOrder #${activeOrder.id}\nStatus: ${activeOrder.orderStatus.replace('_', ' ').toUpperCase()}\nTotal: ₹${activeOrder.total}\n\nLive GPS Radar Link:\n${trackingUrl}`;
+    const text = `🍰 *Track YOYO CAKES Kitchen Order*\nOrder #${activeOrder.id}\nStatus: ${activeOrder.orderStatus.replace('_', ' ').toUpperCase()}\nTotal: ₹${activeOrder.total}\n\nKitchen Status Link:\n${trackingUrl}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -113,8 +125,8 @@ export default function LiveTrackingPage() {
               type="submit"
               className="w-full sm:w-auto px-6 py-2.5 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5"
             >
-              <Truck size={14} />
-              <span>Track Live Delivery</span>
+              <Store size={14} />
+              <span>Check Kitchen Status</span>
             </button>
           </form>
 
@@ -174,13 +186,127 @@ export default function LiveTrackingPage() {
         {/* Active Order Live Tracking View */}
         {!loading && activeOrder && (
           <div className="space-y-6">
-            {/* Swiggy / Zepto Live Map Component */}
-            <SwiggyLiveDeliveryMap order={activeOrder} autoSimulate={true} />
+            {/* Kitchen Pickup Status Card */}
+            <div className="bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] rounded-3xl p-6 sm:p-8 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--color-brand-border)]">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] text-xs font-bold mb-2">
+                    <Store size={13} />
+                    <span>Kitchen Counter Collection</span>
+                  </span>
+                  <h2 className="font-heading text-2xl font-black text-[var(--color-brand-chocolate)]">
+                    Order #{activeOrder.id}
+                  </h2>
+                  <p className="text-xs text-[var(--color-brand-muted)] mt-1">
+                    Placed on {new Date(activeOrder.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </p>
+                </div>
+                <div className="text-left sm:text-right">
+                  <span className="text-xs text-[var(--color-brand-muted)] block">Estimated Counter Collection</span>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    {activeOrder.deliverySlot || 'Ready within 1–2 Hours'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Milestones */}
+              <div className="py-6 border-b border-[var(--color-brand-border)]">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+                  {KITCHEN_STEPS.map((step, idx) => {
+                    const stepOrder: Record<string, number> = {
+                      placed: 0,
+                      confirmed: 1,
+                      preparing: 2,
+                      ready: 3,
+                      out_for_delivery: 3,
+                      delivered: 4,
+                    };
+                    const currentIdx = stepOrder[activeOrder.orderStatus] ?? 0;
+                    const isDone = idx <= currentIdx;
+                    const isCurrent = idx === currentIdx;
+
+                    return (
+                      <div
+                        key={step.key}
+                        className={`p-3.5 rounded-2xl border text-center transition-all ${
+                          isCurrent
+                            ? 'bg-[var(--color-brand-surface-elevated)] border-[var(--color-brand-primary)] shadow-sm'
+                            : isDone
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-[var(--color-brand-chocolate)]'
+                            : 'border-[var(--color-brand-border)] opacity-50'
+                        }`}
+                      >
+                        <div className="text-xl mb-1">{step.icon}</div>
+                        <div className="text-[11px] font-black text-[var(--color-brand-chocolate)] leading-snug">
+                          {step.label}
+                        </div>
+                        <div className="text-[10px] text-[var(--color-brand-muted)] mt-0.5">
+                          {step.desc}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Counter Location & Contact Box */}
+              <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-muted)] block">
+                    Collection Counter
+                  </span>
+                  <p className="font-heading font-black text-sm text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
+                    <Store size={15} className="text-[var(--color-brand-primary)] flex-shrink-0" />
+                    {activeOrder.pickupLocation?.name || 'Anna Nagar Central Kitchen'}
+                  </p>
+                  <p className="text-xs text-[var(--color-brand-muted)] leading-relaxed">
+                    {activeOrder.pickupLocation?.address || '14/2, 2nd Avenue, Anna Nagar East, Chennai – 600040'}
+                  </p>
+                  <div className="pt-2 flex flex-wrap items-center gap-2">
+                    <a
+                      href="tel:+918428855444"
+                      className="px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)] text-white text-xs font-bold hover:bg-[var(--color-brand-primary-dark)] transition-colors inline-flex items-center gap-1"
+                    >
+                      <Phone size={12} /> Call Counter
+                    </a>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        activeOrder.pickupLocation?.address || '14/2, 2nd Avenue, Anna Nagar East, Chennai'
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 rounded-full border border-[var(--color-brand-border)] text-xs font-bold text-[var(--color-brand-chocolate)] hover:bg-[var(--color-brand-surface)] transition-colors inline-flex items-center gap-1"
+                    >
+                      <ExternalLink size={12} /> Directions
+                    </a>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[var(--color-brand-surface-elevated)] border border-[var(--color-brand-border)] space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-muted)] block">
+                    Pickup Schedule & Details
+                  </span>
+                  <div className="flex items-center gap-2 text-xs text-[var(--color-brand-chocolate)]">
+                    <Clock size={14} className="text-[var(--color-brand-primary)]" />
+                    <span>Slot: <strong>{activeOrder.deliverySlot || 'Morning Batch (10 AM - 1 PM)'}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-[var(--color-brand-muted)]">
+                    <Sparkles size={14} className="text-amber-500" />
+                    <span>Date: <strong>{activeOrder.scheduledDate || 'Today'}</strong></span>
+                  </div>
+                  {activeOrder.customer?.instructions && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 mt-2">
+                      <strong>Cake Message:</strong> "{activeOrder.customer.instructions}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* Order Items & Receipt Snapshot */}
             <div className="bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] rounded-2xl p-5 sm:p-6 shadow-xs">
               <h3 className="font-heading text-sm sm:text-base font-bold text-[var(--color-brand-chocolate)] mb-4 flex items-center justify-between">
-                <span>Items in Cold-Pack Container</span>
+                <span>Items in Celebration Box</span>
                 <span className="text-xs font-mono font-bold text-[var(--color-brand-primary)]">
                   Total: {formatPrice(activeOrder.total)}
                 </span>
@@ -209,11 +335,11 @@ export default function LiveTrackingPage() {
                 ))}
               </div>
 
-              {/* Delivery Address Details */}
+              {/* Counter Details */}
               <div className="mt-4 pt-4 border-t border-[var(--color-brand-border)] text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[var(--color-brand-muted)]">
                 <span className="flex items-center gap-1.5">
                   <MapPin size={13} className="text-[var(--color-brand-primary)]" />
-                  Drop Address: <strong className="text-[var(--color-brand-chocolate)]">{activeOrder.customer.address || 'Chennai'}</strong>
+                  Pickup Counter: <strong className="text-[var(--color-brand-chocolate)]">{activeOrder.pickupLocation?.name || activeOrder.customer.city || 'Central Kitchen'}</strong>
                 </span>
 
                 <span className="flex items-center gap-1.5 font-mono">

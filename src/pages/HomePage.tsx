@@ -20,8 +20,7 @@ import {
   Gift,
   Zap,
   RotateCcw,
-  Navigation,
-  Thermometer,
+  Store,
   Award
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
@@ -85,15 +84,6 @@ const DREAM_CAKE_LAYERS = [
   },
 ];
 
-// Quick Pincode Delivery Hub Data
-const QUICK_HUBS = [
-  { name: 'Anna Nagar', pin: '600040', city: 'Chennai', hub: 'Central Patisserie Kitchen', time: '35–45 mins' },
-  { name: 'T. Nagar', pin: '600017', city: 'Chennai', hub: 'South City Hub', time: '30–40 mins' },
-  { name: 'Velachery', pin: '600042', city: 'Chennai', hub: 'IT Corridor Kitchen', time: '40–50 mins' },
-  { name: 'RS Puram', pin: '641002', city: 'Coimbatore', hub: 'West Kitchen', time: '25–35 mins' },
-  { name: 'Gandhipuram', pin: '641012', city: 'Coimbatore', hub: 'Cross Cut Hub', time: '20–30 mins' },
-];
-
 const FAQS = [
   {
     q: 'Are all YOYO cakes, brownies, and jar desserts 100% Eggless?',
@@ -125,15 +115,6 @@ export default function HomePage() {
   // 3. Interactive Celebration Mood Finder State
   type MoodType = 'all' | 'birthday' | 'chocolate' | 'coffee' | 'gifting' | 'budget';
   const [selectedMood, setSelectedMood] = useState<MoodType>('all');
-
-  // 4. Interactive Pincode & Hub Checker State
-  const [pincode, setPincode] = useState('');
-  const [pincodeResult, setPincodeResult] = useState<{
-    valid: boolean;
-    hubName?: string;
-    eta?: string;
-    message: string;
-  } | null>(null);
 
   // 5. Interactive Daily Specials Category State
   const [specialsFilter, setSpecialsFilter] = useState<'all' | 'cakes' | 'brownies' | 'jars' | 'tiramisu'>('all');
@@ -233,57 +214,6 @@ export default function HomePage() {
   const handleResetShell = () => {
     setIsCracked(false);
     toast('Shell reset! Tap to crack again.', { icon: '🔄' });
-  };
-
-  // Handle Pincode Check
-  const evaluatePincode = (code: string) => {
-    const cleanPin = code.replace(/\D/g, '');
-    if (cleanPin.length !== 6) {
-      setPincodeResult({
-        valid: false,
-        message: 'Please enter a valid 6-digit delivery pincode.',
-      });
-      return;
-    }
-
-    const matchedHub = QUICK_HUBS.find((h) => h.pin === cleanPin);
-    if (matchedHub) {
-      setPincodeResult({
-        valid: true,
-        hubName: `${matchedHub.city} (${matchedHub.hub})`,
-        eta: matchedHub.time,
-        message: `✓ Express Delivery Available! Dispatched fresh from ${matchedHub.hub} in ${matchedHub.city}.`,
-      });
-    } else if (cleanPin.startsWith('600') || cleanPin.startsWith('601') || cleanPin.startsWith('602') || cleanPin.startsWith('603')) {
-      setPincodeResult({
-        valid: true,
-        hubName: 'Chennai Central Kitchen Hub',
-        eta: '45–60 mins',
-        message: '✓ Delivery & Kitchen Pickup active across Chennai metro area.',
-      });
-    } else if (cleanPin.startsWith('641')) {
-      setPincodeResult({
-        valid: true,
-        hubName: 'Coimbatore West Hub',
-        eta: '30–45 mins',
-        message: '✓ Delivery & Kitchen Pickup active across Coimbatore city.',
-      });
-    } else {
-      setPincodeResult({
-        valid: false,
-        message: 'Currently delivering within Chennai (600xxx) and Coimbatore (641xxx) metropolitan hubs.',
-      });
-    }
-  };
-
-  const handlePincodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    evaluatePincode(pincode);
-  };
-
-  const handleSelectQuickHub = (hub: typeof QUICK_HUBS[0]) => {
-    setPincode(hub.pin);
-    evaluatePincode(hub.pin);
   };
 
   // Mood Filter Products
@@ -741,95 +671,118 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================== */}
-      {/* 5. INTERACTIVE LIVE PINCODE & HUB ESTIMATOR */}
+      {/* 5. FRESH KITCHEN PICKUP & BAKING SCHEDULE */}
       {/* ============================================================== */}
-      <section className="py-10 bg-[var(--color-brand-surface-elevated)] border-y border-[var(--color-brand-border)]">
-        <div className="container-main max-w-4xl">
-          <div className="bg-[var(--color-brand-surface)] p-6 sm:p-8 rounded-3xl border border-[var(--color-brand-border)] shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <MapPin size={18} className="text-[var(--color-brand-primary)]" />
-                  <h3 className="font-heading text-lg sm:text-xl font-extrabold text-[var(--color-brand-chocolate)]">
-                    Live Kitchen Dispatch & Pincode Checker
-                  </h3>
-                </div>
-                <p className="text-xs text-[var(--color-brand-muted)]">
-                  Verify immediate delivery speed, refrigerated dispatch, and kitchen pickup slots.
-                </p>
-              </div>
+      <section className="py-12 sm:py-16 bg-[var(--color-brand-surface-elevated)] border-y border-[var(--color-brand-border)]">
+        <div className="container-main max-w-5xl">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/15 text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] text-xs font-bold mb-2">
+              <Store size={13} />
+              <span>Direct Kitchen Pickup & Counter Orders</span>
+            </span>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--color-brand-chocolate)] tracking-tight">
+              Fresh Daily Baking Schedule & Kitchens
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] mt-1.5">
+              Order your favorite cakes and desserts online and collect them freshly packaged straight from our patisserie kitchen counters.
+            </p>
+          </div>
 
-              {/* Quick Hub Chips */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-bold text-[var(--color-brand-muted)] uppercase">Quick Tap:</span>
-                {QUICK_HUBS.map((h) => (
-                  <button
-                    key={h.pin}
-                    onClick={() => handleSelectQuickHub(h)}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[var(--color-brand-cream)] hover:bg-[var(--color-brand-primary)] hover:text-white text-[var(--color-brand-chocolate)] border border-[var(--color-brand-border)] transition-colors"
-                  >
-                    {h.name}
-                  </button>
-                ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
+            {/* Kitchen 1: Anna Nagar */}
+            <div className="p-6 rounded-3xl bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] shadow-xs hover:border-[var(--color-brand-primary)]/40 transition-all">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                    <Store size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-black text-base text-[var(--color-brand-chocolate)]">
+                      Anna Nagar Central Kitchen
+                    </h3>
+                    <p className="text-[11px] font-bold text-[var(--color-brand-primary)]">
+                      Main Production & Master Chef Studio
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  Open Now
+                </span>
+              </div>
+              <p className="text-xs text-[var(--color-brand-muted)] mb-3 leading-relaxed">
+                14/2, 2nd Ave, Anna Nagar, Chennai – 600040. Full live cake counter, custom celebration orders, and fresh tasting.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[var(--color-brand-border)]/60 text-xs">
+                <span className="flex items-center gap-1 text-[var(--color-brand-chocolate)] font-semibold">
+                  <Clock size={13} className="text-[var(--color-brand-primary)]" /> 9:00 AM – 10:30 PM
+                </span>
+                <a
+                  href="tel:+918428855444"
+                  className="ml-auto inline-flex items-center gap-1 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] hover:underline"
+                >
+                  <Phone size={12} /> Call Kitchen
+                </a>
               </div>
             </div>
 
-            {/* Input Form */}
-            <form onSubmit={handlePincodeSubmit} className="flex flex-col sm:flex-row gap-2.5">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter 6-digit delivery pincode (e.g. 600040 or 641002)"
-                  className="w-full px-4 py-3 rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-cream)] text-[var(--color-brand-chocolate)] text-xs sm:text-sm font-mono outline-none focus:ring-2 focus:ring-[var(--color-brand-primary)]/40 min-h-[46px]"
-                />
-              </div>
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-xl bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white font-extrabold text-xs sm:text-sm shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
-              >
-                <Zap size={15} /> Check Delivery Slots
-              </button>
-            </form>
-
-            {/* Pincode Result Box */}
-            {pincodeResult && (
-              <div className={`mt-4 p-4 rounded-2xl border transition-all animate-fade-in ${
-                pincodeResult.valid
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-200'
-                  : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'
-              }`}>
-                <div className="flex items-start gap-3">
-                  {pincodeResult.valid ? (
-                    <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <Clock size={20} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                  )}
+            {/* Kitchen 2: T. Nagar */}
+            <div className="p-6 rounded-3xl bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] shadow-xs hover:border-[var(--color-brand-primary)]/40 transition-all">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                    <Store size={20} />
+                  </div>
                   <div>
-                    <p className="font-extrabold text-xs sm:text-sm">
-                      {pincodeResult.message}
+                    <h3 className="font-heading font-black text-base text-[var(--color-brand-chocolate)]">
+                      T. Nagar Patisserie Hub
+                    </h3>
+                    <p className="text-[11px] font-bold text-[var(--color-brand-primary)]">
+                      Quick Pickup & Dessert Bar
                     </p>
-                    {pincodeResult.valid && pincodeResult.eta && (
-                      <div className="flex flex-wrap items-center gap-3 mt-2 text-xs font-semibold text-[var(--color-brand-chocolate)]">
-                        <span className="flex items-center gap-1">
-                          ⚡ Estimated Transit: <strong>{pincodeResult.eta}</strong>
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          ❄️ Cold Insulated Box: <strong>Included</strong>
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          🚗 Free Kitchen Pickup: <strong>Ready in 20 mins</strong>
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  Open Now
+                </span>
               </div>
-            )}
+              <p className="text-xs text-[var(--color-brand-muted)] mb-3 leading-relaxed">
+                28, South Usman Road, T. Nagar, Chennai – 600017. Fast takeaway station for Dream Cakes, Brownies & Mini Jars.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[var(--color-brand-border)]/60 text-xs">
+                <span className="flex items-center gap-1 text-[var(--color-brand-chocolate)] font-semibold">
+                  <Clock size={13} className="text-[var(--color-brand-primary)]" /> 9:30 AM – 11:00 PM
+                </span>
+                <a
+                  href="tel:+916379603744"
+                  className="ml-auto inline-flex items-center gap-1 font-bold text-[var(--color-brand-primary-dark)] dark:text-[var(--color-brand-primary)] hover:underline"
+                >
+                  <Phone size={12} /> Call Kitchen
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Daily Baking Batch Schedule Banner */}
+          <div className="p-5 rounded-2xl bg-[var(--color-brand-surface)] border border-[var(--color-brand-border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-primary)]/20 text-[var(--color-brand-chocolate)] flex items-center justify-center flex-shrink-0">
+                <Sparkles size={18} />
+              </div>
+              <div>
+                <h4 className="text-sm font-extrabold text-[var(--color-brand-chocolate)]">
+                  Fresh Batch Baking Hours Daily
+                </h4>
+                <p className="text-xs text-[var(--color-brand-muted)]">
+                  Morning Batch: 10:00 AM • Afternoon Batch: 3:00 PM • Evening Batch: 7:00 PM
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/shop"
+              className="px-5 py-2.5 rounded-full bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white text-xs font-bold transition-all shadow-xs flex-shrink-0"
+            >
+              Pre-Order Fresh Batch
+            </Link>
           </div>
         </div>
       </section>
@@ -954,7 +907,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================== */}
-      {/* 8. PATISSERIE HERITAGE & EXPRESS ZEPTTO/SWIGGY LIVE DELIVERY */}
+      {/* 8. PATISSERIE HERITAGE & MASTER CHEF CRAFTSMANSHIP */}
       {/* ============================================================== */}
       <section className="py-14 sm:py-16 bg-[var(--color-brand-surface)] border-t border-[var(--color-brand-border)]">
         <div className="container-main">
@@ -962,13 +915,13 @@ export default function HomePage() {
           <div className="text-center max-w-2xl mx-auto mb-10">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold mb-3">
               <Award size={13} />
-              <span>Artisanal Quality Standard & Rapid Dispatch</span>
+              <span>Artisanal Quality Standard & Master Craftsmanship</span>
             </div>
             <h2 className="font-heading text-2xl sm:text-4xl font-extrabold text-[var(--color-brand-chocolate)] tracking-tight">
               The YOYO Patisserie Standard
             </h2>
             <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] mt-2">
-              Every creation is freshly baked in small batches, chilled with precision temperature telemetry, and dispatched directly through express couriers across Chennai & Coimbatore.
+              Every creation is freshly baked in small batches in our dedicated eggless kitchens in Chennai, using pure Belgian chocolate and slow-churned dairy butter.
             </p>
           </div>
 
@@ -994,10 +947,10 @@ export default function HomePage() {
                 desc: 'Crafted with premium plant-based stabilizers and food-grade agar-agar. Dedicated egg-free kitchen.'
               },
               {
-                icon: '❄️',
-                title: 'Cold-Chain Telemetry',
-                subtitle: 'Maintained at 4°C - 6°C',
-                desc: 'Insulated triple-walled thermocol boxes with food-safe gel ice packs protect delicate textures in transit.'
+                icon: '✨',
+                title: 'Small Batch Baking',
+                subtitle: 'Fresh Daily Batches',
+                desc: 'Crafted daily at our Anna Nagar & T. Nagar kitchens for supreme moisture and silken crumb.'
               }
             ].map((pillar, idx) => (
               <div
@@ -1018,58 +971,53 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Express Live Tracking Hero Card */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-stone-900 border border-neutral-800 p-6 sm:p-8 text-white shadow-xl">
+          {/* Custom Celebration Banner Card */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#2A160D] via-[#1E0F09] to-[#140A06] border border-amber-900/40 p-6 sm:p-8 text-white shadow-xl">
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
               <div className="max-w-xl text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-3">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>Swiggy & Zepto Style Live GPS Active</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-[#FFD814] text-xs font-bold mb-3">
+                  <Sparkles size={13} />
+                  <span>Custom Orders & Celebration Cakes</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-heading font-black tracking-tight text-white mb-2">
-                  Track Your Bakery Dispatch in Real Time
+                  Have a Special Birthday or Wedding Celebration?
                 </h3>
                 <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed mb-4">
-                  Experience full visibility on your fresh bakes: monitor rider transit along animated vector GPS routes, inspect live cold-chain box temperatures, and contact your assigned rider with 1 tap.
+                  Work directly with our head pastry chef for custom dessert hampers, tiered dream cakes, and personalized celebration messaging. Fresh kitchen collection ready when you arrive.
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs text-neutral-400">
-                  <span className="flex items-center gap-1 bg-neutral-800/80 px-2.5 py-1 rounded-lg border border-neutral-700/60">
-                    <Thermometer size={12} className="text-sky-400" /> Insulated at 4.2°C
+                  <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg border border-white/10">
+                    🎂 Custom Fondant & Torte
                   </span>
-                  <span className="flex items-center gap-1 bg-neutral-800/80 px-2.5 py-1 rounded-lg border border-neutral-700/60">
-                    <Clock size={12} className="text-amber-400" /> 30-45 Mins Fast Delivery
+                  <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg border border-white/10">
+                    ✨ 100% Eggless Certified
                   </span>
-                  <span className="flex items-center gap-1 bg-neutral-800/80 px-2.5 py-1 rounded-lg border border-neutral-700/60">
-                    <MapPin size={12} className="text-emerald-400" /> Central Kitchens Active
+                  <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg border border-white/10">
+                    📍 Anna Nagar & T. Nagar
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                <Link
-                  to="/track"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-extrabold text-sm shadow-lg shadow-orange-500/25 transition-all transform active:scale-95"
+                <a
+                  href="tel:+918428855444"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#FFD814] to-[#F7CA00] hover:from-[#F7CA00] hover:to-[#E5B500] text-[#1E1008] font-extrabold text-sm shadow-lg transition-all transform active:scale-95"
                 >
-                  <Navigation size={16} />
-                  <span>Launch Live GPS Tracking 🛵</span>
-                </Link>
+                  <Phone size={16} />
+                  <span>Call Master Chef</span>
+                </a>
                 <Link
                   to="/shop"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-sm border border-neutral-700 transition-colors"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition-colors"
                 >
-                  <span>Order Fresh Now</span>
+                  <span>Explore Menu</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-400 gap-2">
-              <span>🔒 Customer reviews are verified & moderated exclusively via the YOYO Admin Portal.</span>
-              <span className="text-amber-400 font-semibold font-mono">Anna Nagar Hub • RS Puram Hub</span>
             </div>
           </div>
         </div>
@@ -1085,7 +1033,7 @@ export default function HomePage() {
               Frequently Asked Questions
             </h2>
             <p className="text-xs sm:text-sm text-[var(--color-brand-muted)] mt-1">
-              Everything you need to know about our fresh bakes and deliveries.
+              Everything you need to know about our fresh eggless bakes and kitchen pickup.
             </p>
           </div>
 

@@ -102,6 +102,7 @@ export default function App() {
               <Route path="/privacy-policy" element={<PolicyPage />} />
               <Route path="/terms" element={<PolicyPage />} />
               <Route path="/shipping-policy" element={<PolicyPage />} />
+              <Route path="/pickup-policy" element={<PolicyPage />} />
               <Route path="/cancellation-policy" element={<PolicyPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>

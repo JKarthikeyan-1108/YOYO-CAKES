@@ -59,7 +59,7 @@ export default function OrderConfirmationPage() {
     if (!order) return;
     triggerHaptic('medium');
     const trackingUrl = `${window.location.origin}/track/${order.id}`;
-    const text = `🍰 *YOYO CAKES Order #${order.id}*\nStatus: ${order.orderStatus.replace('_', ' ').toUpperCase()}\nTotal: ₹${order.total}\n\nTrack Live GPS Delivery:\n${trackingUrl}`;
+    const text = `🍰 *YOYO CAKES Order #${order.id}*\nStatus: ${order.orderStatus.replace('_', ' ').toUpperCase()}\nTotal: ₹${order.total}\n\nView Kitchen Order Status:\n${trackingUrl}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
