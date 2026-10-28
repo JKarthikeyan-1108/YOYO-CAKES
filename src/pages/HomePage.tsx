@@ -15,7 +15,6 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  ShoppingBag,
   Plus,
   Eye,
   Gift,
@@ -107,19 +106,12 @@ const FAQS = [
   {
     q: 'Do you provide birthday candles, message cards, and wooden knives?',
     a: 'Yes! Every cake order includes complimentary celebration candles and a food-grade wooden knife. You can also write a customized birthday or anniversary message during checkout at zero extra cost.'
-  },
-  {
-    q: 'What delivery slots and areas do you cover in Chennai and Coimbatore?',
-    a: 'We operate dedicated patisserie hubs in Chennai (Anna Nagar, T. Nagar, Velachery, OMR) and Coimbatore (RS Puram, Gandhipuram). We offer Express Slots (10 AM – 8 PM) and Midnight Surprise Delivery (11 PM – 12 AM) with cold-box insulated packaging.'
   }
 ];
 
 export default function HomePage() {
   const products = useProductStore((s) => s.products);
-  const { addItem, getItemCount, getSubtotal } = useCartStore();
-
-  const cartCount = getItemCount();
-  const cartSubtotal = getSubtotal();
+  const { addItem } = useCartStore();
 
   // 1. Interactive Hero Carousel State
   const [heroIndex, setHeroIndex] = useState(0);
@@ -1161,28 +1153,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ============================================================== */}
-      {/* 11. FLOATING QUICK-CART NOTIFIER PILL */}
-      {/* ============================================================== */}
-      {cartCount > 0 && (
-        <div className="fixed bottom-18 sm:bottom-6 right-4 sm:right-6 z-40 animate-fade-in">
-          <Link
-            to="/cart"
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-dark)] text-white shadow-xl hover:shadow-2xl border-2 border-white/40 active:scale-95 transition-all text-xs font-black"
-          >
-            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-              <ShoppingBag size={13} />
-            </div>
-            <span>
-              {cartCount} item{cartCount > 1 ? 's' : ''} • {formatPrice(cartSubtotal)}
-            </span>
-            <span className="bg-white text-[var(--color-brand-chocolate)] px-2 py-0.5 rounded-full text-[10px] font-black uppercase ml-1">
-              View Cart →
-            </span>
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

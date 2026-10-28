@@ -98,7 +98,6 @@ export default function Footer() {
               {[
                 { to: '/account', label: 'Your Account & Orders' },
                 { to: '/wishlist', label: 'Your Saved Wishlist' },
-                { to: '/shipping-policy', label: 'Chennai Express Delivery Info' },
                 { to: '/cancellation-policy', label: 'Cancellation & Refund Guarantee' },
                 { to: '/faq', label: 'Shelf Life & Eggless FAQs' },
                 { to: '/terms', label: 'Terms of Service' },
@@ -218,7 +217,6 @@ export default function Footer() {
 
         {/* Quick Links */}
         <div className="flex flex-wrap justify-center gap-x-3.5 gap-y-1 text-[11px] text-white/60">
-          <Link to="/shipping-policy" className="hover:text-[#FFD814] underline">Delivery</Link>
           <Link to="/cancellation-policy" className="hover:text-[#FFD814] underline">Refunds</Link>
           <Link to="/privacy-policy" className="hover:text-[#FFD814] underline">Privacy</Link>
           <Link to="/terms" className="hover:text-[#FFD814] underline">Terms</Link>
