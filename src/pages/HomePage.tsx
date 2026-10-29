@@ -28,6 +28,7 @@ import ProductCard from '@/components/product/ProductCard';
 import { CATEGORIES, formatPrice, type Product } from '@/data/products';
 import { useProductStore } from '@/stores/productStore';
 import { useCartStore } from '@/stores/cartStore';
+import { triggerHaptic } from '@/services/mobileService';
 import toast from 'react-hot-toast';
 
 // 5-in-1 Chocolate Dream Cake Layer Anatomy
@@ -192,14 +193,37 @@ export default function HomePage() {
     }
   };
 
-  // Handle Shell Crack Interactive Click
+  // Handle Shell Crack Interactive Click with tactile haptics & audio snap
   const handleCrackShell = () => {
+    triggerHaptic('heavy');
+
+    // Synthesize physical chocolate snap sound (Web Audio API)
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(380, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.14);
+      }
+    } catch {
+      // Audio autoplay gracefully handled
+    }
+
     setCrackAnimation(true);
     setTimeout(() => {
       setIsCracked(true);
       setCrackAnimation(false);
       setActiveLayerLevel(2);
-      toast('💥 CRACK! Shell opened — 5 layers revealed!', {
+      toast('💥 CRACK! Shell shattered — 5 molten layers unlocked!', {
         icon: '🍫',
         style: {
           borderRadius: '16px',
@@ -208,13 +232,14 @@ export default function HomePage() {
           fontWeight: 700,
         },
       });
-    }, 350);
+    }, 400);
   };
 
   // Reset Shell Crack
   const handleResetShell = () => {
+    triggerHaptic('medium');
     setIsCracked(false);
-    toast('Shell reset! Tap to crack again.', { icon: '🔄' });
+    toast('Shell reset! Tap the hammer to crack again.', { icon: '🔄' });
   };
 
   // Mood Filter Products
@@ -499,45 +524,155 @@ export default function HomePage() {
             {/* Visual Crack Interactive Stage */}
             <div className="lg:col-span-5 flex flex-col items-center">
               <div 
-                className={`relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden border-4 ${
-                  isCracked ? 'border-amber-500 shadow-2xl' : 'border-[var(--color-brand-border)] shadow-lg'
-                } bg-[#2B150C] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
-                  crackAnimation ? 'animate-crack-shake' : 'hover:scale-102'
+                className={`relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden border-4 select-none ${
+                  isCracked ? 'border-amber-500 shadow-[0_0_35px_rgba(245,158,11,0.35)]' : 'border-[var(--color-brand-border)] shadow-xl'
+                } bg-[#1F0E07] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
+                  crackAnimation ? 'animate-crack-shake scale-95' : 'hover:scale-102'
                 }`}
                 onClick={isCracked ? handleResetShell : handleCrackShell}
                 title="Tap to crack chocolate shell"
               >
-                <img
-                  src="/images/products/dream-cake.jpg"
-                  alt="Dream Cake Shell"
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                    isCracked ? 'opacity-30 blur-xs scale-105' : 'opacity-90'
-                  }`}
-                />
+                {/* Background Layer: Molten Ganache Underneath */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#3D1A0A] via-[#240F06] to-[#120703]">
+                  {/* Subtle molten chocolate sheen & cocoa speckles */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.25)_0%,transparent_70%)]" />
+                </div>
 
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
-
-                {/* Interactive Center Content */}
-                <div className="relative z-10 text-white flex flex-col items-center">
-                  <div className={`w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl mb-3 shadow-inner ${
-                    isCracked ? 'bg-amber-500 text-white' : 'animate-pulse'
-                  }`}>
-                    {isCracked ? '✨' : '🔨'}
+                {/* Uncracked or Splitting Shell Disc */}
+                <div className="absolute inset-0 overflow-hidden">
+                  {/* Left Shard */}
+                  <div 
+                    className={`absolute inset-0 w-full h-full transition-all duration-500 ${
+                      isCracked ? 'animate-shard-left' : ''
+                    }`}
+                    style={{ clipPath: isCracked ? 'polygon(0% 0%, 55% 0%, 48% 35%, 60% 65%, 45% 100%, 0% 100%)' : undefined }}
+                  >
+                    <img
+                      src="/images/products/dream-cake.jpg"
+                      alt="Dream Cake Chocolate Shell"
+                      className={`w-full h-full object-cover transition-all duration-500 ${
+                        isCracked ? 'brightness-90 contrast-110' : 'opacity-95'
+                      }`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
                   </div>
 
-                  <h3 className="font-heading text-lg font-black tracking-wide">
-                    {isCracked ? 'SHELL CRACKED!' : 'Tap to Crack Shell!'}
+                  {/* Right Shard */}
+                  {isCracked && (
+                    <div 
+                      className="absolute inset-0 w-full h-full animate-shard-right transition-all duration-500"
+                      style={{ clipPath: 'polygon(55% 0%, 100% 0%, 100% 100%, 45% 100%, 60% 65%, 48% 35%)' }}
+                    >
+                      <img
+                        src="/images/products/dream-cake.jpg"
+                        alt="Dream Cake Chocolate Shell"
+                        className="w-full h-full object-cover brightness-90 contrast-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Animated Dynamic SVG Crack Fracture Lines */}
+                {(crackAnimation || isCracked) && (
+                  <svg 
+                    className="absolute inset-0 w-full h-full pointer-events-none z-20"
+                    viewBox="0 0 200 200"
+                    fill="none"
+                  >
+                    {/* Center Impact Flash */}
+                    <circle cx="100" cy="100" r="6" fill="#FBBF24" className="animate-ping opacity-75" />
+                    <circle cx="100" cy="100" r="3" fill="#FFFFFF" />
+
+                    {/* Main Fracture Lines */}
+                    <path
+                      d="M100,100 L90,65 L65,50 L40,25"
+                      stroke="#FFD814"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="animate-crack-line drop-shadow-[0_0_6px_rgba(255,216,20,0.9)]"
+                    />
+                    <path
+                      d="M100,100 L115,70 L145,55 L175,30"
+                      stroke="#FFFFFF"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      className="animate-crack-line drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+                    />
+                    <path
+                      d="M100,100 L85,130 L60,155 L30,175"
+                      stroke="#FFD814"
+                      strokeWidth="2.8"
+                      strokeLinecap="round"
+                      className="animate-crack-line drop-shadow-[0_0_6px_rgba(255,216,20,0.9)]"
+                    />
+                    <path
+                      d="M100,100 L120,125 L150,150 L180,175"
+                      stroke="#FFFFFF"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      className="animate-crack-line drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+                    />
+                    <path
+                      d="M100,100 L140,95 L175,105"
+                      stroke="#FFD814"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      className="animate-crack-line drop-shadow-[0_0_4px_rgba(255,216,20,0.8)]"
+                    />
+                    <path
+                      d="M100,100 L60,105 L25,95"
+                      stroke="#FFFFFF"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      className="animate-crack-line"
+                    />
+                  </svg>
+                )}
+
+                {/* Shockwave Radial Wave on Strike */}
+                {(crackAnimation || isCracked) && (
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-amber-400 animate-shockwave pointer-events-none z-20" />
+                )}
+
+                {/* Flying Chocolate Splinters & Crumbs */}
+                {(crackAnimation || isCracked) && (
+                  <>
+                    <span className="absolute top-1/2 left-1/2 w-3 h-3 bg-[#422213] border border-amber-400 rounded-sm animate-crumb-1 pointer-events-none z-30 shadow-md" />
+                    <span className="absolute top-1/2 left-1/2 w-2.5 h-2.5 bg-[#2B140A] border border-white/80 rounded-full animate-crumb-2 pointer-events-none z-30 shadow-md" />
+                    <span className="absolute top-1/2 left-1/2 w-3.5 h-2 bg-[#522A17] border border-amber-300 rounded-sm animate-crumb-3 pointer-events-none z-30 shadow-md" />
+                    <span className="absolute top-1/2 left-1/2 w-2.5 h-3 bg-[#1D0D06] border border-amber-500 rounded-full animate-crumb-4 pointer-events-none z-30 shadow-md" />
+                  </>
+                )}
+
+                {/* Interactive Center Content */}
+                <div className="relative z-20 text-white flex flex-col items-center">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-3 transition-all duration-300 shadow-lg ${
+                    isCracked 
+                      ? 'bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.5)] scale-110' 
+                      : crackAnimation 
+                      ? 'animate-hammer-tap bg-amber-400 text-black' 
+                      : 'bg-white/20 backdrop-blur-md animate-pulse hover:scale-110'
+                  }`}>
+                    {isCracked ? '💥' : crackAnimation ? '🔨' : '🔨'}
+                  </div>
+
+                  <h3 className="font-heading text-lg font-black tracking-wide text-white drop-shadow-md">
+                    {isCracked ? 'CRACKED & UNLOCKED!' : 'Tap to Crack Shell!'}
                   </h3>
 
-                  <p className="text-[11px] text-white/80 mt-1 max-w-[180px] leading-tight">
+                  <p className="text-[11px] text-white/90 mt-1 max-w-[200px] leading-tight drop-shadow-xs">
                     {isCracked 
-                      ? '5 decadent molten layers unlocked! Tap again to reset.' 
+                      ? '5 molten layers revealed! Tap again to reset.' 
                       : 'Audible Belgian chocolate crack followed by gooey ganache.'}
                   </p>
 
-                  <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 backdrop-blur-xs text-[10px] font-black uppercase tracking-wider">
-                    {isCracked ? <RotateCcw size={11} /> : <span>🔨 Tap Here</span>}
+                  <div className={`mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all shadow-md ${
+                    isCracked 
+                      ? 'bg-amber-500 text-stone-950 hover:bg-amber-400' 
+                      : 'bg-white/25 hover:bg-white/40 text-white backdrop-blur-xs'
+                  }`}>
+                    {isCracked ? <RotateCcw size={12} /> : <span>🔨 Tap Here</span>}
                     {isCracked ? 'Reset Shell' : 'Crack Now'}
                   </div>
                 </div>
