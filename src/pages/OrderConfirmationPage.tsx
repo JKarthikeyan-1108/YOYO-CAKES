@@ -133,7 +133,7 @@ export default function OrderConfirmationPage() {
             ) : (
               <div className="mb-8 sm:mb-10">
                 <h2 className="font-heading text-lg sm:text-xl font-bold text-[var(--color-brand-chocolate)] mb-4 sm:mb-6">
-                  Store Pickup Status
+                  Kitchen Counter Pickup Status
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5 sm:gap-3">
                   {STATUS_STEPS.map((step, idx) => {
@@ -167,7 +167,7 @@ export default function OrderConfirmationPage() {
               <div className="bg-[var(--color-brand-surface-elevated)] rounded-xl p-5 border border-[var(--color-brand-border)]">
                 <h3 className="font-heading text-lg font-bold text-[var(--color-brand-chocolate)] mb-4 flex items-center gap-2">
                   {order.fulfillment === 'delivery' ? <Truck size={18} /> : <ChefHat size={18} />}
-                  {order.fulfillment === 'delivery' ? 'Delivery Details' : 'Store Pickup Details'}
+                  {order.fulfillment === 'delivery' ? 'Delivery Details' : 'Kitchen Counter Pickup Details'}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -238,16 +238,16 @@ export default function OrderConfirmationPage() {
                     </div>
                   ) : (
                     <div className="pt-2 border-t border-[var(--color-brand-primary-light)]/20 space-y-1">
-                      <span className="text-[var(--color-brand-muted)] block text-xs">Pickup Store:</span>
+                      <span className="text-[var(--color-brand-muted)] block text-xs">Pickup Counter / Hub:</span>
                       <p className="text-sm font-semibold text-[var(--color-brand-chocolate)] flex items-center gap-1.5">
                         <Store size={15} className="text-[var(--color-brand-primary-dark)]" />
-                        {order.pickupLocation?.name || 'YOYO CAKES Main Kitchen'}
+                        {order.pickupLocation?.name || 'YOYO CAKES Central Kitchen Counter'}
                       </p>
                       <p className="text-xs text-[var(--color-brand-muted)]">
                         {order.pickupLocation?.address || 'Plot 14, 2nd Avenue, Anna Nagar East, Chennai'}
                       </p>
                       <p className="text-xs text-[#007600] font-semibold mt-1">
-                        ✓ Store pickup ready within 2 hours of confirmation.
+                        ✓ Fresh batch ready for counter collection upon order confirmation.
                       </p>
                     </div>
                   )}

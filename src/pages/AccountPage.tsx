@@ -462,7 +462,7 @@ export default function AccountPage() {
               </div>
               <div>
                 <h3 className="font-heading font-bold text-base text-[var(--color-brand-chocolate)]">Your Orders</h3>
-                <p className="text-xs text-[var(--color-brand-muted)]">Track packages, view details, buy again</p>
+                <p className="text-xs text-[var(--color-brand-muted)]">Track pickup status, view details, reorder</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-[var(--color-brand-muted)]" />
