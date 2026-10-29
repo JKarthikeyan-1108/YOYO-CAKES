@@ -48,7 +48,7 @@
     {
       "name": "My Orders",
       "short_name": "Orders",
-      "description": "Track live bakery and delivery status",
+      "description": "Track live kitchen pickup and order status",
       "url": "/orders",
       "icons": [{ "src": "/images/logo.png", "sizes": "192x192" }]
     },
