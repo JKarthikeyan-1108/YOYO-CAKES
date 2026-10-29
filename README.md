@@ -20,8 +20,8 @@ A complete, production-grade business e-commerce platform built for **YOYO CAKES
   - `+91 84288 55444`
   - `+91 63796 03744`
 - **Support Email**: `hello@yoyocakes.in`
-- **Fulfillment**: Local City Delivery & Bakery Kitchen Pickup
-- **Free Delivery**: Complimentary on orders above ₹500 (Standard ₹40 fee otherwise)
+- **Fulfillment**: Fresh Kitchen Counter Pickup (Anna Nagar Central Kitchen, T. Nagar Hub, Coimbatore Counter)
+- **Pickup Cost**: 100% Complimentary (₹0) across all slots
 
 ---
 
@@ -142,22 +142,22 @@ npm run build
 - `/` — Homepage (Hero, Bestsellers, Brownies, Mini Jar cakes, Why Choose Us, Reviews, Hotline)
 - `/shop` — Shop catalog (27 products, search, category pills, sorting, quick view, add to cart)
 - `/product/:id` — Product Detail (image preview, ingredient notice, quantity selector, tabs)
-- `/cart` — Cart & Checkout summary (quantity updates, coupon `YOYO10`, free delivery indicator)
-- `/checkout` — Checkout (Local delivery vs Store pickup toggle, address form, Razorpay checkout)
-- `/order/:id` — Real-time Order Confirmation & Status Tracking timeline
+- `/cart` — Cart & Checkout summary (quantity updates, coupon `YOYO10`, free kitchen pickup indicator)
+- `/checkout` — Checkout (Kitchen Counter selector, batch date/time slots, free cake message card, Pay at Counter / Razorpay)
+- `/order/:id` — Real-time Order Confirmation & Kitchen Pickup Status timeline
 - `/wishlist` — Saved customer favorites
-- `/account` — Profile overview, order history, and saved addresses
-- `/login` & `/register` — Authentication with Google OAuth option & verification
+- `/account` — Profile overview, order history, and saved address coordinates
+- `/login` & `/register` — Authentication with clean email/password flow
 - `/about` — The YOYO Story, artisanal baking techniques, quality values
-- `/contact` — Phone hotlines (+91 84288 55444 / +91 63796 03744) & inquiry form
+- `/contact` — Phone hotlines (+91 84288 55444 / +91 63796 03744), WhatsApp Head Chef button & inquiry form
 - `/faq` — Categorized bakery FAQs
-- `/privacy-policy`, `/terms`, `/shipping-policy`, `/cancellation-policy` — Business policies
+- `/privacy-policy`, `/terms`, `/pickup-policy`, `/cancellation-policy` — Business policies
 
 ### Admin Management Portal (`/admin`)
-- `/admin` — KPI metrics (Revenue, orders, pending, delivered, low stock alerts, Recharts sales trends)
+- `/admin` — KPI metrics (Revenue, orders, pending, kitchen batches, low stock alerts, Recharts sales trends)
 - `/admin/products` — Catalog table, stock counter adjustments, price edits, add new dessert
-- `/admin/orders` — Kitchen order processing, step-by-step status transitions (Placed → Confirmed → Baking → Ready → Out for Delivery → Delivered)
-- `/admin/settings` — Business contact numbers, pickup address, delivery fee rules, and 1-click Firestore database sync
+- `/admin/orders` — Kitchen order processing, step-by-step status transitions (Placed → Confirmed → Baking → Ready at Counter → Collected)
+- `/admin/settings` — Business contact numbers, kitchen counter addresses, and 1-click Firestore database sync
 
 ---
 
