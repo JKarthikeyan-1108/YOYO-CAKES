@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, MessageSquare, Send, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, Send, CheckCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ContactPage() {
@@ -20,6 +20,18 @@ export default function ContactPage() {
     }
     toast.success('Thank you! Your message has been sent to our bakery team.');
     setSubmitted(true);
+  };
+
+  const handleWhatsAppInquiry = () => {
+    const text = encodeURIComponent(
+      `*YOYO CAKES Custom Celebration Inquiry*\n\n` +
+      `*Name:* ${form.name || 'Customer'}\n` +
+      `*Subject:* ${form.subject}\n` +
+      `*Phone:* ${form.phone || 'N/A'}\n` +
+      `*Email:* ${form.email || 'N/A'}\n\n` +
+      `*Message:* ${form.message || 'I would like to inquire about a custom cake order.'}`
+    );
+    window.open(`https://wa.me/916379603744?text=${text}`, '_blank');
   };
 
   return (
@@ -214,12 +226,21 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="btn-primary w-full sm:w-auto px-8 py-3 text-sm flex items-center justify-center gap-2"
-                  >
-                    <Send size={16} /> Send Inquiry
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button
+                      type="submit"
+                      className="btn-primary w-full sm:w-auto px-8 py-3 text-sm flex items-center justify-center gap-2"
+                    >
+                      <Send size={16} /> Send Inquiry
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleWhatsAppInquiry}
+                      className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-white bg-[#25D366] hover:bg-[#1EBE5D] rounded-full flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                    >
+                      <MessageCircle size={16} /> Send via WhatsApp
+                    </button>
+                  </div>
                 </form>
               )}
             </div>

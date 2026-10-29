@@ -21,7 +21,8 @@ import {
   Zap,
   RotateCcw,
   Store,
-  Award
+  Award,
+  MessageCircle
 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
 import { CATEGORIES, formatPrice, type Product } from '@/data/products';
@@ -1093,10 +1094,12 @@ export default function HomePage() {
               <Phone size={14} /> Call +91 84288 55444
             </a>
             <a
-              href="tel:+916379603744"
-              className="px-5 py-2.5 rounded-full border border-white/30 text-white font-bold text-xs hover:bg-white hover:text-[var(--color-brand-chocolate)] transition-colors flex items-center gap-1.5"
+              href="https://wa.me/916379603744?text=Hi%20YOYO%20Cakes!%20I%20would%20like%20to%20inquire%20about%20a%20custom%20celebration%20cake."
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-2.5 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-md"
             >
-              <Phone size={14} /> Call +91 63796 03744
+              <MessageCircle size={14} /> WhatsApp Head Chef
             </a>
             <Link
               to="/contact"
