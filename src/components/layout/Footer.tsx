@@ -148,7 +148,7 @@ export default function Footer() {
                 <Clock size={15} className="text-[#FFD814] mt-0.5 flex-shrink-0" />
                 <div className="text-white/70">
                   <span className="font-semibold text-white block">Operating Hours:</span>
-                  Monday – Sunday: 9:00 AM – 11:30 PM (Midnight delivery active)
+                  Monday – Sunday: 9:00 AM – 11:30 PM (Kitchen Counter Pickup Active)
                 </div>
               </li>
             </ul>
@@ -162,7 +162,7 @@ export default function Footer() {
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#A3E635]" />
             <span className="text-[var(--color-brand-footer-text)] font-medium">
-              100% Secure Checkout with Razorpay & Cash on Delivery • 256-Bit SSL Encrypted
+              100% Secure Checkout with Razorpay & Counter Pay • 256-Bit SSL Encrypted
             </span>
           </div>
           <div className="flex items-center gap-3 text-[11px] font-bold text-[var(--color-brand-footer-muted)] uppercase tracking-wider">

@@ -410,6 +410,9 @@ export default function HomePage() {
                             src={item.image}
                             alt=""
                             className="w-5 h-5 rounded-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
+                            }}
                           />
                           <span className="hidden sm:inline line-clamp-1 max-w-[120px]">{item.title}</span>
                           <span className="sm:hidden">{idx + 1}</span>
@@ -445,6 +448,9 @@ export default function HomePage() {
                   src={currentHero.image}
                   alt={currentHero.title}
                   className="w-full h-full object-cover transition-all duration-700 hover:scale-105 animate-fade-in"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/products/dream-cake.jpg';
+                  }}
                 />
                 <div className={`absolute inset-0 bg-gradient-to-t ${currentHero.accentBg} opacity-60 lg:opacity-40 pointer-events-none`} />
 
