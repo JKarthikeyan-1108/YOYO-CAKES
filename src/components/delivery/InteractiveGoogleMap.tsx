@@ -589,8 +589,8 @@ export default function InteractiveGoogleMap({
         </p>
 
         {!isServiceable && (
-          <p className="text-[11px] text-rose-600 font-semibold pt-1 border-t border-rose-100">
-            ⚠️ This address is beyond our fresh cake delivery radius ({maxRadiusKm} km). Please select Store Pickup at checkout.
+          <p className="text-[11px] text-amber-700 font-semibold pt-1 border-t border-amber-100">
+            📍 Location is {distanceFromStore} km from our central kitchen counter. Fresh orders are available for direct kitchen pickup.
           </p>
         )}
       </div>

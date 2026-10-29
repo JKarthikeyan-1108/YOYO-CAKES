@@ -91,7 +91,7 @@ export default function AddressFormModal({
     e.preventDefault();
 
     if (!user?.uid) {
-      toast.error('Please sign in to save your delivery address.');
+      toast.error('Please sign in to save your address.');
       return;
     }
 
@@ -101,7 +101,7 @@ export default function AddressFormModal({
     }
 
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
-      toast.error('Valid 10-digit mobile number is required for delivery coordination.');
+      toast.error('Valid 10-digit mobile number is required for order coordination.');
       return;
     }
 
@@ -141,7 +141,7 @@ export default function AddressFormModal({
       };
 
       await saveAddressToFirestore(newAddress);
-      toast.success(editingAddress ? 'Address updated successfully!' : 'Delivery address saved!');
+      toast.success(editingAddress ? 'Address updated successfully!' : 'Address saved!');
       onAddressSaved(newAddress);
       onClose();
     } catch (err: any) {
@@ -167,10 +167,10 @@ export default function AddressFormModal({
             </div>
             <div>
               <h3 className="font-heading text-base sm:text-lg font-bold">
-                {editingAddress ? 'Edit Delivery Address' : 'Add Delivery Address & GPS Pin'}
+                {editingAddress ? 'Edit Saved Address' : 'Add Saved Address & Location'}
               </h3>
               <p className="text-[11px] text-white/70">
-                Pinpoint your gate on the map for accurate doorstep delivery
+                Pinpoint your location for easy order coordination
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function AddressFormModal({
           {/* Section 1: Interactive Map & GPS Locator */}
           <div>
             <label className="text-xs font-bold uppercase tracking-wider text-gray-700 block mb-2">
-              Step 1: Pinpoint Delivery Location on Map
+              Step 1: Pinpoint Location on Map
             </label>
             <InteractiveGoogleMap
               initialCoords={{ latitude, longitude }}
@@ -326,14 +326,14 @@ export default function AddressFormModal({
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-[var(--color-brand-muted)] mb-1">
-                  Delivery Instructions for Driver (Optional)
+                  Order Notes or Preferences (Optional)
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={deliveryInstructions}
                     onChange={(e) => setDeliveryInstructions(e.target.value)}
-                    placeholder="e.g. Leave with security / Ring bell twice / Fragile cake box"
+                    placeholder="e.g. Call before arrival / Fragile cake box / Gift wrap"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[var(--color-brand-border)] bg-[var(--color-brand-surface-elevated)] text-[var(--color-brand-chocolate)] focus:border-[var(--color-brand-primary-dark)] text-xs sm:text-sm outline-none"
                   />
                   <FileText size={15} className="absolute left-3 top-3 text-[var(--color-brand-muted)]" />
@@ -349,7 +349,7 @@ export default function AddressFormModal({
                     className="checkbox checkbox-sm checkbox-warning rounded-md"
                   />
                   <span className="text-xs text-[var(--color-brand-muted)] font-medium">
-                    Set this as my primary default delivery address
+                    Set this as my primary default address
                   </span>
                 </label>
               </div>
